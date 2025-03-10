@@ -97,7 +97,11 @@
         <button id="next-button" class="nav-button">Next</button>
     </div>
     
-    <!-- Load your custom script as a module -->
-    <script type="module" src="./js/island.js"></script>
+    <!-- Load Three.js libraries first -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Load your custom script after Three.js is loaded -->
+    <script src="/js/island.js"></script>
 </body>
 </html>
