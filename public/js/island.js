@@ -7,16 +7,14 @@ scene.background = new THREE.Color(0x87CEEB); // Sky blue background
 
 // Initialize the camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.set(0, 5, 10);
+camera.position.set(15, 15, 15);
 
 // Initialize the renderer
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
-
-// Add the renderer to the DOM
-document.getElementById('scene-container').appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement);
 
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -27,102 +25,106 @@ controls.minDistance = 5;
 controls.maxDistance = 50;
 controls.maxPolarAngle = Math.PI / 2;
 
-// Create a simple floating island
-function createIsland() {
-    // Island base (ground)
-    const islandGeometry = new THREE.CylinderGeometry(5, 3, 2, 32);
-    const islandMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // Brown
-    const island = new THREE.Mesh(islandGeometry, islandMaterial);
-    island.position.y = 0;
-    island.castShadow = true;
-    island.receiveShadow = true;
-    scene.add(island);
+// Create island base
+const islandGeometry = new THREE.CylinderGeometry(8, 6, 2, 32);
+const islandMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 });
+const island = new THREE.Mesh(islandGeometry, islandMaterial);
+island.receiveShadow = true;
+scene.add(island);
 
-    // Grass top
-    const grassGeometry = new THREE.CylinderGeometry(5, 5, 0.5, 32);
-    const grassMaterial = new THREE.MeshPhongMaterial({ color: 0x7CFC00 }); // Lawn green
-    const grass = new THREE.Mesh(grassGeometry, grassMaterial);
-    grass.position.y = 1.25;
-    grass.castShadow = true;
-    grass.receiveShadow = true;
-    scene.add(grass);
+// Add grass top layer
+const grassGeometry = new THREE.CylinderGeometry(7.5, 7.5, 0.5, 32);
+const grassMaterial = new THREE.MeshPhongMaterial({ color: 0x90EE90 });
+const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+grass.position.y = 1;
+grass.receiveShadow = true;
+scene.add(grass);
 
-    // Add trees
-    addTree(2, 1.5, 2);
-    addTree(-2, 1.5, -1);
-    addTree(0, 1.5, -3);
-    
-    // Add a small house
-    addHouse(-1, 1.5, 0);
+// Create factory building
+function createFactory() {
+    const factory = new THREE.Group();
+
+    // Main building
+    const buildingGeometry = new THREE.BoxGeometry(4, 6, 4);
+    const buildingMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 });
+    const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+    building.position.y = 4;
+    building.castShadow = true;
+    factory.add(building);
+
+    // Chimney
+    const chimneyGeometry = new THREE.CylinderGeometry(0.5, 0.5, 4, 8);
+    const chimneyMaterial = new THREE.MeshPhongMaterial({ color: 0x696969 });
+    const chimney = new THREE.Mesh(chimneyGeometry, chimneyMaterial);
+    chimney.position.set(1, 8, 1);
+    chimney.castShadow = true;
+    factory.add(chimney);
+
+    factory.position.y = 1;
+    return factory;
 }
 
-// Function to create a simple tree
-function addTree(x, y, z) {
-    // Tree trunk
-    const trunkGeometry = new THREE.CylinderGeometry(0.2, 0.2, 1.5, 8);
-    const trunkMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // Brown
-    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
-    trunk.position.set(x, y + 0.75, z);
-    trunk.castShadow = true;
-    scene.add(trunk);
+// Create houses
+function createHouse(x, z) {
+    const house = new THREE.Group();
 
-    // Tree leaves
-    const leavesGeometry = new THREE.ConeGeometry(1, 2, 8);
-    const leavesMaterial = new THREE.MeshPhongMaterial({ color: 0x228B22 }); // Forest green
-    const leaves = new THREE.Mesh(leavesGeometry, leavesMaterial);
-    leaves.position.set(x, y + 2.5, z);
-    leaves.castShadow = true;
-    scene.add(leaves);
-}
-
-// Function to create a simple house
-function addHouse(x, y, z) {
     // House base
-    const baseGeometry = new THREE.BoxGeometry(1.5, 1, 1.5);
-    const baseMaterial = new THREE.MeshPhongMaterial({ color: 0xD2B48C }); // Tan
+    const baseGeometry = new THREE.BoxGeometry(2, 2, 2);
+    const baseMaterial = new THREE.MeshPhongMaterial({ color: 0xD2B48C });
     const base = new THREE.Mesh(baseGeometry, baseMaterial);
-    base.position.set(x, y + 0.5, z);
     base.castShadow = true;
-    scene.add(base);
+    house.add(base);
 
-    // House roof
-    const roofGeometry = new THREE.ConeGeometry(1.2, 1, 4);
-    const roofMaterial = new THREE.MeshPhongMaterial({ color: 0x8B0000 }); // Dark red
+    // Roof
+    const roofGeometry = new THREE.ConeGeometry(1.5, 1.5, 4);
+    const roofMaterial = new THREE.MeshPhongMaterial({ color: 0x8B0000 });
     const roof = new THREE.Mesh(roofGeometry, roofMaterial);
-    roof.position.set(x, y + 1.5, z);
+    roof.position.y = 1.75;
     roof.rotation.y = Math.PI / 4;
     roof.castShadow = true;
-    scene.add(roof);
+    house.add(roof);
+
+    house.position.set(x, 2, z);
+    return house;
 }
 
-// Add lighting
-function setupLights() {
-    // Ambient light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambientLight);
+// Add factory and houses
+const factory = createFactory();
+scene.add(factory);
 
-    // Directional light (sun)
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(10, 15, 10);
-    directionalLight.castShadow = true;
-    
-    // Set up shadow properties
-    directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
-    directionalLight.shadow.camera.near = 0.5;
-    directionalLight.shadow.camera.far = 50;
-    directionalLight.shadow.camera.left = -20;
-    directionalLight.shadow.camera.right = 20;
-    directionalLight.shadow.camera.top = 20;
-    directionalLight.shadow.camera.bottom = -20;
-    
-    scene.add(directionalLight);
+// Add houses in a circle
+const houseCount = 6;
+const radius = 6;
+for (let i = 0; i < houseCount; i++) {
+    const angle = (i / houseCount) * Math.PI * 2;
+    const x = Math.cos(angle) * radius;
+    const z = Math.sin(angle) * radius;
+    const house = createHouse(x, z);
+    scene.add(house);
+}
+
+// Add water around the island
+function addWater() {
+    const waterGeometry = new THREE.CircleGeometry(30, 64);
+    const waterMaterial = new THREE.MeshPhongMaterial({
+        color: 0x0077be,
+        transparent: true,
+        opacity: 0.7,
+    });
+    const water = new THREE.Mesh(waterGeometry, waterMaterial);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = -1;
+    scene.add(water);
 }
 
 // Add clouds
 function addClouds() {
     const cloudGeometry = new THREE.SphereGeometry(1, 16, 16);
-    const cloudMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+    const cloudMaterial = new THREE.MeshPhongMaterial({ 
+        color: 0xffffff, 
+        transparent: true, 
+        opacity: 0.8 
+    });
     
     // Create several cloud clusters
     for (let i = 0; i < 5; i++) {
@@ -152,26 +154,30 @@ function addClouds() {
     }
 }
 
-// Add water around the island
-function addWater() {
-    const waterGeometry = new THREE.CircleGeometry(30, 64);
-    const waterMaterial = new THREE.MeshPhongMaterial({
-        color: 0x0077be,
-        transparent: true,
-        opacity: 0.7,
-    });
-    const water = new THREE.Mesh(waterGeometry, waterMaterial);
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = -1;
-    scene.add(water);
-}
+// Add lighting
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(10, 15, 10);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 2048;
+directionalLight.shadow.mapSize.height = 2048;
+directionalLight.shadow.camera.near = 0.5;
+directionalLight.shadow.camera.far = 50;
+directionalLight.shadow.camera.left = -20;
+directionalLight.shadow.camera.right = 20;
+directionalLight.shadow.camera.top = 20;
+directionalLight.shadow.camera.bottom = -20;
+scene.add(directionalLight);
+
+// Add water and clouds
+addWater();
+addClouds();
 
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    
-    // Rotate the island slightly
-    scene.rotation.y += 0.001;
     
     // Make the island float up and down slightly
     scene.position.y = Math.sin(Date.now() * 0.001) * 0.2;
@@ -187,17 +193,36 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Initialize the scene
-function init() {
-    createIsland();
-    setupLights();
-    addClouds();
-    addWater();
-    
-    window.addEventListener('resize', onWindowResize, false);
-    
-    animate();
+window.addEventListener('resize', onWindowResize, false);
+
+// Start the animation loop
+animate();
+
+// Functions to handle loading screen (from your original code)
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
+    }
 }
 
-// Start the scene
-init();
+function hideNavigationButtons() {
+    const navButtons = document.getElementById('timeline-navigation');
+    if (navButtons) {
+        navButtons.style.display = 'none';
+    }
+}
+
+function updateLoadingProgress(xhr) {
+    if (xhr.lengthComputable) {
+        const percentComplete = (xhr.loaded / xhr.total) * 100;
+        const progressBar = document.getElementById('loading-progress');
+        if (progressBar) {
+            progressBar.style.width = percentComplete + '%';
+        }
+    }
+}
+
+// Hide loading screen since we're not loading external models
+hideLoadingScreen();
+hideNavigationButtons();
