@@ -1,0 +1,542 @@
+// Wait for the DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    // Scene setup
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x87CEEB); // Sky blue background
+
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 15, 25);
+
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.shadowMap.enabled = true;
+    document.getElementById('scene-container').appendChild(renderer.domElement);
+
+    // Controls setup - enable drag to move camera
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.minDistance = 5;
+    controls.maxDistance = 100;
+    controls.enablePan = true; // Enable panning
+    controls.panSpeed = 0.5; // Adjust panning speed
+    controls.screenSpacePanning = true; // Pan parallel to the screen
+    controls.rotateSpeed = 0.7; // Increase rotation speed for better control
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(20, 30, 20);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 2048;
+    directionalLight.shadow.mapSize.height = 2048;
+    directionalLight.shadow.camera.near = 0.5;
+    directionalLight.shadow.camera.far = 100;
+    directionalLight.shadow.camera.left = -30;
+    directionalLight.shadow.camera.right = 30;
+    directionalLight.shadow.camera.top = 30;
+    directionalLight.shadow.camera.bottom = -30;
+    scene.add(directionalLight);
+
+    // Create the island group
+    const islandGroup = new THREE.Group();
+
+    // Create the island base
+    const islandRadius = 15;
+    const islandGeometry = new THREE.CylinderGeometry(islandRadius, islandRadius * 0.8, 3, 64);
+    const islandMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // Brown
+    const islandBase = new THREE.Mesh(islandGeometry, islandMaterial);
+    islandBase.castShadow = true;
+    islandBase.receiveShadow = true;
+    islandGroup.add(islandBase);
+
+    // Add grass on top
+    const grassGeometry = new THREE.CylinderGeometry(islandRadius, islandRadius, 0.5, 64);
+    const grassMaterial = new THREE.MeshPhongMaterial({ color: 0x7CFC00 }); // Lawn green
+    const grass = new THREE.Mesh(grassGeometry, grassMaterial);
+    grass.position.y = 1.75; // Adjusted for taller island
+    grass.castShadow = true;
+    grass.receiveShadow = true;
+    islandGroup.add(grass);
+
+    // Function to create a factory in the middle of the island
+    function createFactory() {
+        const factory = new THREE.Group();
+        
+        // Main building
+        const buildingGeometry = new THREE.BoxGeometry(8, 5, 6);
+        const buildingMaterial = new THREE.MeshPhongMaterial({ color: 0x808080 }); // Gray
+        const building = new THREE.Mesh(buildingGeometry, buildingMaterial);
+        building.position.y = 2.5;
+        building.castShadow = true;
+        building.receiveShadow = true;
+        factory.add(building);
+        
+        // Roof
+        const roofGeometry = new THREE.BoxGeometry(9, 0.5, 7);
+        const roofMaterial = new THREE.MeshPhongMaterial({ color: 0x505050 }); // Dark gray
+        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+        roof.position.y = 5.25;
+        roof.castShadow = true;
+        factory.add(roof);
+        
+        // Chimney 1
+        const chimney1Geometry = new THREE.CylinderGeometry(0.5, 0.5, 3, 16);
+        const chimney1Material = new THREE.MeshPhongMaterial({ color: 0x8B0000 }); // Dark red
+        const chimney1 = new THREE.Mesh(chimney1Geometry, chimney1Material);
+        chimney1.position.set(2.5, 7, 1.5);
+        chimney1.castShadow = true;
+        factory.add(chimney1);
+        
+        // Chimney 2
+        const chimney2Geometry = new THREE.CylinderGeometry(0.7, 0.7, 4, 16);
+        const chimney2Material = new THREE.MeshPhongMaterial({ color: 0x8B0000 }); // Dark red
+        const chimney2 = new THREE.Mesh(chimney2Geometry, chimney2Material);
+        chimney2.position.set(-2, 7.5, -1.5);
+        chimney2.castShadow = true;
+        factory.add(chimney2);
+        
+        // Windows
+        const windowMaterial = new THREE.MeshPhongMaterial({ color: 0x87CEFA, transparent: true, opacity: 0.7 }); // Light blue
+        
+        // Front windows
+        for (let i = -2; i <= 2; i += 2) {
+            const windowGeometry = new THREE.BoxGeometry(1.2, 1.2, 0.1);
+            const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
+            windowMesh.position.set(i, 2.5, 3.05);
+            factory.add(windowMesh);
+        }
+        
+        // Side windows
+        for (let i = -1.5; i <= 1.5; i += 1.5) {
+            for (let j = -4; j <= 4; j += 4) {
+                const windowGeometry = new THREE.BoxGeometry(0.1, 1.2, 1.2);
+                const windowMesh = new THREE.Mesh(windowGeometry, windowMaterial);
+                windowMesh.position.set(j, 2.5, i);
+                factory.add(windowMesh);
+            }
+        }
+        
+        // Door
+        const doorGeometry = new THREE.BoxGeometry(1.5, 2.5, 0.1);
+        const doorMaterial = new THREE.MeshPhongMaterial({ color: 0x8B4513 }); // Brown
+        const door = new THREE.Mesh(doorGeometry, doorMaterial);
+        door.position.set(0, 1.25, 3.05);
+        factory.add(door);
+        
+        // Smoke particles (simple representation)
+        const smokeGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+        const smokeMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xDDDDDD, 
+            transparent: true, 
+            opacity: 0.7 
+        });
+        
+        // Add smoke to both chimneys
+        for (let i = 0; i < 5; i++) {
+            const smoke1 = new THREE.Mesh(smokeGeometry, smokeMaterial);
+            smoke1.position.set(
+                2.5 + Math.random() * 0.5 - 0.25,
+                8.5 + i * 0.5,
+                1.5 + Math.random() * 0.5 - 0.25
+            );
+            smoke1.scale.set(
+                0.8 + Math.random() * 0.4,
+                0.8 + Math.random() * 0.4,
+                0.8 + Math.random() * 0.4
+            );
+            smoke1.userData = { 
+                offsetY: 8.5 + i * 0.5,
+                speed: 0.01 + Math.random() * 0.01
+            };
+            factory.add(smoke1);
+            
+            const smoke2 = new THREE.Mesh(smokeGeometry, smokeMaterial);
+            smoke2.position.set(
+                -2 + Math.random() * 0.5 - 0.25,
+                9 + i * 0.5,
+                -1.5 + Math.random() * 0.5 - 0.25
+            );
+            smoke2.scale.set(
+                0.8 + Math.random() * 0.4,
+                0.8 + Math.random() * 0.4,
+                0.8 + Math.random() * 0.4
+            );
+            smoke2.userData = { 
+                offsetY: 9 + i * 0.5,
+                speed: 0.01 + Math.random() * 0.01
+            };
+            factory.add(smoke2);
+        }
+        
+        return factory;
+    }
+
+    // Create and add factory to the island
+    const factory = createFactory();
+    islandGroup.add(factory);
+
+    // Timeline data - one event per house
+    const timelineEvents = [
+        {
+            title: "Foundation",
+            content: "In 1920, the first factory was established on this island, marking the beginning of industrial development in the region."
+        },
+        {
+            title: "Expansion",
+            content: "By 1935, the factory had doubled in size, employing over 200 workers from neighboring communities."
+        },
+        {
+            title: "War Effort",
+            content: "During World War II (1939-1945), the factory was converted to produce essential supplies for the military."
+        },
+        {
+            title: "Post-War Boom",
+            content: "The 1950s saw unprecedented growth as consumer demand skyrocketed in the post-war economy."
+        },
+        {
+            title: "Modernization",
+            content: "In 1968, the factory underwent major renovations to implement automated production lines."
+        },
+        {
+            title: "Environmental Concerns",
+            content: "The 1970s brought new challenges as environmental regulations required significant changes to reduce pollution."
+        },
+        {
+            title: "Economic Downturn",
+            content: "The recession of the 1980s hit hard, forcing layoffs and production cutbacks to survive."
+        },
+        {
+            title: "Technological Revolution",
+            content: "In the 1990s, computer systems transformed operations, increasing efficiency by over 40%."
+        },
+        {
+            title: "Global Competition",
+            content: "The early 2000s brought intense competition from overseas manufacturers, requiring strategic pivots."
+        },
+        {
+            title: "Sustainability Initiative",
+            content: "In 2010, the factory launched a comprehensive sustainability program, including solar panels and waste reduction."
+        },
+        {
+            title: "Digital Transformation",
+            content: "Recent years have seen the implementation of IoT sensors and AI-driven analytics to optimize production."
+        },
+        {
+            title: "Future Vision",
+            content: "Today, the factory stands as a model of innovation, with plans to become carbon-neutral by 2030."
+        }
+    ];
+
+    // Houses and timeline markers
+    const houses = [];
+    const markers = [];
+    const numHouses = 12; // Match the number of timeline events
+
+    for (let i = 0; i < numHouses; i++) {
+        const angle = (i / numHouses) * Math.PI * 2;
+        const x = Math.cos(angle) * (islandRadius - 2);
+        const z = Math.sin(angle) * (islandRadius - 2);
+        const scale = 0.8 + Math.random() * 0.4;
+        
+        // Rotate houses to face the center
+        const rotation = Math.atan2(-x, -z);
+        
+        // Create house
+        const house = new THREE.Group();
+        
+        const baseGeometry = new THREE.BoxGeometry(1.5 * scale, 1 * scale, 1.5 * scale);
+        const baseMaterial = new THREE.MeshPhongMaterial({ color: 0xD2B48C });
+        const base = new THREE.Mesh(baseGeometry, baseMaterial);
+        base.position.y = 0.5 * scale;
+        base.castShadow = true;
+        house.add(base);
+
+        const roofGeometry = new THREE.ConeGeometry(1.2 * scale, 1 * scale, 4);
+        const roofMaterial = new THREE.MeshPhongMaterial({ color: 0x8B0000 });
+        const roof = new THREE.Mesh(roofGeometry, roofMaterial);
+        roof.position.y = 1.5 * scale;
+        roof.rotation.y = Math.PI / 4;
+        roof.castShadow = true;
+        house.add(roof);
+        
+        // Add a window
+        const windowGeometry = new THREE.PlaneGeometry(0.4 * scale, 0.4 * scale);
+        const windowMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x87CEFA, 
+            transparent: true, 
+            opacity: 0.7,
+            side: THREE.DoubleSide
+        });
+        const window1 = new THREE.Mesh(windowGeometry, windowMaterial);
+        window1.position.set(0, 0.5 * scale, 0.76 * scale);
+        house.add(window1);
+        
+        // Add a door
+        const doorGeometry = new THREE.PlaneGeometry(0.4 * scale, 0.7 * scale);
+        const doorMaterial = new THREE.MeshPhongMaterial({ 
+            color: 0x8B4513,
+            side: THREE.DoubleSide
+        });
+        const door = new THREE.Mesh(doorGeometry, doorMaterial);
+        door.position.set(0.4 * scale, 0.35 * scale, 0.76 * scale);
+        house.add(door);
+        
+        house.position.set(x, 2, z);
+        house.rotation.y = rotation;
+        house.userData = { timelineIndex: i };
+        
+        islandGroup.add(house);
+        houses.push(house);
+        
+        // Create marker for this house
+        const markerGeometry = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16);
+        const markerMaterial = new THREE.MeshPhongMaterial({ color: 0xFF4500 }); // Orange-red
+        const marker = new THREE.Mesh(markerGeometry, markerMaterial);
+        marker.position.set(x, 1.8, z);
+        marker.userData = { timelineIndex: i };
+        islandGroup.add(marker);
+        markers.push(marker);
+    }
+
+    // Add water
+    const waterGeometry = new THREE.CircleGeometry(100, 64);
+    const waterMaterial = new THREE.MeshPhongMaterial({
+        color: 0x0077be,
+        transparent: true,
+        opacity: 0.7,
+    });
+    const water = new THREE.Mesh(waterGeometry, waterMaterial);
+    water.rotation.x = -Math.PI / 2;
+    water.position.y = -1;
+    scene.add(water);
+
+    // Add the island group to the scene
+    scene.add(islandGroup);
+
+    // Create a simple character using cylinder and sphere
+    function createCharacter() {
+        const character = new THREE.Group();
+
+        // Body
+        const bodyGeometry = new THREE.CylinderGeometry(0.2, 0.2, 0.7, 16);
+        const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x1E90FF }); // Blue
+        const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+        body.position.y = 0.5;
+        character.add(body);
+
+        // Head
+        const headGeometry = new THREE.SphereGeometry(0.25, 16, 16);
+        const headMaterial = new THREE.MeshPhongMaterial({ color: 0xFFD700 }); // Gold
+        const head = new THREE.Mesh(headGeometry, headMaterial);
+        head.position.y = 1.1;
+        character.add(head);
+
+        // Arms
+        const armGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8);
+        const armMaterial = new THREE.MeshPhongMaterial({ color: 0x1E90FF });
+
+        const leftArm = new THREE.Mesh(armGeometry, armMaterial);
+        leftArm.position.set(0.3, 0.5, 0);
+        leftArm.rotation.z = -Math.PI / 6;
+        character.add(leftArm);
+
+        const rightArm = new THREE.Mesh(armGeometry, armMaterial);
+        rightArm.position.set(-0.3, 0.5, 0);
+        rightArm.rotation.z = Math.PI / 6;
+        character.add(rightArm);
+
+        // Legs
+        const legGeometry = new THREE.CylinderGeometry(0.1, 0.1, 0.5, 8);
+        const legMaterial = new THREE.MeshPhongMaterial({ color: 0x1E90FF });
+
+        const leftLeg = new THREE.Mesh(legGeometry, legMaterial);
+        leftLeg.position.set(0.15, 0, 0);
+        character.add(leftLeg);
+
+        const rightLeg = new THREE.Mesh(legGeometry, legMaterial);
+        rightLeg.position.set(-0.15, 0, 0);
+        character.add(rightLeg);
+
+        // Add shadow
+        character.traverse((object) => {
+            if (object.isMesh) {
+                object.castShadow = true;
+            }
+        });
+
+        // Position the character on the island
+        character.position.y = 2; // Adjusted for taller island
+
+        return character;
+    }
+
+    const character = createCharacter();
+    scene.add(character);
+
+    // Create info panel for displaying timeline information
+    const infoPanel = document.createElement('div');
+    infoPanel.style.position = 'absolute';
+    infoPanel.style.bottom = '20px';
+    infoPanel.style.left = '20px';
+    infoPanel.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    infoPanel.style.color = 'white';
+    infoPanel.style.padding = '15px';
+    infoPanel.style.borderRadius = '10px';
+    infoPanel.style.maxWidth = '300px';
+    infoPanel.style.display = 'none';
+    document.body.appendChild(infoPanel);
+
+    // Create a "Next Stop" button
+    const nextStopButton = document.createElement('button');
+    nextStopButton.textContent = 'Next Stop';
+    nextStopButton.style.position = 'absolute';
+    nextStopButton.style.top = '20px';
+    nextStopButton.style.right = '20px';
+    nextStopButton.style.padding = '10px 15px';
+    nextStopButton.style.backgroundColor = 'rgba(76, 175, 80, 0.8)';
+    nextStopButton.style.color = 'white';
+    nextStopButton.style.border = 'none';
+    nextStopButton.style.borderRadius = '5px';
+    nextStopButton.style.cursor = 'pointer';
+    nextStopButton.style.fontSize = '16px';
+    document.body.appendChild(nextStopButton);
+
+    // Current timeline index
+    let currentTimelineIndex = 0;
+
+    // Function to move to next timeline stop
+    function moveToNextStop() {
+        currentTimelineIndex = (currentTimelineIndex + 1) % timelineEvents.length;
+        moveToTimelineStop(currentTimelineIndex);
+    }
+
+    // Function to move to a specific timeline stop
+    function moveToTimelineStop(index) {
+        const house = houses[index];
+        const housePosition = house.position.clone();
+        
+        // Position character near the house
+        const direction = new THREE.Vector3(
+            housePosition.x, 
+            0, 
+            housePosition.z
+        ).normalize();
+        
+        // Position character 2 units away from the house toward the center
+        character.position.x = housePosition.x - direction.x * 2;
+        character.position.z = housePosition.z - direction.z * 2;
+        character.position.y = 2; // Keep at ground level
+        
+        // Make character face the house
+        character.rotation.y = Math.atan2(
+            housePosition.x - character.position.x,
+            housePosition.z - character.position.z
+        );
+        
+        // Display timeline information
+        displayTimelineInfo(index);
+    }
+
+    // Function to display timeline information
+    function displayTimelineInfo(index) {
+        const event = timelineEvents[index];
+        infoPanel.innerHTML = `<h3>${event.title}</h3><p>${event.content}</p>`;
+        infoPanel.style.display = 'block';
+    }
+
+    // Add event listener to the Next Stop button
+    nextStopButton.addEventListener('click', moveToNextStop);
+
+    // Add keyboard event listener for SPACE key
+    document.addEventListener('keydown', function(event) {
+        if (event.code === 'Space') {
+            moveToNextStop();
+        }
+    });
+
+    // Raycaster for detecting house clicks
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    // Add click event listener for house selection
+    renderer.domElement.addEventListener('click', function(event) {
+        // Calculate mouse position in normalized device coordinates
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        
+        // Update the raycaster
+        raycaster.setFromCamera(mouse, camera);
+        
+        // Check for intersections with houses
+        const intersects = raycaster.intersectObjects(houses, true);
+        
+        if (intersects.length > 0) {
+            // Find the house that was clicked
+            let house = intersects[0].object;
+            
+            // If we hit a child of the house group, find the parent
+            while (house.parent && !house.userData.hasOwnProperty('timelineIndex')) {
+                house = house.parent;
+            }
+            
+            if (house.userData.hasOwnProperty('timelineIndex')) {
+                currentTimelineIndex = house.userData.timelineIndex;
+                moveToTimelineStop(currentTimelineIndex);
+            }
+        }
+    });
+
+    // Position character at first timeline stop
+    moveToTimelineStop(currentTimelineIndex);
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Island floating animation
+        const floatY = Math.sin(Date.now() * 0.001) * 0.2;
+        islandGroup.position.y = floatY; // Apply floating to the group
+
+        // Animate smoke from factory chimneys
+        factory.children.forEach(child => {
+            if (child.userData && child.userData.hasOwnProperty('offsetY')) {
+                child.position.y += child.userData.speed;
+                child.position.x += (Math.random() - 0.5) * 0.01;
+                child.position.z += (Math.random() - 0.5) * 0.01;
+                child.material.opacity -= 0.001;
+                
+                // Reset smoke when it gets too high or too transparent
+                if (child.position.y > child.userData.offsetY + 5 || child.material.opacity < 0.1) {
+                    child.position.y = child.userData.offsetY;
+                    child.material.opacity = 0.7;
+                }
+            }
+        });
+
+        // Update controls
+        controls.update();
+
+        // Render scene
+        renderer.render(scene, camera);
+    }
+
+    // Handle window resize
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    window.addEventListener('resize', onWindowResize, false);
+
+    // Start animation
+    animate();
+
+    console.log("Three.js scene with factory in the middle and houses on the perimeter initialized!");
+});
