@@ -32,7 +32,7 @@
             position: fixed;
             bottom: 120px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) scale(1);
             background: rgba(15, 15, 15, 0.8);
             backdrop-filter: blur(10px);
             padding: 2rem;
@@ -41,23 +41,140 @@
             text-align: center;
             width: 90%;
             max-width: 600px;
-            transition: all 0.3s ease;
+            height: auto;
+            transition: all 1s cubic-bezier(0.22, 1, 0.36, 1);
+            cursor: pointer;
+            transform-origin: center bottom;
+            will-change: transform, width, height;
         }
 
-        .event-content h2 {
-            font-size: 1.8rem;
+        .event-content.expanded {
+            width: 95%;
+            max-width: 1200px;
+            height: 80vh;
+            bottom: 50%;
+            transform: translate(-50%, 50%) scale(1);
+            display: flex;
+            flex-direction: column;
+            cursor: default;
+            padding: 3rem;
+        }
+
+        .event-content.expanding {
+            transform: translateX(-50%) scale(0.97);
+        }
+
+        .event-content.expanded.expanding {
+            transform: translate(-50%, 50%) scale(1.03);
+        }
+
+        .event-details {
+            display: none;
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 1rem;
+        }
+
+        .event-content.expanded .event-details {
+            display: block;
+            opacity: 1;
+            visibility: visible;
+            height: auto;
+            transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.4s;
+        }
+
+        .event-media {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .event-content.expanded .event-media {
+            display: grid;
+        }
+
+        .media-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .media-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .event-stats {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .event-content.expanded .event-stats {
+            display: grid;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
             font-weight: 300;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #fff;
+            margin-bottom: 0.5rem;
         }
 
-        .event-content p {
+        .stat-label {
             color: #94a3b8;
-            line-height: 1.6;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+        }
+
+        .close-expanded {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .event-content.expanded .close-expanded {
+            opacity: 0.7;
+        }
+
+        .event-content.expanded .close-expanded:hover {
+            opacity: 1;
+        }
+
+        .expand-hint {
+            position: absolute;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .event-content.expanded .expand-hint {
+            display: none;
         }
 
         .timeline-ui {
@@ -288,8 +405,30 @@
     </div>
     
     <div class="event-content">
-        <h2>Event Title</h2>
-        <p>Event description goes here...</p>
+        <button class="close-expanded">×</button>
+        <h2>Loading...</h2>
+        <p>Please wait while we prepare your journey...</p>
+        <div class="event-details">
+            <div class="event-description"></div>
+            <div class="event-stats">
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Impact Score</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Community Response</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Environmental Change</div>
+                </div>
+            </div>
+            <div class="event-media">
+                <!-- Media items will be dynamically added here -->
+            </div>
+        </div>
+        <div class="expand-hint">Click to view more details</div>
     </div>
 
     <div class="timeline-ui">
@@ -344,46 +483,235 @@
     </div>
 
     <script type="module">
-        import * as THREE from 'three';
-        import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+        import * as THREE from '/node_modules/three/build/three.module.js';
+        import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
 
         // Timeline data
         const timelineEvents = [
             {
                 title: "1991 - Stofregen in Wijk aan Zee",
                 description: "Zesde keer in drie maanden tijd een stofregen op het dorp Wijk aan Zee terecht komt (NOS Journaal)",
-                position: { angle: 0, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: 0, distance: 30 }
             },
             {
                 title: "2012 - BREF Vaststelling",
                 description: "BREF IJzer- en staalproductie door EU vastgesteld",
-                position: { angle: Math.PI * 2 / 7, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: Math.PI * 2 / 7, distance: 30 }
             },
             {
                 title: "2014 - BREF Implementatie",
                 description: "Implementeren BREF IJzer- en staalproductie door OD. Is dat al klaar? In 2020 nog niet.",
-                position: { angle: Math.PI * 4 / 7, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: Math.PI * 4 / 7, distance: 30 }
             },
             {
                 title: "2019 - RIVM Onderzoek",
                 description: "RIVM, Inschatting gezondheidsrisico's grafietregen Wijk aan Zee, juni 2019.",
-                position: { angle: Math.PI * 6 / 7, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: Math.PI * 6 / 7, distance: 30 }
             },
             {
                 title: "2020 - ILT Beroep",
                 description: "ILT twee keer in beroep bij de rechter tegen besluiten van de provincie Noord-Holland (over de wijze waarop een BBT-maatregel onvoldoende streng aan Tata Steel is opgelegd) De ILT had de OD NZKG verzocht om Tata Steel een verplichting op te leggen om een haalbaarheidsonderzoek uit te voeren voor het bestrijden van NOx-emissies van de Pelletfabriek met een nageschakelde techniek (BBT conclusie 36). Is deze nageschakelde techniek inmiddels ingevoerd?",
-                position: { angle: Math.PI * 8 / 7, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: Math.PI * 8 / 7, distance: 30 }
             },
             {
                 title: "2021 - RIVM Tussenresultaten",
                 description: "RIVM, Tussentijdse resultaten Gezondheidsonderzoek in de IJmond",
-                position: { angle: Math.PI * 10 / 7, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: Math.PI * 10 / 7, distance: 30 }
             },
             {
                 title: "2024 - Expertgroep Rapport",
                 description: "Gezondheid geborgd - Expertgroep Gezondheid IJmond",
-                position: { angle: Math.PI * 12 / 7, distance: 15 }
+                fullDescription: `
+                    <p>The establishment of the Tata Steel factory marked a significant milestone in the industrial development of the region. The initial construction phase involved extensive planning and consideration of various factors including:</p>
+                    <ul style="color: #94a3b8; margin: 1rem 0; padding-left: 1.5rem;">
+                        <li>Selection of the strategic location near IJmond</li>
+                        <li>Initial environmental impact assessments</li>
+                        <li>Community consultation processes</li>
+                        <li>Infrastructure development plans</li>
+                    </ul>
+                    <p>The decision to establish the factory here would have long-lasting implications for both the local economy and environment.</p>
+                `,
+                stats: {
+                    impact: 85,
+                    community: 70,
+                    environmental: 60
+                },
+                media: [
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-1.jpg",
+                        caption: "Initial construction site, circa 1918"
+                    },
+                    {
+                        type: "image",
+                        url: "https://example.com/historical-photo-2.jpg",
+                        caption: "First steel production line"
+                    }
+                ],
+                position: { angle: Math.PI * 12 / 7, distance: 30 }
             }
         ];
 
@@ -607,8 +935,7 @@
             content.style.opacity = '0';
             
             setTimeout(() => {
-                content.querySelector('h2').textContent = event.title;
-                content.querySelector('p').textContent = event.description;
+                updateEventContent(currentEventIndex);
                 content.style.opacity = '1';
                 
                 // Dispatch event for tracking
@@ -667,18 +994,101 @@
             showCurrentEvent();
         }
 
-        function nextEvent() {
+        function previousEvent() {
             if (isAnimating) return;
-            currentEventIndex = (currentEventIndex + 1) % timelineEvents.length;
+            currentEventIndex = (currentEventIndex - 1 + timelineEvents.length) % timelineEvents.length;
+            collapseEventContent();
             updateTimelineIndicator();
             showCurrentEvent();
         }
 
-        function previousEvent() {
+        function nextEvent() {
             if (isAnimating) return;
-            currentEventIndex = (currentEventIndex - 1 + timelineEvents.length) % timelineEvents.length;
+            currentEventIndex = (currentEventIndex + 1) % timelineEvents.length;
+            collapseEventContent();
             updateTimelineIndicator();
             showCurrentEvent();
+        }
+
+        // Event content interaction
+        const eventContent = document.querySelector('.event-content');
+        const closeExpandedBtn = document.querySelector('.close-expanded');
+        let isExpanded = false;
+
+        function expandEventContent() {
+            isExpanded = true;
+            const content = document.querySelector('.event-content');
+            
+            // Add expanding state for animation
+            content.classList.add('expanding');
+            setTimeout(() => {
+                content.classList.add('expanded');
+                setTimeout(() => {
+                    content.classList.remove('expanding');
+                }, 150);
+            }, 150);
+            
+            updateEventContent(currentEventIndex, true);
+        }
+
+        function collapseEventContent() {
+            isExpanded = false;
+            const content = document.querySelector('.event-content');
+            
+            // Add expanding state for animation
+            content.classList.add('expanding');
+            setTimeout(() => {
+                content.classList.remove('expanded');
+                setTimeout(() => {
+                    content.classList.remove('expanding');
+                }, 150);
+            }, 150);
+            
+            updateEventContent(currentEventIndex, false);
+        }
+
+        eventContent.addEventListener('click', (e) => {
+            // Only allow expansion if clicking on the main content area or its immediate children
+            // This prevents expansion when clicking on the detailed content
+            if (!isExpanded && (e.target === eventContent || e.target.parentElement === eventContent)) {
+                expandEventContent();
+            }
+        });
+
+        closeExpandedBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            collapseEventContent();
+        });
+
+        function updateEventContent(index, expanded = false) {
+            const event = timelineEvents[index];
+            const content = document.querySelector('.event-content');
+            
+            // Always update title and basic description
+            content.querySelector('h2').textContent = event.title;
+            
+            if (expanded) {
+                // Update detailed content
+                const detailsDiv = content.querySelector('.event-description');
+                detailsDiv.innerHTML = event.fullDescription;
+
+                // Update stats
+                const statValues = content.querySelectorAll('.stat-value');
+                statValues[0].textContent = event.stats.impact;
+                statValues[1].textContent = event.stats.community;
+                statValues[2].textContent = event.stats.environmental;
+
+                // Update media
+                const mediaContainer = content.querySelector('.event-media');
+                mediaContainer.innerHTML = event.media.map(item => `
+                    <div class="media-item">
+                        <img src="${item.url}" alt="${item.caption}">
+                    </div>
+                `).join('');
+            } else {
+                // Show basic description
+                content.querySelector('p').textContent = event.description;
+            }
         }
 
         // Animation loop
