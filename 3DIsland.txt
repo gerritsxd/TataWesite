@@ -1,0 +1,43 @@
+# 3D Island
+
+## Overview
+3D Island is an interactive web application that allows users to explore a 3D environment. Navigate through a virtual island landscape with intuitive controls for an immersive experience.
+
+## Features
+- Interactive 3D environment
+- Smooth camera controls
+- Character movement
+- Responsive design
+
+## Controls
+- **Mouse**: Rotate the view
+- **Scroll**: Zoom in and out
+- **Arrow Keys**: Move the character
+- **Click and Drag**: Move the camera
+
+## Navigation
+The application includes a simple navigation bar with:
+- Home
+- About
+- Contact
+
+## Getting Started
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Run the development server with `npm start`
+4. Open your browser and navigate to `localhost:3000/island`
+
+## Technologies
+- Three.js for 3D rendering
+- Node.js backend
+- Modern JavaScript
+
+## Requirements
+- Modern web browser with WebGL support
+- JavaScript enabled
+
+## License
+MIT
+
+## Contact
+For questions or support, please visit the Contact page in the application.
