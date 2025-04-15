@@ -1089,28 +1089,103 @@
 
         // Load 3D Model
         const loader = new GLTFLoader();
-        loader.load(
-            'IslandCopy.glb',
-            function (gltf) {
-                const model = gltf.scene;
-                scene.add(model);
-                
-                // Center the model
-                const box = new THREE.Box3().setFromObject(model);
-                const center = box.getCenter(new THREE.Vector3());
-                model.position.sub(center);
+        
+        // Check if we have a preloaded model from the landing page
+        let usePreloadedModel = false;
+        if (window.PreloadCache && window.PreloadCache.model) {
+            usePreloadedModel = true;
+            console.log('Using preloaded model from landing page!');
+            
+            // Use the preloaded model
+            const model = window.PreloadCache.model.scene.clone();
+            scene.add(model);
+            
+            // Center the model
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            model.position.sub(center);
+            
+            // Scale the model to make it 23% larger
+            model.scale.set(1.23, 1.23, 1.23);
+            
+            // Optimize rendering for complex model
+            model.traverse(function(node) {
+                if (node.isMesh) {
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                    
+                    // Optimize materials if needed
+                    if (node.material) {
+                        // Use simpler materials for better performance
+                        node.material.flatShading = true;
+                    }
+                }
+            });
+            
+            createEventMarkers();
+            
+            // Remove loading text immediately
+            document.querySelector('.loading').style.display = 'none';
+            
+            // Initialize UI 
+            initializeTimelineUI();
+            showCurrentEvent();
+        } 
+        // If no preloaded model, load it normally
+        else {
+            loader.load(
+                'models/GloomyDoomy2.glb',
+                function (gltf) {
+                    const model = gltf.scene;
+                    scene.add(model);
+                    
+                    // Center the model
+                    const box = new THREE.Box3().setFromObject(model);
+                    const center = box.getCenter(new THREE.Vector3());
+                    model.position.sub(center);
+                    
+                    // Scale the model to make it 23% larger
+                    model.scale.set(1.23, 1.23, 1.23);
+                    
+                    // Optimize rendering for complex model
+                    model.traverse(function(node) {
+                        if (node.isMesh) {
+                            node.castShadow = true;
+                            node.receiveShadow = true;
+                            
+                            // Optimize materials if needed
+                            if (node.material) {
+                                // Use simpler materials for better performance
+                                node.material.flatShading = true;
+                            }
+                        }
+                    });
 
-                createEventMarkers();
-                
-                // Remove loading text
-                document.querySelector('.loading').style.display = 'none';
-                
-                // Initialize UI
-                initializeTimelineUI();
-                showCurrentEvent();
-            }
-        );
-
+                    createEventMarkers();
+                    
+                    // Remove loading text
+                    document.querySelector('.loading').style.display = 'none';
+                    
+                    // Initialize UI
+                    initializeTimelineUI();
+                    showCurrentEvent();
+                },
+                // Add a loading progress callback
+                function (xhr) {
+                    const loadingText = document.querySelector('.loading');
+                    if (loadingText && xhr.total > 0) {
+                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+                        loadingText.textContent = `Loading 3D Environment... ${percent}%`;
+                    }
+                },
+                // Add an error callback
+                function (error) {
+                    console.error('An error happened loading the model:', error);
+                    document.querySelector('.loading').textContent = 'Error loading 3D model. Please refresh the page.';
+                }
+            );
+        }
+        
         // UI Controls
         function initializeTimelineUI() {
             const indicator = document.querySelector('.timeline-indicator');

@@ -172,10 +172,107 @@
             <h1>A Journey Through Time<br>The Tata Steel Factory</h1>
             <p class="subtitle">Ontdek de belangrijke gebeurtenissen en ontwikkelingen in de geschiedenis van Tata Steel en de impact op de omgeving van IJmond.</p>
             <div class="button-container">
-                <a href="viewer.html" class="cta-button">Begin the Journey</a>
-                <a href="dystopian-island.html" class="cta-button dystopian">Enter Dystopian Future</a>
+                <a href="viewer.html" class="cta-button" id="normalBtn">Begin the Journey</a>
+                <a href="dystopian-island.html" class="cta-button dystopian" id="dystopianBtn">Enter Dystopian Future</a>
             </div>
+            <div id="preloadStatus" style="margin-top: 1rem; font-size: 0.8rem; color: #666; opacity: 0.7;"></div>
         </div>
     </main>
+
+    <!-- Import Three.js and GLTFLoader for preloading -->
+    <script type="module">
+        import * as THREE from '/node_modules/three/build/three.module.js';
+        import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+        
+        // Global cache for preloaded model
+        window.PreloadCache = window.PreloadCache || {};
+        
+        // Start preloading the 3D model immediately when the page loads
+        const modelPath = 'models/GloomyDoomy2.glb';
+        const loader = new GLTFLoader();
+        const statusElement = document.getElementById('preloadStatus');
+        
+        // Cache DOM elements
+        const normalBtn = document.getElementById('normalBtn');
+        const dystopianBtn = document.getElementById('dystopianBtn');
+        
+        // Create a global loading manager to handle the preloading
+        const loadingManager = new THREE.LoadingManager();
+        
+        // Set loading manager callbacks
+        loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+            const progress = Math.floor((itemsLoaded / itemsTotal) * 100);
+            statusElement.textContent = `Preloading resources: ${progress}%`;
+            
+            // When it hits 100%, change the buttons to indicate they're ready
+            if (progress === 100) {
+                statusElement.textContent = 'Resources loaded! Ready to explore.';
+                normalBtn.classList.add('ready');
+                dystopianBtn.classList.add('ready');
+                
+                // Store the animation frames for faster rendering
+                window.PreloadCache.isModelLoaded = true;
+            }
+        };
+        
+        // Start loading the model
+        loader.setPath('');
+        loader.manager = loadingManager;
+        loader.load(modelPath, function (gltf) {
+            // Store the loaded model in cache for instant access later
+            window.PreloadCache.model = gltf;
+        }, 
+        // Progress callback
+        function (xhr) {
+            // Progress is handled by the loading manager
+        },
+        // Error callback
+        function (error) {
+            console.error('Error preloading model:', error);
+            statusElement.textContent = 'Ready to explore (some resources may load when you enter)';
+        });
+        
+        // Add click handlers to intercept the normal navigation
+        normalBtn.addEventListener('click', function(e) {
+            transitionToPage(e, 'viewer.html');
+        });
+        
+        dystopianBtn.addEventListener('click', function(e) {
+            transitionToPage(e, 'dystopian-island.html');
+        });
+        
+        // Function to handle page transitions
+        function transitionToPage(e, url) {
+            e.preventDefault();
+            
+            // Store the loaded model data in sessionStorage
+            if (window.PreloadCache.isModelLoaded) {
+                sessionStorage.setItem('modelPreloaded', 'true');
+            }
+            
+            // Add a page transition effect
+            document.body.style.opacity = 0;
+            
+            // Navigate to the destination after transition
+            setTimeout(function() {
+                window.location.href = url;
+            }, 300);
+        }
+        
+        // Add a style tag for the transition and ready states
+        const style = document.createElement('style');
+        style.textContent = `
+            body {
+                transition: opacity 0.3s ease;
+            }
+            .cta-button.ready {
+                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            }
+            .dystopian.ready {
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
