@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Island - Tata Steel Factory</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="gradient-bg"></div>
+    <div id="scene-container"></div>
+    <div class="event-content">
+        <button class="action-btn" id="permanentActionBtn" style="margin-top: 1rem;">Take Action</button>
+    </div>
+    <div class="action-modal" id="actionModal">
+        <div class="action-modal-content">
+            <button class="action-modal-close" id="closeModal">×</button>
+            <h2 style="font-size: 2rem; font-weight: 300; margin-bottom: 1rem; background: linear-gradient(to right, #ff3333, #ff9494); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Take Action Now</h2>
+            <p style="color: #ff9494; margin-bottom: 2rem;">Choose how you want to make an impact and support positive change.</p>
+            <div class="action-grid">
+                <div class="action-card" onclick="window.open('https://example.com/petition', '_blank')">
+                    <div class="action-card-icon">📝</div>
+                    <h3>Sign the Petition</h3>
+                    <p>Add your voice to thousands demanding better environmental standards.</p>
+                </div>
+                <div class="action-card" onclick="shareOnSocial()">
+                    <div class="action-card-icon">🔄</div>
+                    <h3>Share on Social Media</h3>
+                    <p>Spread awareness by sharing this timeline with your network.</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://example.com/events', '_blank')">
+                    <div class="action-card-icon">👥</div>
+                    <h3>Join Local Events</h3>
+                    <p>Find and participate in local environmental activism events.</p>
+                </div>
+                <div class="action-card" onclick="window.open('https://example.com/donate', '_blank')">
+                    <div class="action-card-icon">💚</div>
+                    <h3>Support the Cause</h3>
+                    <p>Contribute to environmental organizations making a difference.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a href="/" class="cta-button" style="position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); z-index: 100;">Back to Home</a>
+    <script type="module" src="/public/js/island-script.js"></script>
+    <script>
+        const permanentActionBtn = document.getElementById('permanentActionBtn');
+        const actionModal = document.getElementById('actionModal');
+        const closeModal = document.getElementById('closeModal');
+        if (permanentActionBtn && actionModal && closeModal) {
+            permanentActionBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                actionModal.classList.add('show');
+            });
+            closeModal.addEventListener('click', () => {
+                actionModal.classList.remove('show');
+            });
+        }
+    </script>
+</body>
+</html>

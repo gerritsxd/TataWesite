@@ -397,12 +397,195 @@
             margin-bottom: 1rem;
             color: #fff;
         }
+
+        /* Hamburger Menu Styles */
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 2000;
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger-menu:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .hamburger-icon {
+            width: 20px;
+            height: 16px;
+            position: relative;
+        }
+        
+        .hamburger-icon span {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background-color: #ffffff;
+            left: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger-icon span:nth-child(1) {
+            top: 0;
+        }
+        
+        .hamburger-icon span:nth-child(2) {
+            top: 7px;
+        }
+        
+        .hamburger-icon span:nth-child(3) {
+            top: 14px;
+        }
+        
+        .hamburger-menu.active .hamburger-icon span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+        
+        .hamburger-menu.active .hamburger-icon span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger-menu.active .hamburger-icon span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+        
+        .nav-overlay {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100%;
+            background: linear-gradient(to right, rgba(10, 20, 30, 0.9), rgba(20, 30, 40, 0.95));
+            backdrop-filter: blur(10px);
+            z-index: 1999;
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 100px 40px 40px;
+            box-shadow: -5px 0 25px rgba(0, 0, 0, 0.7);
+        }
+        
+        .nav-overlay.active {
+            right: 0;
+        }
+        
+        .nav-title {
+            color: #94a3b8;
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 15px;
+        }
+        
+        .nav-link {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            margin: 12px 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-link:hover {
+            color: #94a3b8;
+            border-left: 3px solid #94a3b8;
+            background: rgba(255, 255, 255, 0.1);
+            padding-left: 20px;
+        }
+        
+        .nav-link:before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            margin-right: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover:before {
+            background: #94a3b8;
+            transform: scale(1.5);
+        }
+        
+        .back-to-landing {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .back-to-landing:before {
+            content: '←';
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+        
+        .back-to-landing:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body>
     <div id="scene-container">
         <div class="loading">Loading 3D Environment...</div>
     </div>
+    
+    <!-- Hamburger Menu -->
+    <div class="hamburger-menu" id="hamburgerMenu">
+        <div class="hamburger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    
+    <!-- Navigation Overlay -->
+    <div class="nav-overlay" id="navOverlay">
+        <div class="nav-title">Navigation</div>
+        <a href="/" class="nav-link">Home</a>
+        <a href="https://example.com/petition" class="nav-link">Petitions</a>
+        <a href="/contact.html" class="nav-link">Contact</a>
+        <a href="https://www.mnh.nl/" class="nav-link" target="_blank">MNH.nl</a>
+    </div>
+    
+    <!-- Back to Landing Page Button -->
+    <a href="/" class="back-to-landing">Back to Landing Page</a>
     
     <div class="event-content">
         <button class="close-expanded">×</button>
@@ -429,7 +612,16 @@
             </div>
         </div>
         <div class="expand-hint">Click to view more details</div>
+        <button class="timeline-btn" id="takeActionBtn" style="margin-top: 1rem; display: block; margin-left: auto; margin-right: auto; transition: all 0.3s ease;">Take Action</button>
     </div>
+
+    <style>
+        #takeActionBtn:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-2px) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+    </style>
 
     <div class="timeline-ui">
         <div class="timeline-controls">
@@ -996,7 +1188,7 @@
 
         function previousEvent() {
             if (isAnimating) return;
-            currentEventIndex = (currentEventIndex - 1 + timelineEvents.length) % timelineEvents.length;
+            currentEventIndex = (currentEventIndex + 1) % timelineEvents.length;
             collapseEventContent();
             updateTimelineIndicator();
             showCurrentEvent();
@@ -1004,7 +1196,7 @@
 
         function nextEvent() {
             if (isAnimating) return;
-            currentEventIndex = (currentEventIndex + 1) % timelineEvents.length;
+            currentEventIndex = (currentEventIndex - 1 + timelineEvents.length) % timelineEvents.length;
             collapseEventContent();
             updateTimelineIndicator();
             showCurrentEvent();
@@ -1214,6 +1406,37 @@
                 window.open(twitterUrl, '_blank');
             }
         };
+
+        // Permanent Action Button Logic
+        const takeActionBtn = document.getElementById('takeActionBtn');
+        if (takeActionBtn) {
+            takeActionBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('actionModal').classList.add('show');
+            });
+        }
+
+        // Remove any old engagement tracking that auto-shows popup
+        if (window.engagementTracker) {
+            window.engagementTracker.showActionPopup = () => {};
+        }
+
+        // Hamburger Menu Functionality
+        const hamburgerMenu = document.getElementById('hamburgerMenu');
+        const navOverlay = document.getElementById('navOverlay');
+        
+        hamburgerMenu.addEventListener('click', () => {
+            hamburgerMenu.classList.toggle('active');
+            navOverlay.classList.toggle('active');
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!hamburgerMenu.contains(e.target) && !navOverlay.contains(e.target) && navOverlay.classList.contains('active')) {
+                hamburgerMenu.classList.remove('active');
+                navOverlay.classList.remove('active');
+            }
+        });
     </script>
 </body>
 </html>
