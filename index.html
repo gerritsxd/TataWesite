@@ -77,25 +77,37 @@
 
         .cta-button {
             display: inline-block;
-            padding: 1.5rem 3rem;
-            font-size: 1.1rem;
+            background: rgba(29, 78, 216, 0.2);
             color: #fff;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 100px;
+            padding: 1rem 2rem;
+            border-radius: 8px;
             text-decoration: none;
+            font-weight: 500;
+            border: 1px solid rgba(29, 78, 216, 0.3);
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            margin-top: 3rem;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease forwards 0.6s;
+            margin: 0 1rem;
         }
 
         .cta-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.3);
+            background: rgba(29, 78, 216, 0.3);
             transform: translateY(-2px);
+        }
+
+        .cta-button.dystopian {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff3333;
+        }
+
+        .cta-button.dystopian:hover {
+            background: rgba(255, 0, 0, 0.3);
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
         }
 
         @keyframes fadeInUp {
@@ -159,7 +171,10 @@
         <div class="title-container">
             <h1>A Journey Through Time<br>The Tata Steel Factory</h1>
             <p class="subtitle">Ontdek de belangrijke gebeurtenissen en ontwikkelingen in de geschiedenis van Tata Steel en de impact op de omgeving van IJmond.</p>
-            <a href="viewer.html" class="cta-button">Begin the Journey</a>
+            <div class="button-container">
+                <a href="viewer.html" class="cta-button">Begin the Journey</a>
+                <a href="dystopian-island.html" class="cta-button dystopian">Enter Dystopian Future</a>
+            </div>
         </div>
     </main>
 </body>
