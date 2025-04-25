@@ -514,23 +514,17 @@
         
         .back-to-landing {
             position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-            padding: 12px 24px;
+            bottom: 20px;
+            right: 20px;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 8px 15px;
+            border-radius: 20px;
             background: rgba(50, 50, 50, 0.3);
             border: 1px solid rgba(70, 70, 70, 0.4);
-            color: #fff;
-            border-radius: 30px;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            letter-spacing: 0.5px;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: none;
         }
         
         .back-to-landing:hover {
@@ -580,6 +574,28 @@
             background: rgba(60, 60, 60, 0.4);
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            .timeline-ui {
+                display: none !important; /* Hide bottom controls on mobile */
+            }
+            
+            .event-content {
+                width: 90% !important;
+                max-width: 400px;
+                bottom: 20px !important;
+            }
+
+            .timeline-indicator {
+                bottom: 10px !important;
+            }
+            
+            .hamburger-menu {
+                top: 15px !important;
+                right: 15px !important;
+            }
         }
     </style>
 </head>
@@ -1217,7 +1233,7 @@
         // If no preloaded model, load it normally
         else {
             loader.load(
-                'models/GloomyDoomy2.glb',
+                '/models/GloomyDoomy2.glb',
                 function (gltf) {
                     const model = gltf.scene;
                     scene.add(model);
@@ -1634,7 +1650,34 @@
         }
 
         // Initialize engagement tracker
-        const tracker = new EngagementTracker();
+        const engagementTracker = new EngagementTracker();
+        
+        // Touch events for mobile swipe navigation
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+        
+        function handleSwipe() {
+            const swipeThreshold = 75; // Minimum swipe distance to trigger navigation
+            
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Swipe left - go to next event
+                nextEvent();
+            }
+            
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // Swipe right - go to previous event
+                previousEvent();
+            }
+        }
 
         // Setup popup and modal interactions
         const actionPopup = document.getElementById('actionPopup');

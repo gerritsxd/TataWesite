@@ -31,3 +31,14 @@ build/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Large files
+models/GloomyDoomy2.glb
+public/models/GloomyDoomy2.glb
+*.glb
+
+# Redundant HTML files
+public/test-model.html
+public/dual-islands-fixed.html
+public/dual-islands-simple.html
+public/dual-islands.html

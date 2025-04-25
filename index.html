@@ -158,6 +158,63 @@
             from { transform: translate(0, 0); }
             to { transform: translate(50px, 50px); }
         }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                padding: 0 1rem;
+            }
+            
+            .button-container {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .cta-button {
+                width: 100%;
+                max-width: 250px;
+                padding: 1.2rem 0;
+                font-size: 1.1rem;
+                text-align: center;
+            }
+            
+            .title-container {
+                padding: 0 1rem;
+            }
+            
+            .shape-1 {
+                width: 300px;
+                height: 300px;
+                top: -100px;
+                left: -100px;
+            }
+            
+            .shape-2 {
+                width: 200px;
+                height: 200px;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .cta-button {
+                padding: 1rem 0;
+            }
+            
+            #preloadStatus {
+                font-size: 0.7rem !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -188,7 +245,7 @@
         window.PreloadCache = window.PreloadCache || {};
         
         // Start preloading the 3D model immediately when the page loads
-        const modelPath = 'models/GloomyDoomy2.glb';
+        const modelPath = '/models/GloomyDoomy2.glb';
         const loader = new GLTFLoader();
         const statusElement = document.getElementById('preloadStatus');
         
