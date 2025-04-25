@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Islands Explorer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #004466, #000000);
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: white;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .island-info {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 300px;
+            z-index: 10;
+        }
+
+        .island-info h2 {
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+
+        .island-info p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div id="scene-container">
+        <div class="loading">Loading Islands Environment...</div>
+    </div>
+
+    <div class="controls">
+        <button class="control-btn" id="toggleIslandBtn">Switch Island View</button>
+        <button class="control-btn" id="resetViewBtn">Reset Camera</button>
+    </div>
+
+    <div class="island-info">
+        <h2>Island Explorer</h2>
+        <p>Use the controls below to switch between island views and reset the camera position.</p>
+        <p>Drag to rotate, scroll to zoom, and right-click drag to pan the view.</p>
+    </div>
+    
+    <script type="module">
+        import * as THREE from './node_modules/three/build/three.module.js';
+        import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        
+        // Create island groups for easy toggling
+        const mainIslandGroup = new THREE.Group();
+        const distantIslandGroup = new THREE.Group();
+        
+        scene.add(mainIslandGroup);
+        scene.add(distantIslandGroup);
+        
+        // Initially hide the distant island
+        distantIslandGroup.visible = false;
+
+        // Camera setup
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
+        camera.position.set(0, 500, 1000);
+        
+        // Renderer setup
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.2;
+        document.getElementById('scene-container').appendChild(renderer.domElement);
+        
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.screenSpacePanning = false;
+        controls.minDistance = 100;
+        controls.maxDistance = 10000;
+        controls.maxPolarAngle = Math.PI / 2;
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(100, 100, 50);
+        directionalLight.castShadow = true;
+        directionalLight.shadow.mapSize.width = 2048;
+        directionalLight.shadow.mapSize.height = 2048;
+        scene.add(directionalLight);
+        
+        // Add sky
+        const skyGeometry = new THREE.SphereGeometry(50000, 32, 32);
+        const skyMaterial = new THREE.MeshBasicMaterial({
+            color: 0x87CEEB,
+            side: THREE.BackSide
+        });
+        const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+        scene.add(sky);
+        
+        // Add stars
+        function createStars() {
+            const starGeometry = new THREE.BufferGeometry();
+            const starMaterial = new THREE.PointsMaterial({
+                color: 0xffffff,
+                size: 1
+            });
+            
+            const starVertices = [];
+            
+            for (let i = 0; i < 10000; i++) {
+                const x = (Math.random() - 0.5) * 100000;
+                const y = (Math.random() - 0.5) * 20000 + 10000; // Higher in the sky
+                const z = (Math.random() - 0.5) * 100000;
+                starVertices.push(x, y, z);
+            }
+            
+            starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+            const stars = new THREE.Points(starGeometry, starMaterial);
+            scene.add(stars);
+            
+            return stars;
+        }
+        
+        const stars = createStars();
+
+        // Load the GLB models
+        const loader = new GLTFLoader();
+        
+        // Variables to track loading progress
+        let modelsLoaded = 0;
+        const totalModels = 2;
+
+        // Load the main island
+        loader.load(
+            './models/IslandCopyTest2.glb',
+            function (gltf) {
+                const model = gltf.scene;
+                model.scale.set(1, 1, 1); // Normal scale for main view
+                model.position.set(0, 0, 0);
+                mainIslandGroup.add(model);
+                
+                model.traverse(function (node) {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+
+                modelsLoaded++;
+                checkAllModelsLoaded();
+            },
+            function (xhr) {
+                console.log('Main Island Loading: ' + (xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            function (error) {
+                console.error('An error happened while loading the main island:', error);
+            }
+        );
+
+        // Load the distant island (same model but scaled differently)
+        loader.load(
+            './models/IslandCopyTest2.glb',
+            function (gltf) {
+                const model = gltf.scene;
+                model.scale.set(10, 10, 10); // Larger scale for distant view
+                model.position.set(0, -500, 0); // Lower position
+                model.rotation.y = Math.PI; // Rotate 180 degrees for variety
+                distantIslandGroup.add(model);
+                
+                model.traverse(function (node) {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+
+                modelsLoaded++;
+                checkAllModelsLoaded();
+            },
+            function (xhr) {
+                console.log('Distant Island Loading: ' + (xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            function (error) {
+                console.error('An error happened while loading the distant island:', error);
+            }
+        );
+
+        // Check if all models are loaded
+        function checkAllModelsLoaded() {
+            if (modelsLoaded === totalModels) {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+
+        // Toggle between islands
+        let isAnimating = false;
+        let currentView = 'main';
+        
+        document.getElementById('toggleIslandBtn').addEventListener('click', toggleIslandView);
+        document.getElementById('resetViewBtn').addEventListener('click', resetCameraView);
+        
+        function toggleIslandView() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            controls.enabled = false;
+            
+            // Store original camera position for smooth transition
+            const startPosition = camera.position.clone();
+            const startTarget = controls.target.clone();
+            
+            // Set target position based on current view
+            let endPosition, endTarget;
+            
+            if (currentView === 'main') {
+                // Switch to distant view
+                endPosition = new THREE.Vector3(0, 1000, 2000);
+                endTarget = new THREE.Vector3(0, 0, 0);
+                currentView = 'distant';
+                
+                // Fade between islands
+                fadeIslands(mainIslandGroup, distantIslandGroup);
+            } else {
+                // Switch to main view
+                endPosition = new THREE.Vector3(0, 500, 1000);
+                endTarget = new THREE.Vector3(0, 0, 0);
+                currentView = 'main';
+                
+                // Fade between islands
+                fadeIslands(distantIslandGroup, mainIslandGroup);
+            }
+            
+            // Animate camera movement
+            let progress = 0;
+            const animationDuration = 2000; // ms
+            const startTime = Date.now();
+            
+            function animateCamera() {
+                const currentTime = Date.now();
+                progress = Math.min((currentTime - startTime) / animationDuration, 1);
+                
+                // Use easing function for smoother transition
+                const easeProgress = easeInOutCubic(progress);
+                
+                // Interpolate camera position and target
+                camera.position.lerpVectors(startPosition, endPosition, easeProgress);
+                controls.target.lerpVectors(startTarget, endTarget, easeProgress);
+                controls.update();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateCamera);
+                } else {
+                    isAnimating = false;
+                    controls.enabled = true;
+                }
+            }
+            
+            animateCamera();
+        }
+        
+        // Fade between island groups
+        function fadeIslands(fromGroup, toGroup) {
+            // Make both groups visible during transition
+            fromGroup.visible = true;
+            toGroup.visible = true;
+            
+            // After animation completes, hide the 'from' group
+            setTimeout(() => {
+                fromGroup.visible = false;
+            }, 2000);
+        }
+        
+        // Reset camera to default view
+        function resetCameraView() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            controls.enabled = false;
+            
+            const startPosition = camera.position.clone();
+            const startTarget = controls.target.clone();
+            
+            let endPosition, endTarget;
+            
+            if (currentView === 'main') {
+                endPosition = new THREE.Vector3(0, 500, 1000);
+                endTarget = new THREE.Vector3(0, 0, 0);
+            } else {
+                endPosition = new THREE.Vector3(0, 1000, 2000);
+                endTarget = new THREE.Vector3(0, 0, 0);
+            }
+            
+            let progress = 0;
+            const animationDuration = 1500; // ms
+            const startTime = Date.now();
+            
+            function animateReset() {
+                const currentTime = Date.now();
+                progress = Math.min((currentTime - startTime) / animationDuration, 1);
+                
+                const easeProgress = easeInOutCubic(progress);
+                
+                camera.position.lerpVectors(startPosition, endPosition, easeProgress);
+                controls.target.lerpVectors(startTarget, endTarget, easeProgress);
+                controls.update();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateReset);
+                } else {
+                    isAnimating = false;
+                    controls.enabled = true;
+                }
+            }
+            
+            animateReset();
+        }
+        
+        // Easing function for smoother animations
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>

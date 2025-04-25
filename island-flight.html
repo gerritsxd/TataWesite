@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Island Flight Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        #scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .loading {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            color: white;
+            text-align: center;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            min-width: 200px;
+        }
+
+        .flight-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 100, 150, 0.7);
+            color: white;
+            border: 1px solid rgba(0, 150, 200, 0.5);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .flight-btn:hover {
+            background: rgba(0, 120, 180, 0.8);
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        .location-indicator {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div id="scene-container">
+        <div class="loading">Loading Islands Environment...</div>
+    </div>
+
+    <div class="location-indicator">Current Location: <span id="location-text">Island 1</span></div>
+    <button class="flight-btn" id="flight-btn">Fly to Island 2</button>
+    
+    <script type="module">
+        import * as THREE from './node_modules/three/build/three.module.js';
+        import { GLTFLoader } from './node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+
+        // Scene setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB); // Sky blue background
+        scene.fog = new THREE.FogExp2(0x87CEEB, 0.0005);
+        
+        // Camera setup
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100000);
+        camera.position.set(0, 100, 300);
+        
+        // Renderer setup
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        document.getElementById('scene-container').appendChild(renderer.domElement);
+        
+        // Controls
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 50;
+        controls.maxDistance = 1000;
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(100, 100, 50);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+        
+        // Create water
+        const waterGeometry = new THREE.PlaneGeometry(100000, 100000);
+        const waterMaterial = new THREE.MeshStandardMaterial({
+            color: 0x0077be,
+            metalness: 0.1,
+            roughness: 0.3
+        });
+        const water = new THREE.Mesh(waterGeometry, waterMaterial);
+        water.rotation.x = -Math.PI / 2;
+        water.position.y = -10;
+        water.receiveShadow = true;
+        scene.add(water);
+        
+        // Island positions
+        const island1Position = new THREE.Vector3(0, 0, 0);
+        const island2Position = new THREE.Vector3(20000, 0, 0); // 20,000 units away on X axis
+        
+        // Load the islands
+        const loader = new GLTFLoader();
+        let island1, island2;
+        let modelsLoaded = 0;
+        
+        // Load Island 1 (IslandCopy.glb)
+        loader.load(
+            './IslandCopy.glb',
+            function (gltf) {
+                island1 = gltf.scene;
+                island1.position.copy(island1Position);
+                island1.scale.set(1, 1, 1);
+                
+                // Apply shadows to all meshes
+                island1.traverse(function (node) {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                
+                scene.add(island1);
+                modelsLoaded++;
+                checkAllModelsLoaded();
+            },
+            function (xhr) {
+                console.log('Island 1 Loading: ' + (xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            function (error) {
+                console.error('An error happened while loading Island 1:', error);
+                document.querySelector('.loading').textContent = 'Error loading Island 1. Please refresh.';
+            }
+        );
+        
+        // Load Island 2 (models/IslandCopyTest2.glb)
+        loader.load(
+            './models/IslandCopyTest2.glb',
+            function (gltf) {
+                island2 = gltf.scene;
+                island2.position.copy(island2Position);
+                island2.scale.set(1, 1, 1);
+                
+                // Apply shadows to all meshes
+                island2.traverse(function (node) {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                    }
+                });
+                
+                scene.add(island2);
+                modelsLoaded++;
+                checkAllModelsLoaded();
+            },
+            function (xhr) {
+                console.log('Island 2 Loading: ' + (xhr.loaded / xhr.total * 100) + '% loaded');
+            },
+            function (error) {
+                console.error('An error happened while loading Island 2:', error);
+                document.querySelector('.loading').textContent = 'Error loading Island 2. Please refresh.';
+            }
+        );
+        
+        // Check if all models are loaded
+        function checkAllModelsLoaded() {
+            if (modelsLoaded === 2) {
+                document.querySelector('.loading').style.display = 'none';
+            }
+        }
+        
+        // Flight animation
+        let isAnimating = false;
+        let currentLocation = 'island1';
+        const locationText = document.getElementById('location-text');
+        const flightBtn = document.getElementById('flight-btn');
+        
+        flightBtn.addEventListener('click', startFlight);
+        
+        function startFlight() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            controls.enabled = false;
+            
+            const startPosition = camera.position.clone();
+            const startTarget = controls.target.clone();
+            
+            let endPosition, endTarget, newLocation, buttonText;
+            
+            if (currentLocation === 'island1') {
+                // Flying to Island 2
+                endPosition = new THREE.Vector3().copy(island2Position).add(new THREE.Vector3(0, 100, 300));
+                endTarget = island2Position.clone();
+                newLocation = 'island2';
+                buttonText = 'Fly to Island 1';
+                locationText.textContent = 'Flying to Island 2...';
+            } else {
+                // Flying to Island 1
+                endPosition = new THREE.Vector3().copy(island1Position).add(new THREE.Vector3(0, 100, 300));
+                endTarget = island1Position.clone();
+                newLocation = 'island1';
+                buttonText = 'Fly to Island 2';
+                locationText.textContent = 'Flying to Island 1...';
+            }
+            
+            // Create a flight path with altitude
+            const distance = startPosition.distanceTo(endPosition);
+            const midPoint = new THREE.Vector3().lerpVectors(startPosition, endPosition, 0.5);
+            midPoint.y = Math.max(startPosition.y, endPosition.y) + distance * 0.1; // Fly higher in the middle
+            
+            // Create a smooth curve for the flight path
+            const curve = new THREE.QuadraticBezierCurve3(
+                startPosition,
+                midPoint,
+                endPosition
+            );
+            
+            // Animation parameters
+            const duration = 10000; // 10 seconds
+            const startTime = Date.now();
+            
+            function animateFlight() {
+                const elapsedTime = Date.now() - startTime;
+                const progress = Math.min(elapsedTime / duration, 1);
+                
+                // Use an easing function for smoother motion
+                const easedProgress = easeInOutQuad(progress);
+                
+                // Get position along the curve
+                const position = curve.getPoint(easedProgress);
+                camera.position.copy(position);
+                
+                // Smoothly interpolate the target
+                controls.target.lerpVectors(startTarget, endTarget, easedProgress);
+                controls.update();
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateFlight);
+                } else {
+                    // Flight completed
+                    currentLocation = newLocation;
+                    locationText.textContent = currentLocation === 'island1' ? 'Island 1' : 'Island 2';
+                    flightBtn.textContent = buttonText;
+                    
+                    controls.enabled = true;
+                    isAnimating = false;
+                }
+            }
+            
+            animateFlight();
+        }
+        
+        // Easing function for smoother animation
+        function easeInOutQuad(t) {
+            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        }
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+    </script>
+</body>
+</html>
