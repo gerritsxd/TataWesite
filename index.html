@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A Journey Through Time: The Tata Steel Factory</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical resources with correct type -->
+    <link rel="modulepreload" href="/node_modules/three/build/three.module.js">
+    <link rel="modulepreload" href="/node_modules/three/examples/jsm/loaders/GLTFLoader.js">
+    <link rel="modulepreload" href="/node_modules/three/examples/jsm/controls/OrbitControls.js">
+    
     <style>
         * {
             margin: 0;
@@ -86,21 +92,29 @@
             border: 1px solid rgba(29, 78, 216, 0.3);
             transition: all 0.3s ease;
             margin: 0 1rem;
+            position: relative;
+            overflow: hidden;
         }
 
         .cta-button:hover {
             background: rgba(29, 78, 216, 0.3);
             transform: translateY(-2px);
         }
-
-        .cta-button.dystopian {
-            background: rgba(255, 0, 0, 0.2);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-            color: #ff3333;
+        
+        .cta-button.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            pointer-events: none;
         }
-
-        .cta-button.dystopian:hover {
-            background: rgba(255, 0, 0, 0.3);
+        
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            width: 0%;
+            background: linear-gradient(to right, #4a9eff, #9b4aff);
+            transition: width 0.3s ease;
         }
 
         .button-container {
@@ -215,6 +229,56 @@
                 font-size: 0.7rem !important;
             }
         }
+        
+        .cta-button.ready {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Viewer page styles */
+        #viewer-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111111;
+            z-index: 100;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        #viewer-container.active {
+            display: block;
+            opacity: 1;
+        }
+        
+        #scene-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 200;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -224,112 +288,267 @@
         <div class="shape shape-2"></div>
     </div>
 
-    <main class="main-content">
+    <!-- Landing Page View -->
+    <main class="main-content" id="landing-view">
         <div class="title-container">
             <h1>A Journey Through Time<br>The Tata Steel Factory</h1>
             <p class="subtitle">Ontdek de belangrijke gebeurtenissen en ontwikkelingen in de geschiedenis van Tata Steel en de impact op de omgeving van IJmond.</p>
             <div class="button-container">
-                <a href="viewer.html" class="cta-button" id="normalBtn">Begin the Journey</a>
-                <a href="dystopian-island.html" class="cta-button dystopian" id="dystopianBtn">Enter Dystopian Future</a>
+                <button class="cta-button disabled" id="beginJourneyBtn">
+                    Begin the Journey
+                    <div class="progress-bar" id="progress-bar"></div>
+                </button>
             </div>
             <div id="preloadStatus" style="margin-top: 1rem; font-size: 0.8rem; color: #666; opacity: 0.7;"></div>
         </div>
     </main>
+    
+    <!-- Viewer Page View -->
+    <div id="viewer-container">
+        <div id="scene-container"></div>
+        <button class="back-button" id="backToLandingBtn">Back to Home</button>
+    </div>
 
     <!-- Import Three.js and GLTFLoader for preloading -->
     <script type="module">
         import * as THREE from '/node_modules/three/build/three.module.js';
         import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
         
-        // Global cache for preloaded model
-        window.PreloadCache = window.PreloadCache || {};
+        console.time('Page Initialization');
+        console.log('[App] Starting initialization');
         
-        // Start preloading the 3D model immediately when the page loads
-        const modelPath = '/models/GloomyDoomy2.glb';
-        const loader = new GLTFLoader();
+        // DOM Elements
+        const landingView = document.getElementById('landing-view');
+        const viewerContainer = document.getElementById('viewer-container');
+        const beginJourneyBtn = document.getElementById('beginJourneyBtn');
+        const backToLandingBtn = document.getElementById('backToLandingBtn');
+        const progressBar = document.getElementById('progress-bar');
         const statusElement = document.getElementById('preloadStatus');
         
-        // Cache DOM elements
-        const normalBtn = document.getElementById('normalBtn');
-        const dystopianBtn = document.getElementById('dystopianBtn');
+        // Global variables
+        let scene, camera, renderer, controls;
+        let model = null;
+        let isModelLoaded = false;
         
-        // Create a global loading manager to handle the preloading
-        const loadingManager = new THREE.LoadingManager();
-        
-        // Set loading manager callbacks
-        loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
-            const progress = Math.floor((itemsLoaded / itemsTotal) * 100);
-            statusElement.textContent = `Preloading resources: ${progress}%`;
+        // Initialize Three.js scene
+        function initScene() {
+            console.time('Scene Initialization');
             
-            // When it hits 100%, change the buttons to indicate they're ready
-            if (progress === 100) {
-                statusElement.textContent = 'Resources loaded! Ready to explore.';
-                normalBtn.classList.add('ready');
-                dystopianBtn.classList.add('ready');
-                
-                // Store the animation frames for faster rendering
-                window.PreloadCache.isModelLoaded = true;
-            }
-        };
-        
-        // Start loading the model
-        loader.setPath('');
-        loader.manager = loadingManager;
-        loader.load(modelPath, function (gltf) {
-            // Store the loaded model in cache for instant access later
-            window.PreloadCache.model = gltf;
-        }, 
-        // Progress callback
-        function (xhr) {
-            // Progress is handled by the loading manager
-        },
-        // Error callback
-        function (error) {
-            console.error('Error preloading model:', error);
-            statusElement.textContent = 'Ready to explore (some resources may load when you enter)';
-        });
-        
-        // Add click handlers to intercept the normal navigation
-        normalBtn.addEventListener('click', function(e) {
-            transitionToPage(e, 'viewer.html');
-        });
-        
-        dystopianBtn.addEventListener('click', function(e) {
-            transitionToPage(e, 'dystopian-island.html');
-        });
-        
-        // Function to handle page transitions
-        function transitionToPage(e, url) {
-            e.preventDefault();
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
             
-            // Store the loaded model data in sessionStorage
-            if (window.PreloadCache.isModelLoaded) {
-                sessionStorage.setItem('modelPreloaded', 'true');
-            }
+            // Create camera
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
+            camera.position.set(0, 27.5, 35); // Decreased y by 50% (from 55 to 27.5) and increased z by 75% (from 20 to 35)
             
-            // Add a page transition effect
-            document.body.style.opacity = 0;
+            // Create renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             
-            // Navigate to the destination after transition
-            setTimeout(function() {
-                window.location.href = url;
-            }, 300);
+            // Add renderer to DOM
+            const sceneContainer = document.getElementById('scene-container');
+            sceneContainer.innerHTML = '';
+            sceneContainer.appendChild(renderer.domElement);
+            
+            // Add orbit controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.screenSpacePanning = false;
+            controls.minDistance = 10;  // Adjusted minimum zoom distance
+            controls.maxDistance = 30; // Adjusted maximum zoom distance
+            controls.maxPolarAngle = Math.PI / 2;
+            controls.target.set(0, 10, 0); // Keep the same target point
+            
+            // Add lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(0, 200, 100);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            directionalLight.shadow.camera.near = 0.5;
+            directionalLight.shadow.camera.far = 500;
+            directionalLight.shadow.camera.left = -500;
+            directionalLight.shadow.camera.right = 500;
+            directionalLight.shadow.camera.top = 500;
+            directionalLight.shadow.camera.bottom = -500;
+            scene.add(directionalLight);
+            
+            console.timeEnd('Scene Initialization');
+            
+            // Start animation loop
+            animate();
         }
         
-        // Add a style tag for the transition and ready states
-        const style = document.createElement('style');
-        style.textContent = `
-            body {
-                transition: opacity 0.3s ease;
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (controls) {
+                controls.update();
             }
-            .cta-button.ready {
-                box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            
+            if (renderer && scene && camera) {
+                renderer.render(scene, camera);
             }
-            .dystopian.ready {
-                box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+        
+        // Load model
+        function loadModel() {
+            console.time('Model Loading');
+            console.log('[App] Starting model loading...');
+            
+            const loadingManager = new THREE.LoadingManager();
+            const loader = new GLTFLoader(loadingManager);
+            
+            loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
+                const progress = Math.floor((itemsLoaded / itemsTotal) * 100);
+                progressBar.style.width = `${progress}%`;
+                statusElement.textContent = `Loading 3D model: ${progress}%`;
+                console.log(`[App] Loading progress: ${progress}%`);
+            };
+            
+            loadingManager.onError = function(url) {
+                console.error('[App] Error loading:', url);
+                statusElement.textContent = 'Error loading model. Please refresh.';
+                progressBar.style.backgroundColor = '#ff3333';
+            };
+            
+            loadingManager.onLoad = function() {
+                console.log('[App] Model loading complete');
+                statusElement.textContent = 'Model loaded! Click to begin your journey.';
+                beginJourneyBtn.disabled = false;
+                beginJourneyBtn.classList.remove('disabled');
+                isModelLoaded = true;
+                console.timeEnd('Model Loading');
+            };
+            
+            loader.load('./models/GloomyDoomy2.glb', function(gltf) {
+                console.time('Model Setup');
+                console.log('[App] Model loaded, setting up...');
+                
+                model = gltf.scene;
+                
+                // Apply transformations
+                model.scale.set(1, 1, 1);
+                model.position.set(0, 0, 0);
+                model.rotation.y = Math.PI;
+                
+                // Center the model properly
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
+                model.position.x = -center.x;
+                model.position.z = -center.z;
+                // Keep y at 0 to maintain ground level
+                
+                // Count meshes for debugging
+                let meshCount = 0;
+                model.traverse(function(child) {
+                    if (child.isMesh) {
+                        meshCount++;
+                        child.castShadow = true;
+                        child.receiveShadow = true;
+                    }
+                });
+                console.log(`[App] Model contains ${meshCount} meshes`);
+                
+                console.log('[App] Model setup complete');
+                console.timeEnd('Model Setup');
+            }, 
+            function(xhr) {
+                // Progress callback (handled by loadingManager)
+            }, 
+            function(error) {
+                console.error('[App] Error loading model:', error);
+                statusElement.textContent = 'Error loading model. Please refresh.';
+                progressBar.style.backgroundColor = '#ff3333';
+            });
+        }
+        
+        // Show the viewer
+        function showViewer() {
+            console.log('[App] Showing viewer');
+            
+            // Fade out landing page
+            landingView.style.opacity = 0;
+            
+            // After a short delay, show the viewer
+            setTimeout(() => {
+                landingView.style.display = 'none';
+                viewerContainer.style.display = 'block';
+                
+                // Setup the model if it's not already set up
+                if (model && !model.parent) {
+                    scene.add(model);
+                }
+                
+                // Fade in the viewer
+                setTimeout(() => {
+                    viewerContainer.classList.add('active');
+                }, 50);
+            }, 500);
+        }
+        
+        // Show the landing page
+        function showLanding() {
+            console.log('[App] Showing landing page');
+            
+            // Fade out viewer
+            viewerContainer.classList.remove('active');
+            
+            // After a short delay, show the landing page
+            setTimeout(() => {
+                viewerContainer.style.display = 'none';
+                landingView.style.display = 'flex';
+                
+                // Fade in the landing page
+                setTimeout(() => {
+                    landingView.style.opacity = 1;
+                }, 50);
+            }, 500);
+        }
+        
+        // Event listeners
+        beginJourneyBtn.addEventListener('click', function() {
+            if (isModelLoaded) {
+                showViewer();
             }
-        `;
-        document.head.appendChild(style);
+        });
+        
+        backToLandingBtn.addEventListener('click', function() {
+            showLanding();
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+        
+        // Initialize everything
+        function init() {
+            // Initialize Three.js scene
+            initScene();
+            
+            // Start loading the model
+            loadModel();
+            
+            console.timeEnd('Page Initialization');
+        }
+        
+        // Start initialization
+        init();
     </script>
 </body>
 </html>

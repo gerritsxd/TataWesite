@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timeline Viewer - Tata Steel Factory</title>
+    
+    <!-- Preload critical resources with correct type -->
+    <link rel="modulepreload" href="./node_modules/three/build/three.module.js">
+    <link rel="modulepreload" href="./node_modules/three/examples/jsm/loaders/GLTFLoader.js">
+    <link rel="modulepreload" href="./node_modules/three/examples/jsm/controls/OrbitControls.js">
+    
+    <!-- Preconnect to external domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Load fonts asynchronously -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         * {
@@ -227,12 +238,39 @@
 
         .loading {
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: #fff;
-            font-size: 1.2rem;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111111;
+            z-index: 1000;
+        }
+        
+        .loading-content {
             text-align: center;
+            width: 80%;
+            max-width: 500px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #4a9eff, #9b4aff);
+            transition: width 0.3s ease;
+        }
+        
+        .loading-text {
+            font-size: 1rem;
+            opacity: 0.7;
         }
 
         /* Action Popup Styles */
@@ -590,16 +628,48 @@
                 top: 15px !important;
                 right: 15px !important;
             }
+            
+            .bottom-controls {
+                display: none !important;
+            }
+            
+            .event-content {
+                width: 90% !important;
+                max-width: 300px !important;
+                font-size: 0.9rem !important;
+                padding: 1.5rem !important;
+            }
+            
+            .timeline-container {
+                bottom: 10px !important;
+            }
+            
+            .timeline-btn {
+                padding: 8px 12px !important;
+                font-size: 0.8rem !important;
+            }
+        }
+        
+        /* Add styles to initially hide UI elements until everything is ready */
+        .hidden-until-ready {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .show-all {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
     <div id="scene-container">
-        <div class="loading">Loading 3D Environment...</div>
+        <div class="loading" id="loading-container" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #111111; z-index: 1000;">
+            <!-- Completely empty loading screen - just a black background -->
+        </div>
     </div>
     
     <!-- Hamburger Menu -->
-    <div class="hamburger-menu" id="hamburgerMenu">
+    <div class="hamburger-menu hidden-until-ready" id="hamburgerMenu">
         <div class="hamburger-icon">
             <span></span>
             <span></span>
@@ -608,7 +678,7 @@
     </div>
     
     <!-- Navigation Overlay -->
-    <div class="nav-overlay" id="navOverlay">
+    <div class="nav-overlay hidden-until-ready" id="navOverlay">
         <div class="nav-title">Navigation</div>
         <a href="/" class="nav-link">Home</a>
         <a href="https://example.com/petition" class="nav-link">Petitions</a>
@@ -620,9 +690,9 @@
     </div>
     
     <!-- Back to Landing Page Button -->
-    <a href="/" class="back-to-landing">Back to Landing Page</a>
+    <a href="/" class="back-to-landing hidden-until-ready">Back to Landing Page</a>
     
-    <div class="event-content">
+    <div class="event-content hidden-until-ready">
         <button class="close-expanded">×</button>
         <h2>Loading...</h2>
         <p>Please wait while we prepare your journey...</p>
@@ -647,8 +717,8 @@
             </div>
         </div>
         <div class="button-container">
-            <button class="timeline-btn learn-more-btn" id="learnMoreBtn">Learn More</button>
-            <button class="timeline-btn action-btn" id="takeActionBtn">Take Action</button>
+            <button class="timeline-btn learn-more-btn hidden-until-ready" id="learnMoreBtn">Learn More</button>
+            <button class="timeline-btn action-btn hidden-until-ready" id="takeActionBtn">Take Action</button>
         </div>
     </div>
 
@@ -660,22 +730,22 @@
         }
     </style>
 
-    <div class="timeline-ui">
+    <div class="timeline-ui hidden-until-ready">
         <div class="timeline-controls">
-            <button class="timeline-btn" id="prevBtn">Previous</button>
-            <div class="timeline-indicator"></div>
-            <button class="timeline-btn" id="nextBtn">Next</button>
+            <button class="timeline-btn hidden-until-ready" id="prevBtn">Previous</button>
+            <div class="timeline-indicator hidden-until-ready"></div>
+            <button class="timeline-btn hidden-until-ready" id="nextBtn">Next</button>
         </div>
     </div>
 
     <!-- Action Popup -->
-    <div class="action-popup" id="actionPopup">
+    <div class="action-popup hidden-until-ready" id="actionPopup">
         <div class="action-popup-title">You've Explored Our Journey.<br>Ready to Make a Difference?</div>
         <div class="action-popup-subtitle">Discover meaningful ways to support positive environmental change in your community</div>
     </div>
 
     <!-- Action Modal -->
-    <div class="action-modal" id="actionModal">
+    <div class="action-modal hidden-until-ready" id="actionModal">
         <div class="action-modal-content">
             <button class="action-modal-close" id="closeModal">×</button>
             <h2 style="font-size: 2rem; font-weight: 300; margin-bottom: 1rem; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
@@ -712,10 +782,231 @@
     </div>
 
     <script type="module">
-        import * as THREE from '/node_modules/three/build/three.module.js';
-        import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js';
-        import { OrbitControls } from '/node_modules/three/examples/jsm/controls/OrbitControls.js';
+        console.time('Viewer Page Initialization');
+        console.log('[Viewer] Page initialization started');
 
+        // Check if modules were preloaded
+        const modulesPreloaded = sessionStorage.getItem('modulesPreloaded') === 'true';
+        console.log('[Viewer] Modules preloaded status:', modulesPreloaded);
+        
+        // Check if model was preloaded
+        const modelPreloaded = sessionStorage.getItem('modelPreloaded') === 'true';
+        console.log('[Viewer] Model preloaded status:', modelPreloaded);
+        
+        // Check cache timestamp if available
+        const cacheTimestamp = sessionStorage.getItem('cacheTimestamp');
+        if (cacheTimestamp) {
+            const cacheAge = Date.now() - parseInt(cacheTimestamp);
+            console.log(`[Viewer] Cache age: ${cacheAge}ms (${(cacheAge/1000).toFixed(2)}s)`);
+        }
+        
+        // Check if PreloadCache exists
+        console.log('[Viewer] Window.PreloadCache exists:', !!window.PreloadCache);
+        
+        // Import modules - either from cache or from files
+        let THREE, GLTFLoader, OrbitControls;
+        
+        // Import modules normally since window cache isn't persisting
+        console.log('[Viewer] Importing Three.js modules from files');
+        const threeImport = await import('./node_modules/three/build/three.module.js');
+        THREE = threeImport;
+        
+        const gltfLoaderImport = await import('./node_modules/three/examples/jsm/loaders/GLTFLoader.js');
+        GLTFLoader = gltfLoaderImport.GLTFLoader;
+        
+        const orbitControlsImport = await import('./node_modules/three/examples/jsm/controls/OrbitControls.js');
+        OrbitControls = orbitControlsImport.OrbitControls;
+
+        // Global variables
+        let currentEventIndex = 0;
+        let isAnimating = false;
+        let scene, camera, renderer, controls;
+        
+        // Keep loading screen visible until model is fully loaded
+        
+        // Initialize scene immediately
+        console.log('[Viewer] Initializing scene');
+        initScene();
+        
+        // Function to initialize the Three.js scene
+        function initScene() {
+            console.time('Scene Initialization');
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 20, 50);
+            
+            // Renderer setup - use lower initial quality for faster first render
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: false, // Start without antialiasing for faster initial render
+                powerPreference: 'high-performance'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(1); // Start with lower pixel ratio
+            renderer.shadowMap.enabled = true;
+            document.getElementById('scene-container').appendChild(renderer.domElement);
+            
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2;
+            
+            // Add basic lighting immediately
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(50, 100, 50);
+            scene.add(directionalLight);
+            
+            console.log('[Viewer] Basic scene setup complete');
+            console.timeEnd('Scene Initialization');
+            
+            // Start rendering immediately
+            animate();
+            
+            // Always load the model from scratch since window cache isn't persisting
+            console.log('[Viewer] Loading model from scratch');
+            loadModelWithProgress();
+            
+            // Improve quality after initial render
+            setTimeout(() => {
+                console.log('[Viewer] Improving renderer quality');
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.antialias = true;
+            }, 2000);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        // Function to load model with progress tracking
+        function loadModelWithProgress() {
+            console.time('Load Model From Scratch');
+            console.log('[Viewer] Starting model load with progress tracking');
+            
+            // Create a loading manager to track progress
+            const loadingManager = new THREE.LoadingManager();
+            
+            // Set up loading manager callbacks - WITHOUT referencing DOM elements
+            loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
+                const progress = Math.floor((itemsLoaded / itemsTotal) * 100);
+                console.log(`[Viewer] Loading progress: ${progress}%`);
+            };
+            
+            // Create loader with the loading manager
+            const modelLoader = new GLTFLoader(loadingManager);
+            
+            modelLoader.load(
+                './models/GloomyDoomy2.glb',
+                function (gltf) {
+                    console.log('[Viewer] Model loaded successfully from scratch');
+                    console.timeEnd('Load Model From Scratch');
+                    
+                    setupModel(gltf.scene);
+                    
+                    // Hide loading screen only after model is fully set up
+                    document.getElementById('loading-container').style.display = 'none';
+                    
+                    // Show all UI elements at once
+                    showAllUIElements();
+                },
+                // Progress callback
+                function (xhr) {
+                    if (xhr.lengthComputable) {
+                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+                        console.log(`[Viewer] XHR progress: ${percent}%, ${formatBytes(xhr.loaded)}/${formatBytes(xhr.total)}`);
+                    }
+                },
+                // Error callback
+                function (error) {
+                    console.error('[Viewer] Error loading model:', error);
+                }
+            );
+        }
+        
+        // Helper function to format bytes
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+        
+        // Function to set up the model
+        function setupModel(model) {
+            console.time('Model Setup');
+            console.log('[Viewer] Setting up model in scene');
+            
+            scene.add(model);
+            
+            // Center the model
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            model.position.sub(center);
+            
+            // Scale the model
+            model.scale.set(1.23, 1.23, 1.23);
+            
+            // Optimize model
+            let meshCount = 0;
+            model.traverse(function(node) {
+                if (node.isMesh) {
+                    meshCount++;
+                    node.castShadow = true;
+                    node.receiveShadow = true;
+                    
+                    if (node.material) {
+                        node.material.flatShading = true;
+                    }
+                }
+            });
+            console.log(`[Viewer] Model contains ${meshCount} meshes`);
+            
+            createEventMarkers();
+            initializeTimelineUI();
+            showCurrentEvent();
+            
+            console.log('[Viewer] Model setup complete');
+            console.timeEnd('Model Setup');
+            console.timeEnd('Viewer Page Initialization');
+        }
+        
+        // Event markers
+        function createEventMarkers() {
+            const markerGroup = new THREE.Group();
+            
+            timelineEvents.forEach(event => {
+                const x = Math.cos(event.position.angle) * event.position.distance;
+                const z = Math.sin(event.position.angle) * event.position.distance;
+                
+                // Create invisible marker for position reference
+                const marker = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.001, 16, 16),
+                    new THREE.MeshBasicMaterial({ 
+                        transparent: true,
+                        opacity: 0,
+                        visible: false 
+                    })
+                );
+                marker.position.set(x, 0, z);
+                markerGroup.add(marker);
+            });
+            
+            scene.add(markerGroup);
+            return markerGroup;
+        }
+        
         // Timeline data
         const timelineEvents = [
             {
@@ -944,252 +1235,15 @@
             }
         ];
 
-        let currentEventIndex = 0;
-        let isAnimating = false;
-
-        // Scene setup
-        const scene = new THREE.Scene();
-        
-        // Create a bright sky gradient background
-        const vertexShader = `
-            varying vec3 vWorldPosition;
-            void main() {
-                vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-                vWorldPosition = worldPosition.xyz;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `;
-
-        const fragmentShader = `
-            uniform vec3 topColor;
-            uniform vec3 bottomColor;
-            uniform float offset;
-            uniform float exponent;
-            varying vec3 vWorldPosition;
-            void main() {
-                float h = normalize(vWorldPosition + offset).y;
-                gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), 1.0);
-            }
-        `;
-
-        // Create sky dome
-        const skyGeo = new THREE.SphereGeometry(1000, 32, 15);
-        const skyMat = new THREE.ShaderMaterial({
-            vertexShader: vertexShader,
-            fragmentShader: fragmentShader,
-            uniforms: {
-                topColor: { value: new THREE.Color(0x87CEEB) },    // Light sky blue
-                bottomColor: { value: new THREE.Color(0xE0FFFF) }, // Light cyan
-                offset: { value: 400 },
-                exponent: { value: 0.6 }
-            },
-            side: THREE.BackSide
+        let userInteracting = false;
+        renderer.domElement.addEventListener('pointerdown', () => {
+            userInteracting = true;
         });
-        const sky = new THREE.Mesh(skyGeo, skyMat);
-        scene.add(sky);
 
-        // Add subtle fog
-        scene.fog = new THREE.Fog(0xE0FFFF, 100, 1000);
+        renderer.domElement.addEventListener('pointerup', () => {
+            userInteracting = false;
+        });
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-        scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(50, 100, 50);
-        scene.add(directionalLight);
-
-        const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0xE0FFFF, 0.6);
-        scene.add(hemisphereLight);
-
-        // Add clouds
-        function createClouds() {
-            const cloudParticles = [];
-            const textureLoader = new THREE.TextureLoader();
-            const cloudGeometry = new THREE.PlaneGeometry(500, 500);
-            const cloudMaterial = new THREE.MeshLambertMaterial({
-                color: 0xffffff,
-                opacity: 0.2,
-                transparent: true,
-            });
-
-            for(let p=0; p<25; p++) {
-                const cloud = new THREE.Mesh(cloudGeometry, cloudMaterial);
-                cloud.position.set(
-                    Math.random() * 800 - 400,
-                    Math.random() * 100 + 200,
-                    Math.random() * 800 - 400
-                );
-                cloud.rotation.x = 1.16;
-                cloud.rotation.y = -0.12;
-                cloud.rotation.z = Math.random() * 2 * Math.PI;
-                cloud.material.opacity = 0.1;
-                cloudParticles.push(cloud);
-                scene.add(cloud);
-            }
-            return cloudParticles;
-        }
-
-        const cloudParticles = createClouds();
-
-        // Camera and renderer setup
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-        camera.position.set(0, 35, 35); // Increased height for more top-down view
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.0;
-        document.getElementById('scene-container').appendChild(renderer.domElement);
-
-        // Controls
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.05;
-        controls.maxDistance = 150;
-        controls.minDistance = 10;
-        controls.enabled = true;
-        controls.autoRotate = false;
-        controls.enablePan = true;
-        controls.enableZoom = true;
-        controls.enableRotate = true;
-        controls.mouseButtons = {
-            LEFT: THREE.MOUSE.ROTATE,
-            MIDDLE: THREE.MOUSE.DOLLY,
-            RIGHT: THREE.MOUSE.PAN
-        };
-        controls.target.set(0, 0, 0);
-        
-        // Set initial camera angle
-        camera.lookAt(0, 0, 0);
-
-        // Event markers
-        function createEventMarkers() {
-            const markerGroup = new THREE.Group();
-            
-            timelineEvents.forEach(event => {
-                const x = Math.cos(event.position.angle) * event.position.distance;
-                const z = Math.sin(event.position.angle) * event.position.distance;
-                
-                // Create invisible marker for position reference
-                const marker = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.001, 16, 16),
-                    new THREE.MeshBasicMaterial({ 
-                        transparent: true,
-                        opacity: 0,
-                        visible: false 
-                    })
-                );
-                marker.position.set(x, 0, z);
-                markerGroup.add(marker);
-            });
-            
-            scene.add(markerGroup);
-            return markerGroup;
-        }
-
-        // Load 3D Model
-        const loader = new GLTFLoader();
-        
-        // Check if we have a preloaded model from the landing page
-        let usePreloadedModel = false;
-        if (window.PreloadCache && window.PreloadCache.model) {
-            usePreloadedModel = true;
-            console.log('Using preloaded model from landing page!');
-            
-            // Use the preloaded model
-            const model = window.PreloadCache.model.scene.clone();
-            scene.add(model);
-            
-            // Center the model
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            model.position.sub(center);
-            
-            // Scale the model to make it 23% larger
-            model.scale.set(1.23, 1.23, 1.23);
-            
-            // Optimize rendering for complex model
-            model.traverse(function(node) {
-                if (node.isMesh) {
-                    node.castShadow = true;
-                    node.receiveShadow = true;
-                    
-                    // Optimize materials if needed
-                    if (node.material) {
-                        // Use simpler materials for better performance
-                        node.material.flatShading = true;
-                    }
-                }
-            });
-            
-            createEventMarkers();
-            
-            // Remove loading text immediately
-            document.querySelector('.loading').style.display = 'none';
-            
-            // Initialize UI 
-            initializeTimelineUI();
-            showCurrentEvent();
-        } 
-        // If no preloaded model, load it normally
-        else {
-            loader.load(
-                '/models/GloomyDoomy2.glb',
-                function (gltf) {
-                    const model = gltf.scene;
-                    scene.add(model);
-                    
-                    // Center the model
-                    const box = new THREE.Box3().setFromObject(model);
-                    const center = box.getCenter(new THREE.Vector3());
-                    model.position.sub(center);
-                    
-                    // Scale the model to make it 23% larger
-                    model.scale.set(1.23, 1.23, 1.23);
-                    
-                    // Optimize rendering for complex model
-                    model.traverse(function(node) {
-                        if (node.isMesh) {
-                            node.castShadow = true;
-                            node.receiveShadow = true;
-                            
-                            // Optimize materials if needed
-                            if (node.material) {
-                                // Use simpler materials for better performance
-                                node.material.flatShading = true;
-                            }
-                        }
-                    });
-
-                    createEventMarkers();
-                    
-                    // Remove loading text
-                    document.querySelector('.loading').style.display = 'none';
-                    
-                    // Initialize UI
-                    initializeTimelineUI();
-                    showCurrentEvent();
-                },
-                // Add a loading progress callback
-                function (xhr) {
-                    const loadingText = document.querySelector('.loading');
-                    if (loadingText && xhr.total > 0) {
-                        const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-                        loadingText.textContent = `Loading 3D Environment... ${percent}%`;
-                    }
-                },
-                // Add an error callback
-                function (error) {
-                    console.error('An error happened loading the model:', error);
-                    document.querySelector('.loading').textContent = 'Error loading 3D model. Please refresh the page.';
-                }
-            );
-        }
-        
         // UI Controls
         function initializeTimelineUI() {
             const indicator = document.querySelector('.timeline-indicator');
@@ -1395,25 +1449,6 @@
             }
         }
 
-        // Animation loop
-        let userInteracting = false;
-        renderer.domElement.addEventListener('pointerdown', () => {
-            userInteracting = true;
-        });
-
-        renderer.domElement.addEventListener('pointerup', () => {
-            userInteracting = false;
-        });
-
-        function animate() {
-            requestAnimationFrame(animate);
-            cloudParticles.forEach(cloud => {
-                cloud.rotation.z += 0.0001;
-            });
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
         // Handle window resize
         window.addEventListener('resize', onWindowResize, false);
         function onWindowResize() {
@@ -1421,8 +1456,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
-
-        animate();
 
         // Engagement tracking system
         class EngagementTracker {
@@ -1505,12 +1538,16 @@
             
             if (touchEndX < touchStartX - swipeThreshold) {
                 // Swipe left - go to next event
-                nextEvent();
+                if (currentEventIndex < timelineEvents.length - 1 && !isAnimating) {
+                    goToNextEvent();
+                }
             }
             
             if (touchEndX > touchStartX + swipeThreshold) {
                 // Swipe right - go to previous event
-                previousEvent();
+                if (currentEventIndex > 0 && !isAnimating) {
+                    goToPreviousEvent();
+                }
             }
         }
 
@@ -1585,6 +1622,17 @@
                 navOverlay.classList.remove('active');
             }
         });
+        
+        // Function to show all UI elements at once
+        function showAllUIElements() {
+            const uiElements = document.querySelectorAll('.hidden-until-ready');
+            // Add a small delay to ensure everything is ready
+            setTimeout(() => {
+                uiElements.forEach(element => {
+                    element.classList.add('show-all');
+                });
+            }, 100);
+        }
     </script>
 </body>
 </html>
