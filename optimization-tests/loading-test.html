@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLB Loading Performance Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .test-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .model-btn {
+            background: rgba(70, 70, 70, 0.3);
+            border: 1px solid rgba(100, 100, 100, 0.4);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .model-btn:hover, .model-btn.active {
+            background: rgba(70, 70, 70, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .model-btn.active {
+            border-color: #4a9eff;
+        }
+
+        .scene-container {
+            width: 100%;
+            height: 60vh;
+            background: #000;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .loading-text {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            width: 80%;
+            max-width: 400px;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(to right, #4a9eff, #9b4aff);
+            transition: width 0.3s ease;
+        }
+
+        .stats-container {
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(50, 50, 50, 0.5);
+            border-radius: 6px;
+            padding: 15px;
+        }
+
+        .stat-title {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th, .results-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .results-table th {
+            background: rgba(50, 50, 50, 0.5);
+        }
+
+        .results-table tr:nth-child(even) {
+            background: rgba(40, 40, 40, 0.3);
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .test-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .scene-container {
+                height: 50vh;
+            }
+            
+            .results-table {
+                font-size: 0.9rem;
+            }
+            
+            .results-table th, .results-table td {
+                padding: 8px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GLB Loading Performance Test</h1>
+        
+        <div class="test-controls">
+            <button class="model-btn" data-model="original">Original Model</button>
+            <button class="model-btn" data-model="test1-light">Test 1 (Light)</button>
+            <button class="model-btn" data-model="test2-medium">Test 2 (Medium)</button>
+            <button class="model-btn" data-model="test3-heavy">Test 3 (Heavy)</button>
+            <button class="model-btn" data-model="test4-extreme">Test 4 (Extreme)</button>
+            <button class="model-btn" data-model="test5-ultra">Test 5 (Ultra)</button>
+        </div>
+        
+        <div class="scene-container" id="scene-container">
+            <div class="loading-overlay" id="loading-overlay">
+                <div class="loading-text" id="loading-text">Select a model to load</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <h2>Performance Metrics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-title">File Size</div>
+                    <div class="stat-value" id="file-size">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Loading Time</div>
+                    <div class="stat-value" id="loading-time">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Triangles</div>
+                    <div class="stat-value" id="triangle-count">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">FPS</div>
+                    <div class="stat-value" id="fps">-</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-container">
+            <h2>Test Results</h2>
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>File Size</th>
+                        <th>Loading Time</th>
+                        <th>Triangle Count</th>
+                        <th>Avg FPS</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Results will be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script type="module">
+        import * as THREE from '../node_modules/three/build/three.module.js';
+        import { GLTFLoader } from '../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
+        import { OrbitControls } from '../node_modules/three/examples/jsm/controls/OrbitControls.js';
+        import Stats from '../node_modules/three/examples/jsm/libs/stats.module.js';
+        
+        // Model paths
+        const modelPaths = {
+            'original': '../models/GloomyDoomy2.glb',
+            'test1-light': './test1-light.glb',
+            'test2-medium': './test2-medium.glb',
+            'test3-heavy': './test3-heavy.glb',
+            'test4-extreme': './test4-extreme.glb',
+            'test5-ultra': './test5-ultra.glb'
+        };
+        
+        // File sizes in MB (to be filled in after optimization)
+        const fileSizes = {
+            'original': 285.28,
+            'test1-light': 0, // Will be updated after tests
+            'test2-medium': 0,
+            'test3-heavy': 0,
+            'test4-extreme': 0,
+            'test5-ultra': 0
+        };
+        
+        // Test results
+        const testResults = {};
+        
+        // Scene setup
+        let scene, camera, renderer, controls, stats;
+        let currentModel = null;
+        let isLoading = false;
+        let loadingStartTime;
+        
+        // DOM elements
+        const sceneContainer = document.getElementById('scene-container');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const loadingText = document.getElementById('loading-text');
+        const progressFill = document.getElementById('progress-fill');
+        const fileSizeElement = document.getElementById('file-size');
+        const loadingTimeElement = document.getElementById('loading-time');
+        const triangleCountElement = document.getElementById('triangle-count');
+        const fpsElement = document.getElementById('fps');
+        const resultsBody = document.getElementById('results-body');
+        const modelButtons = document.querySelectorAll('.model-btn');
+        
+        // Initialize the scene
+        initScene();
+        
+        // Add event listeners to model buttons
+        modelButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const modelKey = button.dataset.model;
+                
+                // Set active button
+                modelButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Load the selected model
+                loadModel(modelKey);
+            });
+        });
+        
+        // Initialize Three.js scene
+        function initScene() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111111);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(75, sceneContainer.clientWidth / sceneContainer.clientHeight, 0.1, 10000);
+            camera.position.set(0, 100, 300);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            sceneContainer.appendChild(renderer.domElement);
+            
+            // Controls
+            controls = new OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(100, 100, 50);
+            directionalLight.castShadow = true;
+            scene.add(directionalLight);
+            
+            // Performance stats
+            stats = new Stats();
+            stats.dom.style.position = 'absolute';
+            stats.dom.style.top = '0px';
+            stats.dom.style.right = '0px';
+            sceneContainer.appendChild(stats.dom);
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Start animation loop
+            animate();
+        }
+        
+        // Load a model
+        function loadModel(modelKey) {
+            if (isLoading) return;
+            isLoading = true;
+            loadingStartTime = performance.now();
+            
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+            loadingText.textContent = `Loading ${modelKey} model...`;
+            progressFill.style.width = '0%';
+            
+            // Remove current model if exists
+            if (currentModel) {
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+            
+            // Update file size display
+            fileSizeElement.textContent = `${fileSizes[modelKey].toFixed(2)} MB`;
+            
+            // Reset other stats
+            loadingTimeElement.textContent = 'Loading...';
+            triangleCountElement.textContent = '-';
+            fpsElement.textContent = '-';
+            
+            // Load the new model
+            const loader = new GLTFLoader();
+            
+            loader.load(
+                modelPaths[modelKey],
+                function (gltf) {
+                    const loadingEndTime = performance.now();
+                    const loadingTime = (loadingEndTime - loadingStartTime) / 1000; // in seconds
+                    
+                    // Add the model to the scene
+                    currentModel = gltf.scene;
+                    
+                    // Center and scale the model
+                    const box = new THREE.Box3().setFromObject(currentModel);
+                    const center = box.getCenter(new THREE.Vector3());
+                    currentModel.position.sub(center);
+                    
+                    // Adjust scale if needed
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    if (maxDim > 200) {
+                        const scale = 200 / maxDim;
+                        currentModel.scale.set(scale, scale, scale);
+                    }
+                    
+                    scene.add(currentModel);
+                    
+                    // Count triangles
+                    let triangleCount = 0;
+                    currentModel.traverse(function (object) {
+                        if (object.isMesh) {
+                            const geometry = object.geometry;
+                            if (geometry.index !== null) {
+                                triangleCount += geometry.index.count / 3;
+                            } else {
+                                triangleCount += geometry.attributes.position.count / 3;
+                            }
+                        }
+                    });
+                    
+                    // Update stats
+                    loadingTimeElement.textContent = `${loadingTime.toFixed(2)} seconds`;
+                    triangleCountElement.textContent = triangleCount.toLocaleString();
+                    
+                    // Save test results
+                    testResults[modelKey] = {
+                        fileSize: fileSizes[modelKey],
+                        loadingTime: loadingTime,
+                        triangleCount: triangleCount,
+                        fps: 0 // Will be updated during animation
+                    };
+                    
+                    // Update results table
+                    updateResultsTable();
+                    
+                    // Hide loading overlay
+                    loadingOverlay.style.display = 'none';
+                    isLoading = false;
+                },
+                function (xhr) {
+                    // Update progress bar
+                    if (xhr.lengthComputable) {
+                        const percentComplete = (xhr.loaded / xhr.total) * 100;
+                        progressFill.style.width = `${percentComplete}%`;
+                        loadingText.textContent = `Loading ${modelKey} model: ${Math.round(percentComplete)}%`;
+                    }
+                },
+                function (error) {
+                    console.error('An error happened while loading the model:', error);
+                    loadingText.textContent = `Error loading model: ${error.message}`;
+                    isLoading = false;
+                }
+            );
+        }
+        
+        // Update the results table
+        function updateResultsTable() {
+            // Clear existing rows
+            resultsBody.innerHTML = '';
+            
+            // Add rows for each test result
+            for (const [modelKey, result] of Object.entries(testResults)) {
+                const row = document.createElement('tr');
+                
+                // Model name
+                const nameCell = document.createElement('td');
+                nameCell.textContent = modelKey;
+                row.appendChild(nameCell);
+                
+                // File size
+                const sizeCell = document.createElement('td');
+                sizeCell.textContent = `${result.fileSize.toFixed(2)} MB`;
+                row.appendChild(sizeCell);
+                
+                // Loading time
+                const timeCell = document.createElement('td');
+                timeCell.textContent = `${result.loadingTime.toFixed(2)} s`;
+                row.appendChild(timeCell);
+                
+                // Triangle count
+                const triangleCell = document.createElement('td');
+                triangleCell.textContent = result.triangleCount.toLocaleString();
+                row.appendChild(triangleCell);
+                
+                // FPS
+                const fpsCell = document.createElement('td');
+                fpsCell.textContent = result.fps > 0 ? `${result.fps.toFixed(1)}` : '-';
+                fpsCell.id = `fps-${modelKey}`;
+                row.appendChild(fpsCell);
+                
+                resultsBody.appendChild(row);
+            }
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update controls
+            controls.update();
+            
+            // Update stats
+            stats.update();
+            
+            // Update FPS display
+            if (currentModel) {
+                const fps = Math.round(1 / stats.delta);
+                fpsElement.textContent = `${fps} FPS`;
+                
+                // Update FPS in results
+                const activeButton = document.querySelector('.model-btn.active');
+                if (activeButton) {
+                    const modelKey = activeButton.dataset.model;
+                    if (testResults[modelKey]) {
+                        // Use exponential moving average for smoother FPS
+                        if (testResults[modelKey].fps === 0) {
+                            testResults[modelKey].fps = fps;
+                        } else {
+                            testResults[modelKey].fps = 0.95 * testResults[modelKey].fps + 0.05 * fps;
+                        }
+                        
+                        // Update FPS in results table
+                        const fpsCell = document.getElementById(`fps-${modelKey}`);
+                        if (fpsCell) {
+                            fpsCell.textContent = testResults[modelKey].fps.toFixed(1);
+                        }
+                    }
+                }
+            }
+            
+            // Render scene
+            renderer.render(scene, camera);
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = sceneContainer.clientWidth / sceneContainer.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(sceneContainer.clientWidth, sceneContainer.clientHeight);
+        }
+        
+        // Touch events for mobile swipe navigation (based on previous mobile optimizations)
+        let touchStartX = 0;
+        let touchEndX = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+        
+        function handleSwipe() {
+            const swipeThreshold = 75; // Minimum swipe distance to trigger navigation
+            
+            if (touchEndX < touchStartX - swipeThreshold) {
+                // Swipe left - go to next model
+                const activeButton = document.querySelector('.model-btn.active');
+                if (activeButton) {
+                    const nextButton = activeButton.nextElementSibling;
+                    if (nextButton && nextButton.classList.contains('model-btn')) {
+                        nextButton.click();
+                    }
+                }
+            }
+            
+            if (touchEndX > touchStartX + swipeThreshold) {
+                // Swipe right - go to previous model
+                const activeButton = document.querySelector('.model-btn.active');
+                if (activeButton) {
+                    const prevButton = activeButton.previousElementSibling;
+                    if (prevButton && prevButton.classList.contains('model-btn')) {
+                        prevButton.click();
+                    }
+                }
+            }
+        }
+        
+        // Update file sizes from the optimization results
+        // This function would be called after optimization tests are complete
+        function updateFileSizes(sizes) {
+            Object.assign(fileSizes, sizes);
+            
+            // Update any displayed file sizes
+            const activeButton = document.querySelector('.model-btn.active');
+            if (activeButton) {
+                const modelKey = activeButton.dataset.model;
+                fileSizeElement.textContent = `${fileSizes[modelKey].toFixed(2)} MB`;
+            }
+        }
+        
+        // Expose update function to window for external access
+        window.updateFileSizes = updateFileSizes;
+    </script>
+</body>
+</html>

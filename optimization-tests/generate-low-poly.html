@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Low-Poly Model Generator</title>
+    <script src="../node_modules/three/build/three.min.js"></script>
+    <script src="../node_modules/three/examples/js/exporters/GLTFExporter.js"></script>
+</head>
+<body>
+    <div id="info">Generating low-poly model...</div>
+    <script>
+        // Create a scene
+        const scene = new THREE.Scene();
+        
+        // Create a simple island-like mesh
+        const geometry = new THREE.CylinderGeometry(50, 60, 10, 32, 1);
+        const material = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+        const island = new THREE.Mesh(geometry, material);
+        scene.add(island);
+        
+        // Add some trees
+        function createTree(x, y, z) {
+            const trunk = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.5, 0.8, 5, 8),
+                new THREE.MeshStandardMaterial({ color: 0x5D4037 })
+            );
+            trunk.position.set(x, y + 2.5, z);
+            
+            const leaves = new THREE.Mesh(
+                new THREE.ConeGeometry(3, 6, 8),
+                new THREE.MeshStandardMaterial({ color: 0x2E7D32 })
+            );
+            leaves.position.set(x, y + 8, z);
+            
+            const tree = new THREE.Group();
+            tree.add(trunk);
+            tree.add(leaves);
+            return tree;
+        }
+        
+        // Add some trees
+        for (let i = 0; i < 10; i++) {
+            const angle = (i / 10) * Math.PI * 2;
+            const radius = 30 + Math.random() * 15;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            const tree = createTree(x, 5, z);
+            scene.add(tree);
+        }
+        
+        // Add some rocks
+        for (let i = 0; i < 15; i++) {
+            const angle = (i / 15) * Math.PI * 2;
+            const radius = 20 + Math.random() * 25;
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            const rock = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(1 + Math.random() * 2, 0),
+                new THREE.MeshStandardMaterial({ color: 0x757575 })
+            );
+            rock.position.set(x, 5.5, z);
+            rock.rotation.set(Math.random(), Math.random(), Math.random());
+            scene.add(rock);
+        }
+        
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(100, 100, 50);
+        scene.add(directionalLight);
+        
+        // Export as GLB
+        const exporter = new THREE.GLTFExporter();
+        exporter.parse(scene, function(gltf) {
+            const output = JSON.stringify(gltf);
+            
+            // Create a download link
+            const blob = new Blob([output], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = 'low-poly-island.gltf';
+            link.click();
+            
+            document.getElementById('info').textContent = 'Low-poly model generated! Download should start automatically.';
+        }, { binary: false });
+    </script>
+</body>
+</html>
