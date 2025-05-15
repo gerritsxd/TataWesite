@@ -1,0 +1,6 @@
+echo "# Ignore large files that exceed GitHub limits" > .gitignore
+echo "*.7z" >> .gitignore
+echo "*.zip" >> .gitignore
+echo "models/*" >> .gitignore
+echo "!models/Car.glb" >> .gitignore
+echo "!models/IslandGerrit.glb" >> .gitignore
