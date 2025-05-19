@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Tata Steel</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --orange: #f47a23;
+            --blue: #10afef;
+            --green: #74c047;
+            --dark-bg: #051428;
+            --light-text: #ffffff;
+            --semi-transparent: rgba(5, 20, 40, 0.85);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--orange);
+            text-decoration: none;
+        }
+        
+        nav a {
+            color: var(--light-text);
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: var(--orange);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            color: var(--blue);
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            color: var(--orange);
+            margin: 30px 0 15px;
+        }
+        
+        p {
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .highlight {
+            color: var(--green);
+            font-weight: 600;
+        }
+        
+        .card {
+            background-color: var(--semi-transparent);
+            border-radius: 8px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(16, 175, 239, 0.2);
+        }
+        
+        .back-button {
+            display: inline-block;
+            background-color: var(--orange);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background-color: #ff8c3a;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a href="index.html" class="logo">Tata Steel</a>
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+            </nav>
+        </header>
+        
+        <div class="card">
+            <h1>About Tata Steel</h1>
+            <p>Tata Steel is a leading global steel company with an annual crude steel capacity of 34 million tonnes. Established in 1907, it is one of the world's most geographically diversified steel producers, with operations and commercial presence across the world.</p>
+            
+            <h2>Our History</h2>
+            <p>Founded by Jamsetji Tata, Tata Steel (formerly known as Tata Iron and Steel Company Limited) is the tenth largest steel producer in the world. The company was established in 1907 and has since grown to become a global leader in the steel industry.</p>
+            
+            <h2>Our Mission</h2>
+            <p>Our mission is to build sustainable value for all stakeholders by delivering innovative steel solutions for tomorrow's challenges. We are committed to:</p>
+            <p>• Maintaining leadership in sustainable steel production<br>
+            • Driving innovation in steel applications<br>
+            • Creating value for our customers and society<br>
+            • Ensuring environmental stewardship in all our operations</p>
+            
+            <h2>Sustainability Commitment</h2>
+            <p>At Tata Steel, sustainability is at the core of our business strategy. We are committed to reducing our environmental footprint and contributing positively to the communities where we operate. Our sustainability initiatives focus on:</p>
+            <p>• <span class="highlight">Carbon reduction</span> - Targeting carbon-neutral steel production by 2050<br>
+            • <span class="highlight">Circular economy</span> - Maximizing resource efficiency and minimizing waste<br>
+            • <span class="highlight">Community development</span> - Supporting education, healthcare, and livelihood projects</p>
+            
+            <h2>Innovation</h2>
+            <p>Innovation is a key driver of our growth strategy. Our research and development teams work tirelessly to develop new steel grades, manufacturing processes, and applications that address emerging customer needs and societal challenges.</p>
+            
+            <a href="index.html" class="back-button">Back to Interactive Experience</a>
+        </div>
+    </div>
+</body>
+</html>

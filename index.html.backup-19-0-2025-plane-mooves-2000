@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tata Steel - A Journey Through Time</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --orange: #f47a23;
+            --blue: #10afef;
+            --green: #74c047;
+            --dark-bg: #051428;
+            --light-text: #ffffff;
+            --semi-transparent: rgba(5, 20, 40, 0.85);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            overflow: hidden;
+            letter-spacing: 0.03em;
+        }
+        
+        #scene-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        
+        #controls-info {
+            position: fixed;
+            bottom: 50%;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            background-color: rgba(5, 20, 40, 0.85);
+            padding: 20px;
+            border-radius: 8px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            backdrop-filter: blur(5px);
+            border: 2px solid var(--orange);
+            max-width: 320px;
+        }
+        
+        #controls-info .control-keys {
+            margin: 15px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #controls-info .key {
+            background-color: var(--orange);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        /* Animated arrows for the controls guide */
+        .animated-arrow-container {
+            position: relative;
+            width: 250px;
+            height: 140px;
+            margin: 15px auto;
+            background-color: rgba(5, 20, 40, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .animated-car {
+            position: absolute;
+            width: 40px;
+            height: 20px;
+            background-color: var(--blue);
+            border-radius: 3px;
+            top: 60px;
+            left: 105px;
+            z-index: 2;
+        }
+        
+        .animated-car:before {
+            content: "";
+            position: absolute;
+            top: -8px;
+            left: 5px;
+            width: 30px;
+            height: 12px;
+            background-color: var(--blue);
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .animated-arrow {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            top: 50px;
+            opacity: 0.2;
+            transition: opacity 0.5s ease;
+        }
+        
+        .animated-arrow.left {
+            left: 30px;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-right: 20px solid var(--orange);
+            animation: pulse-left 2s infinite alternate;
+        }
+        
+        .animated-arrow.right {
+            right: 30px;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 20px solid var(--orange);
+            animation: pulse-right 2s infinite alternate;
+        }
+        
+        @keyframes pulse-left {
+            0% { opacity: 0.2; transform: translateX(5px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        @keyframes pulse-right {
+            0% { opacity: 0.2; transform: translateX(-5px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Section Text Display Styles - Based on reference image */
+        #section-text-container {
+            position: fixed;
+            top: 100px;
+            left: 50px;
+            width: 360px;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+            pointer-events: auto; /* Allow interaction */
+            max-height: calc(100vh - 150px); /* Allow for expansion without extending past viewport */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #section-text {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--semi-transparent);
+            color: var(--light-text);
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            width: 100%;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            transition: all 0.4s ease-in-out;
+            border: 1px solid rgba(16, 175, 239, 0.2);
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background-color: rgba(16, 175, 239, 0.1);
+            cursor: pointer;
+            flex-shrink: 0;
+            z-index: 20;
+            border: 2px solid var(--orange);
+            border-radius: 6px 6px 0 0;
+            box-shadow: 0 0 6px rgba(244, 122, 35, 0.4);
+        }
+        
+        .section-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: rgba(16, 175, 239, 0.15);
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .section-icon:hover {
+            transform: scale(1.1);
+            background-color: rgba(16, 175, 239, 0.3);
+        }
+        
+        .section-icon svg {
+            width: 36px;
+            height: 36px;
+            fill: var(--blue);
+            stroke: var(--light-text);
+            stroke-width: 0.5;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+        }
+        
+        /* Camera section icon animation */
+        .icon-camera circle,
+        .icon-camera rect {
+            transform-origin: center;
+            animation: pulse 2s infinite alternate ease-in-out;
+        }
+        
+        /* Village section icon animation */
+        .icon-village path {
+            transform-origin: bottom center;
+            animation: sway 3s infinite alternate ease-in-out;
+        }
+        
+        /* Playground section icon animation */
+        .icon-playground .swing {
+            transform-origin: top center;
+            animation: swing 3s infinite alternate ease-in-out;
+        }
+        
+        /* Tata section icon animation */
+        .icon-tata path {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+            animation: draw 4s infinite alternate forwards;
+        }
+        
+        /* Research section icon animation */
+        .icon-research path {
+            transform-origin: center;
+            animation: rotate 4s infinite linear;
+        }
+        
+        /* Plane section icon animation */
+        .icon-plane path {
+            transform-origin: center;
+            animation: flyUpDown 4s infinite alternate ease-in-out;
+        }
+        
+        /* Animation keyframes */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.2); }
+        }
+        
+        @keyframes sway {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+        
+        @keyframes swing {
+            0% { transform: rotate(-15deg); }
+            100% { transform: rotate(15deg); }
+        }
+        
+        @keyframes draw {
+            0% { stroke-dashoffset: 100; }
+            100% { stroke-dashoffset: 0; }
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes flyUpDown {
+            0% { transform: translateY(-5px) rotate(0deg); }
+            100% { transform: translateY(5px) rotate(0deg); }
+        }
+        
+        .section-header-text {
+            flex: 1;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: var(--blue);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        
+        .section-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 500;
+            line-height: 1.4;
+            color: var(--light-text);
+        }
+        
+        .section-content {
+            padding: 0;
+            max-height: 0;
+            overflow-y: auto;
+            transition: all 0.5s ease-in-out;
+            opacity: 0;
+            border-left: 2px solid var(--orange);
+            border-right: 2px solid var(--orange);
+            border-bottom: 2px solid var(--orange);
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 4px 8px rgba(244, 122, 35, 0.3);
+        }
+        
+        .section-content-inner {
+            padding: 24px;
+            padding-bottom: 30px;
+        }
+        
+        .section-content-inner p {
+            color: var(--light-text);
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        
+        .expanded .section-content {
+            max-height: calc(100vh - 200px);
+            opacity: 1;
+        }
+        
+        #section-text.expanded {
+            height: auto;
+            max-height: calc(100vh - 150px);
+        }
+        
+        .section-expand-button {
+            background-color: var(--orange);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: block;
+            margin: 16px auto;
+            width: 80%;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .section-expand-button:hover {
+            background-color: #ff8c3a;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+        }
+        
+        .section-media {
+            margin: 20px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: rgba(5, 20, 40, 0.3);
+            height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .section-media-icon {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .section-media-icon svg {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .section-media-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--blue);
+            text-align: center;
+        }
+        
+        .section-media img {
+            width: 100%;
+            display: block;
+        }
+        
+        .section-media video {
+            width: 100%;
+            display: block;
+        }
+        
+        /* Landing Page Styles */
+        #landing-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease-in-out;
+            color: var(--light-text);
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        .landing-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 20px;
+        }
+        
+        .landing-title {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(244, 122, 35, 0.5);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--orange);
+        }
+        
+        .landing-subtitle {
+            font-size: 1.6rem;
+            margin-bottom: 40px;
+            font-weight: 400;
+            opacity: 0.9;
+            max-width: 600px;
+            color: var(--blue);
+            letter-spacing: 0.03em;
+        }
+        
+        .loading-button-container {
+            position: relative;
+            margin-top: 30px;
+            width: 280px;
+            height: 60px;
+        }
+        
+        .loading-button {
+            width: 100%;
+            height: 100%;
+            border-radius: 4px;
+            border: 2px solid var(--orange);
+            background-color: rgba(244, 122, 35, 0.1);
+            color: var(--light-text);
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            cursor: default;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            text-transform: uppercase;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        
+        .loading-button:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background-color: var(--orange);
+            opacity: 0.7;
+            transition: width 0.5s ease;
+            z-index: 0;
+        }
+        
+        .loading-button span {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .loading-button.ready {
+            background-color: rgba(244, 122, 35, 0.2);
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(244, 122, 35, 0.5);
+        }
+        
+        .loading-button.ready:hover {
+            background-color: rgba(244, 122, 35, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .loading-button.ready:before {
+            width: 100%;
+        }
+        
+        /* Side Navbar Styles */
+        .hamburger-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background-color: var(--orange);
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .hamburger-menu:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+        }
+        
+        .hamburger-line {
+            width: 24px;
+            height: 3px;
+            background-color: white;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(1) {
+            transform: translateY(8px) rotate(45deg);
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .hamburger-menu.active .hamburger-line:nth-child(3) {
+            transform: translateY(-8px) rotate(-45deg);
+        }
+        
+        .side-navbar {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: var(--semi-transparent);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: right 0.4s ease-in-out;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+            padding: 80px 30px 30px 30px;
+            overflow-y: auto;
+            border-left: 2px solid var(--blue);
+        }
+        
+        .side-navbar.open {
+            right: 0;
+        }
+        
+        .nav-section {
+            margin-bottom: 40px;
+        }
+        
+        .nav-section h2 {
+            color: var(--orange);
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--blue);
+            padding-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .nav-section p {
+            color: var(--light-text);
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 1rem;
+            letter-spacing: 0.03em;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+        
+        .contact-icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--blue);
+        }
+        
+        .contact-text {
+            color: var(--light-text);
+        }
+        
+        .close-navbar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--orange);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .loading-status {
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        /* Environment Controls Panel */
+        #environment-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background-color: var(--semi-transparent);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+            overflow: hidden;
+            border: 1px solid var(--blue);
+            transition: all 0.3s ease;
+            max-height: 500px;
+            color: var(--light-text);
+        }
+        
+        #environment-controls.collapsed {
+            max-height: 50px;
+        }
+        
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: rgba(16, 175, 239, 0.3);
+            border-bottom: 1px solid var(--blue);
+        }
+        
+        .controls-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--light-text);
+        }
+        
+        #toggle-controls {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            transition: transform 0.3s ease;
+        }
+        
+        #environment-controls.collapsed #toggle-controls {
+            transform: rotate(180deg);
+        }
+        
+        .controls-body {
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 450px;
+            transition: all 0.3s ease;
+        }
+        
+        #environment-controls.collapsed .controls-body {
+            max-height: 0;
+            padding: 0 15px;
+            overflow: hidden;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .control-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .control-section h4 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: var(--orange);
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        
+        .control-row label {
+            flex: 0 0 120px;
+            font-size: 0.9rem;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--orange);
+        }
+        
+        .control-row input[type="color"] {
+            width: 40px;
+            height: 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            flex: 0 0 40px;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .preset-buttons button {
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--blue);
+            color: var(--light-text);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .preset-buttons button:hover {
+            background-color: var(--blue);
+            transform: translateY(-2px);
+        }
+        
+        /* Animation Controls Styles */
+        .animation-group {
+            margin-bottom: 15px;
+        }
+        
+        #animation-list h5 {
+            margin: 10px 0 5px 0;
+            font-size: 0.95rem;
+            color: var(--orange);
+        }
+        
+        .animation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .animation-name {
+            flex: 1;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .animation-controls button {
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--blue);
+            color: var(--light-text);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .animation-controls button:hover:not(:disabled) {
+            background-color: var(--blue);
+        }
+        
+        .animation-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .animation-controls button.active {
+            background-color: var(--orange);
+            border-color: var(--orange);
+        }
+        
+        .animation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .animation-buttons button {
+            flex: 1;
+            padding: 5px 0;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--blue);
+            color: var(--light-text);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .animation-buttons button:hover {
+            background-color: var(--blue);
+            transform: translateY(-2px);
+        }
+        
+        #play-all {
+            border-color: var(--green);
+        }
+        
+        #play-all:hover {
+            background-color: var(--green);
+        }
+        
+        #stop-all {
+            border-color: var(--orange);
+        }
+        
+        #stop-all:hover {
+            background-color: var(--orange);
+        }
+    </style>
+</head>
+<body>
+    <!-- Landing Page -->
+    <div id="landing-page">
+        <div class="landing-content">
+            <h1 class="landing-title">Tata Steel</h1>
+            <p class="landing-subtitle">A Journey Through Time - Explore the evolution of Tata Steel through an interactive 3D experience</p>
+            <div class="loading-button-container">
+                <button id="enter-button" class="loading-button"><span>Loading...</span></button>
+                <div id="loading-status" class="loading-status">Initializing... 0%</div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="scene-container"></div>
+    
+    <!-- Hamburger Menu Button -->
+    <div class="hamburger-menu" id="hamburger-menu">
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+        <div class="hamburger-line"></div>
+    </div>
+    
+    <!-- Side Navbar -->
+    <div class="side-navbar" id="side-navbar">
+        <div class="nav-section">
+            <h2>About</h2>
+            <p>Tata Steel is a leading global steel company with an annual crude steel capacity of 34 million tonnes. Established in 1907, it is one of the world's most geographically diversified steel producers.</p>
+            <p>Our mission is to build sustainable value for all stakeholders by delivering innovative steel solutions for tomorrow's challenges.</p>
+        </div>
+        
+        <div class="nav-section">
+            <h2>Contact</h2>
+            <div class="contact-item">
+                <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12,1C7.03,1 3,5.03 3,10V17C3,18.66 4.34,20 6,20H9V12H5V10C5,6.13 8.13,3 12,3C15.87,3 19,6.13 19,10V12H15V20H18C19.66,20 21,18.66 21,17V10C21,5.03 16.97,1 12,1M9,21V23H15V21H9Z" />
+                </svg>
+                <span class="contact-text">customer.service@tatasteel.com</span>
+            </div>
+            <div class="contact-item">
+                <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M6.62,10.79C8.06,13.62 10.38,15.94 13.21,17.38L15.41,15.18C15.69,14.9 16.08,14.82 16.43,14.93C17.55,15.3 18.75,15.5 20,15.5A1,1 0 0,1 21,16.5V20A1,1 0 0,1 20,21A17,17 0 0,1 3,4A1,1 0 0,1 4,3H7.5A1,1 0 0,1 8.5,4C8.5,5.25 8.7,6.45 9.07,7.57C9.18,7.92 9.1,8.31 8.82,8.59L6.62,10.79Z" />
+                </svg>
+                <span class="contact-text">+44 20 717 48700</span>
+            </div>
+            <div class="contact-item">
+                <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z" />
+                </svg>
+                <span class="contact-text">30 Millbank, Westminster, London SW1P 4WY, UK</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Controls Info -->
+    <div id="controls-info">
+        <h3>Controls Guide</h3>
+        <div class="control-icons">
+            <div class="control-icon">
+                <div class="arrow left"></div>
+                <span>Previous</span>
+            </div>
+            <div class="control-icon">
+                <div class="car-icon"></div>
+            </div>
+            <div class="control-icon">
+                <div class="arrow right"></div>
+                <span>Next</span>
+            </div>
+        </div>
+        <p>Use arrow keys to navigate</p>
+    </div>
+    
+    <!-- Environment Controls Panel -->
+    <div id="environment-controls">
+        <div class="controls-header">
+            <h3>Environment Controls</h3>
+            <button id="toggle-controls">▼</button>
+        </div>
+        <div class="controls-body">
+            <!-- Lighting Controls -->
+            <div class="control-section">
+                <h4>Lighting</h4>
+                <div class="control-row">
+                    <label for="ambient-intensity">Ambient Light:</label>
+                    <input type="range" id="ambient-intensity" min="0" max="1" step="0.05" value="0.2">
+                    <span class="value-display">0.2</span>
+                </div>
+                <div class="control-row">
+                    <label for="directional-intensity">Directional Light:</label>
+                    <input type="range" id="directional-intensity" min="0" max="2" step="0.05" value="0.5">
+                    <span class="value-display">0.5</span>
+                </div>
+                <div class="control-row">
+                    <label for="light-color">Light Color:</label>
+                    <input type="color" id="light-color" value="#ffffff">
+                </div>
+            </div>
+            
+            <!-- Environment Controls -->
+            <div class="control-section">
+                <h4>Environment</h4>
+                <div class="control-row">
+                    <label for="fog-density">Fog Density:</label>
+                    <input type="range" id="fog-density" min="0" max="0.05" step="0.001" value="0.01">
+                    <span class="value-display">0.01</span>
+                </div>
+                <div class="control-row">
+                    <label for="sky-color">Sky Color:</label>
+                    <input type="color" id="sky-color" value="#87CEEB">
+                </div>
+            </div>
+            
+            <!-- Island Model Controls -->
+            <div class="control-section">
+                <h4>Island</h4>
+                <div class="control-row">
+                    <label for="island-color">Tint Color:</label>
+                    <input type="color" id="island-color" value="#ffffff">
+                </div>
+                <div class="control-row">
+                    <label for="island-metalness">Metalness:</label>
+                    <input type="range" id="island-metalness" min="0" max="1" step="0.05" value="0.1">
+                    <span class="value-display">0.1</span>
+                </div>
+                <div class="control-row">
+                    <label for="island-roughness">Roughness:</label>
+                    <input type="range" id="island-roughness" min="0" max="1" step="0.05" value="0.5">
+                    <span class="value-display">0.5</span>
+                </div>
+            </div>
+            
+            <!-- Car Model Controls -->
+            <div class="control-section">
+                <h4>Car</h4>
+                <div class="control-row">
+                    <label for="car-color">Color:</label>
+                    <input type="color" id="car-color" value="#ff4400">
+                </div>
+                <div class="control-row">
+                    <label for="car-metalness">Metalness:</label>
+                    <input type="range" id="car-metalness" min="0" max="1" step="0.05" value="0.8">
+                    <span class="value-display">0.8</span>
+                </div>
+                <div class="control-row">
+                    <label for="car-roughness">Roughness:</label>
+                    <input type="range" id="car-roughness" min="0" max="1" step="0.05" value="0.2">
+                    <span class="value-display">0.2</span>
+                </div>
+            </div>
+            
+            <!-- Animation Controls -->
+            <div class="control-section">
+                <h4>Animations</h4>
+                <div id="animation-list">
+                    <p>Loading animations...</p>
+                </div>
+                <div class="control-row">
+                    <label for="animation-speed">Speed:</label>
+                    <input type="range" id="animation-speed" min="0.1" max="2" step="0.1" value="1">
+                    <span class="value-display">1.0</span>
+                </div>
+                <div class="animation-buttons">
+                    <button id="play-all">Play All</button>
+                    <button id="stop-all">Stop All</button>
+                </div>
+            </div>
+            
+            <!-- Preset Atmospheres -->
+            <div class="control-section presets">
+                <h4>Atmosphere Presets</h4>
+                <div class="preset-buttons">
+                    <button data-preset="default">Default</button>
+                    <button data-preset="sunset">Sunset</button>
+                    <button data-preset="night">Night</button>
+                    <button data-preset="foggy">Foggy</button>
+                    <button data-preset="dystopian">Dystopian</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="section-text-container">
+        <div id="section-text">
+            <div class="section-header">
+                <div class="section-icon"></div>
+                <div class="section-header-text">
+                    <div class="section-title">Welcome</div>
+                    <div class="section-subtitle">Explore the island to discover more</div>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="section-content-inner">
+                    <p>Welcome to Tata Steel's interactive journey. Click the button below to learn more about each area as you explore.</p>
+                    <div class="section-media">
+                        <img src="https://via.placeholder.com/320x180?text=Tata+Steel" alt="Tata Steel">
+                    </div>
+                    <a href="#" class="section-expand-button">View Details</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
+    <script>
+        // Main Three.js variables
+        let scene, camera, renderer;
+        let mainScene, carModel;
+        let waypoints = [];
+        let currentWaypointIndex = 0;
+        
+        // Animation variables
+        let mixer;
+        let mixers = [];
+        let clock = new THREE.Clock();
+        let animations = [];
+        let activeAnimations = new Map();
+        let targetWaypointIndex = 1;
+        let pathCurve;
+        let pathProgress = 0;
+        
+        // Section definitions for text display with enhanced content
+        const sections = [
+            { 
+                name: "Camera", 
+                start: 6, 
+                end: 16, 
+                title: "Camera Section", 
+                subtitle: "Advanced monitoring technology",
+                content: "This area showcases advanced camera technology used in monitoring and quality control throughout Tata Steel's manufacturing facilities.",
+                expandedContent: "Our state-of-the-art camera systems monitor every stage of the production process, ensuring quality control and worker safety. These cameras use AI-powered image recognition to detect even minor defects in real-time.",
+                imageSrc: null,
+            },
+            { 
+                name: "Village", 
+                start: 28, 
+                end: 36, 
+                title: "Village Community", 
+                subtitle: "Sustainable living solutions",
+                content: "A sustainable community built with Tata Steel's eco-friendly construction materials.",
+                expandedContent: "Our model village demonstrates how Tata Steel's sustainable construction solutions can create beautiful, long-lasting communities with minimal environmental impact. These homes use 40% less energy than traditional construction.",
+                imageSrc: null,
+                videoSrc: "" 
+            },
+            { 
+                name: "Playground", 
+                start: 43, 
+                end: 49, 
+                title: "Playground Area", 
+                subtitle: "Safe and durable equipment",
+                content: "Innovative playground equipment made from durable, weather-resistant Tata Steel products.",
+                expandedContent: "Children's safety is our priority. Our playground equipment undergoes rigorous testing to ensure it withstands all weather conditions while remaining safe and engaging for children of all ages.",
+                imageSrc: null,
+            },
+            { 
+                name: "Tata", 
+                start: 55, 
+                end: 62, 
+                title: "Tata Steel Headquarters", 
+                subtitle: "The heart of innovation",
+                content: "The central hub of operations, where innovation meets tradition.",
+                expandedContent: "Our headquarters combines traditional values with cutting-edge innovation. From this center, we coordinate global operations while developing the next generation of steel products that will shape our future.",
+                imageSrc: null,
+            },
+            { 
+                name: "Empty", 
+                start: 72, 
+                end: 74, 
+                title: "Research Zone", 
+                subtitle: "Creating tomorrow's steel",
+                content: "Where the next generation of steel technologies are being developed and tested.",
+                expandedContent: "Our research facilities work tirelessly to develop stronger, lighter, and more sustainable steel products. Recent innovations include ultra-high-strength steel that reduces vehicle weight by 20% while improving safety.",
+                imageSrc: null,
+            },
+            { 
+                name: "Plane", 
+                start: 75, 
+                end: 81, 
+                title: "Transportation Hub", 
+                subtitle: "Moving people and goods",
+                content: "Showcasing how Tata Steel contributes to modern transportation infrastructure.",
+                expandedContent: "Our specialized steel products are essential components in aircraft, railways, and automotive applications. Tata Steel provides custom alloys that balance weight, strength, and durability for the transportation sector.",
+                imageSrc: "https://via.placeholder.com/320x180?text=Transportation+Hub" 
+            },
+        ];
+        
+        let currentSectionIndex = -1; // Not in any section initially
+        
+        // Camera settings anchored to the car
+        const cameraHeight = 1.5; // Height of camera above car
+        const cameraDistance = 4; // Distance from car to camera
+        const islandCenter = new THREE.Vector3(0, 0, 0); // Center of the island
+        
+        // Mouse panning settings
+        const PATH_SENSITIVITY = 0.0005;
+        const CAMERA_PITCH_SENSITIVITY = 0.002;
+        const MIN_CAMERA_PITCH = -Math.PI/4;
+        const MAX_CAMERA_PITCH = Math.PI/6;
+        const CAMERA_LERP_FACTOR = 0.1;
+        let cameraPitch = 0;
+        
+        // Car movement physics based on user preferences
+        const maxSpeed = 0.001; // Ultra-slow max speed (50% slower than previous)
+        const acceleration = 0.00002; // Ultra-slow acceleration (50% slower than previous)
+        const deceleration = 0.00001; // Ultra-slow deceleration (50% slower than previous)
+        
+        // Key state tracking for smooth movement
+        const keys = {
+            ArrowLeft: false,
+            ArrowRight: false
+        };
+        let currentSpeed = 0;
+        
+        // Initialize Three.js scene
+        function init() {
+            // Create scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87CEEB); // Sky blue background
+            
+            // Add a stronger fog effect to make the scene more visually appealing
+            scene.fog = new THREE.FogExp2(0x87CEEB, 0.01);
+            
+            // Create camera with wider field of view
+            camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            // Create renderer with improved settings for texture quality
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: 'high-performance',
+                precision: 'highp'
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Better shadow quality
+            renderer.outputEncoding = THREE.sRGBEncoding; // Proper color space for textures
+            renderer.gammaFactor = 2.2; // Standard gamma correction
+            document.getElementById('scene-container').appendChild(renderer.domElement);
+            
+            // Add lights with reduced intensity to prevent overexposure
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Reduced from 0.5 to 0.2
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Reduced from 1.0 to 0.5
+            directionalLight.position.set(10, 20, 10);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+            
+            // Add keyboard controls
+            window.addEventListener('keydown', onKeyDown);
+            window.addEventListener('keyup', onKeyUp);
+            
+            // Load models
+            loadModels();
+            
+            // Start animation loop
+            animate();
+        }
+        
+        // Handle window resize
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+        
+        // Load models and track loading progress
+        function loadModels() {
+            // Create LoadingManager to track loading progress
+            const loadingManager = new THREE.LoadingManager();
+            
+            // Setup loading manager events
+            loadingManager.onProgress = function(url, itemsLoaded, itemsTotal) {
+                const progress = (itemsLoaded / itemsTotal) * 100;
+                updateLoadingProgress(progress);
+            };
+            
+            loadingManager.onLoad = function() {
+                console.log('Loading complete!');
+                // Allow a short delay to ensure everything is ready
+                setTimeout(onEnvironmentLoaded, 500);
+            };
+            
+            loadingManager.onError = function(url) {
+                console.error('Error loading', url);
+                const loadingStatus = document.getElementById('loading-status');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = 'Error loading resources. Please refresh.';
+                }
+            };
+            
+            // Create texture loader with same loading manager
+            const textureLoader = new THREE.TextureLoader(loadingManager);
+            
+            // Create GLTF loader with improved settings
+            const gltfLoader = new THREE.GLTFLoader(loadingManager);
+            
+            // Set DRACO decoder path if needed (uncomment if models use DRACO compression)
+            // THREE.DRACOLoader.setDecoderPath('./js/libs/draco/');
+            // gltfLoader.setDRACOLoader(new THREE.DRACOLoader());
+            
+            // Load the island model directly
+            gltfLoader.load('./models/Safespacecopy.glb', (gltf) => {
+                mainScene = gltf.scene;
+                
+                // Enable shadows and improve material settings for scene objects
+                mainScene.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                        
+                        // Fix material settings if needed
+                        if (node.material) {
+                            // Ensure proper texture encoding
+                            if (node.material.map) node.material.map.encoding = THREE.sRGBEncoding;
+                            if (node.material.emissiveMap) node.material.emissiveMap.encoding = THREE.sRGBEncoding;
+                            
+                            // Improve material quality
+                            node.material.side = THREE.DoubleSide; // Render both sides
+                            node.material.needsUpdate = true; // Force material update
+                        }
+                    }
+                });
+                
+                scene.add(mainScene);
+                console.log('Main scene loaded successfully');
+                
+                // DETAILED ANIMATION DEBUGGING
+                console.log('===== DETAILED GLB ANIMATION DEBUGGING =====');
+                console.log('Complete gltf object:', gltf);
+                
+                // Extract animations from the model
+                if (gltf.animations && gltf.animations.length > 0) {
+                    console.log(`Found ${gltf.animations.length} animations in island model`);
+                    
+                    // Create a mixer for this model
+                    const islandMixer = new THREE.AnimationMixer(mainScene);
+                    mixers.push(islandMixer);
+                    
+                    // Process each animation
+                    gltf.animations.forEach((clip, index) => {
+                        console.log(`Animation ${index}: ${clip.name}`);
+                        console.log('Animation clip details:', {
+                            duration: clip.duration,
+                            tracks: clip.tracks.map(track => ({
+                                name: track.name,
+                                type: track.ValueTypeName,
+                                times: Array.from(track.times),
+                                values: Array.from(track.values)
+                            }))
+                        });
+                        
+                        // Check for airbus320action specifically
+                        if (clip.name.toLowerCase().includes('airbus') || 
+                            clip.name.toLowerCase().includes('320')) {
+                            console.log('FOUND AIRBUS ANIMATION!');
+                            console.log('Full airbus animation details:', clip);
+                        }
+                        
+                        // Store animation data
+                        animations.push({
+                            id: `island-anim-${index}`,
+                            name: clip.name || `Island Animation ${index + 1}`,
+                            clip: clip,
+                            mixer: islandMixer,
+                            model: 'island'
+                        });
+                        
+                        // Auto-play the airbus animation if found
+                        if (clip.name.toLowerCase().includes('airbus') || 
+                            clip.name.toLowerCase().includes('320')) {
+                            setTimeout(() => {
+                                playAnimation(`island-anim-${index}`);
+                                console.log(`Auto-playing airbus animation: ${clip.name}`);
+                            }, 1000);
+                        }
+                    });
+                    
+                    // Update the animation list in the UI
+                    updateAnimationList();
+                } else {
+                    console.log('No animations found in island model');
+                    
+                    // Try to find animated objects within the model
+                    console.log('Searching for animated objects within the model...');
+                    let foundAnimatedObjects = false;
+                    
+                    // Log all object names in the scene for debugging
+                    console.log('All objects in the scene:');
+                    mainScene.traverse((node) => {
+                        if (node.name) {
+                            console.log(`- ${node.name} (type: ${node.type})`);
+                        }
+                    });
+                    
+                    // Look for specific objects like airbus
+                    mainScene.traverse((node) => {
+                        // Look for objects with names that might indicate animation
+                        if (node.name && (node.name.toLowerCase().includes('plane') || 
+                                          node.name.toLowerCase().includes('fly') || 
+                                          node.name.toLowerCase().includes('anim') ||
+                                          node.name.toLowerCase().includes('airbus') ||
+                                          node.name.toLowerCase().includes('320'))) {
+                            console.log(`Found potential animated object: ${node.name}`);
+                            console.log('Object details:', {
+                                position: node.position,
+                                rotation: node.rotation,
+                                scale: node.scale,
+                                visible: node.visible,
+                                type: node.type,
+                                children: node.children ? node.children.length : 0
+                            });
+                            foundAnimatedObjects = true;
+                            
+                            // Create a custom animation for this object
+                            createCustomAnimation(node);
+                        }
+                    });
+                    
+                    if (!foundAnimatedObjects) {
+                        console.log('No animated objects found in the model');
+                    }
+                }
+                
+                // Extract waypoints from the scene
+                extractWaypoints(gltf);
+            }, 
+            // Progress callback
+            (xhr) => {
+                console.log(`Island model: ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
+            },
+            // Error callback 
+            (error) => {
+                console.error('Error loading island model:', error);
+                const loadingStatus = document.getElementById('loading-status');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = 'Error loading island model. Please refresh.';
+                }
+            });
+            
+            // Load car model (Car.glb) with improved texture handling
+            gltfLoader.load('./models/Car.glb', (gltf) => {
+                carModel = gltf.scene;
+                
+                // Enable shadows and improve material settings for car
+                carModel.traverse((node) => {
+                    if (node.isMesh) {
+                        node.castShadow = true;
+                        node.receiveShadow = true;
+                        
+                        // Fix material settings if needed
+                        if (node.material) {
+                            // Ensure proper texture encoding
+                            if (node.material.map) node.material.map.encoding = THREE.sRGBEncoding;
+                            if (node.material.emissiveMap) node.material.emissiveMap.encoding = THREE.sRGBEncoding;
+                            
+                            // Improve material quality
+                            node.material.needsUpdate = true; // Force material update
+                        }
+                    }
+                });
+                
+                // Decrease car size by 71.875% (25% smaller than previous 0.375 scale)
+                carModel.scale.set(0.28125, 0.28125, 0.28125); // 28.125% of original size
+                
+                scene.add(carModel);
+                console.log('Car model loaded with improved textures');
+                
+                // Extract animations from the car model
+                if (gltf.animations && gltf.animations.length > 0) {
+                    console.log(`Found ${gltf.animations.length} animations in car model`);
+                    
+                    // Create a mixer for the car model
+                    const carMixer = new THREE.AnimationMixer(carModel);
+                    mixers.push(carMixer);
+                    
+                    // Process each animation
+                    gltf.animations.forEach((clip, index) => {
+                        // Store animation data
+                        animations.push({
+                            id: `car-anim-${index}`,
+                            name: clip.name || `Car Animation ${index + 1}`,
+                            clip: clip,
+                            mixer: carMixer,
+                            model: 'car'
+                        });
+                    });
+                    
+                    // Update the animation list in the UI
+                    updateAnimationList();
+                } else {
+                    console.log('No animations found in car model');
+                }
+                
+                // Position car at first waypoint if waypoints are already loaded
+                if (waypoints.length > 0) {
+                    positionCarAtWaypoint(0);
+                }
+            }, 
+            // Progress callback
+            (xhr) => {
+                console.log(`Car model: ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
+            }, 
+            // Error callback
+            (error) => {
+                console.error('Error loading car model:', error);
+            });
+        }
+        
+        // Extract waypoints from the loaded model
+        function extractWaypoints(gltf) {
+            console.log('Extracting waypoints...');
+            
+            // Find waypoints in the model
+            gltf.scene.traverse((node) => {
+                // Look for objects with names containing 'waypoint' or 'Empty'
+                if (node.name && (node.name.toLowerCase().includes('waypoint') || node.name.includes('Empty'))) {
+                    waypoints.push(node);
+                }
+            });
+            
+            if (waypoints.length < 2) {
+                console.error(`Error: Found only ${waypoints.length} waypoints. Need at least 2 for a path.`);
+                return;
+            }
+            
+            console.log(`Found ${waypoints.length} waypoints`);
+            
+            // Sort waypoints based on names like 'Empty.000', 'Empty.001'
+            waypoints.sort((a, b) => {
+                const numA = parseInt(a.name.match(/\d+$/)?.[0]);
+                const numB = parseInt(b.name.match(/\d+$/)?.[0]);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return a.name.localeCompare(b.name); // Fallback sort
+            });
+            
+            // Create a smooth path through the waypoints
+            const points = waypoints.map(wp => wp.position);
+            pathCurve = new THREE.CatmullRomCurve3(points, true); // true = closed loop
+            
+            // Visualize the path (optional)
+            visualizePath();
+            
+            // Position car at first waypoint if car is already loaded
+            if (carModel) {
+                positionCarAtWaypoint(0);
+                console.log("Total waypoints: " + waypoints.length);
+            }
+        }
+        
+        // Visualize the path with a line (optional, for debugging)
+        function visualizePath() {
+            if (!pathCurve) return;
+            
+            const points = pathCurve.getPoints(100);
+            const geometry = new THREE.BufferGeometry().setFromPoints(points);
+            const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+            const pathLine = new THREE.Line(geometry, material);
+            scene.add(pathLine);
+        }
+        
+        // Anchor camera to show side view of the car
+        function updateCamera() {
+            if (!carModel) return;
+            
+            // Get car's forward direction (the direction it's facing)
+            const carForward = new THREE.Vector3();
+            carModel.getWorldDirection(carForward);
+            
+            // Calculate left vector of the car (perpendicular to forward direction)
+            const upVector = new THREE.Vector3(0, 1, 0);
+            const leftVector = new THREE.Vector3().crossVectors(carForward, upVector).normalize();
+            
+            // Position camera to the left side of the car
+            const cameraPosition = carModel.position.clone();
+            cameraPosition.add(leftVector.multiplyScalar(cameraDistance)); // Move camera to left side
+            cameraPosition.y += cameraHeight; // Set camera height
+            
+            // Set camera position
+            camera.position.copy(cameraPosition);
+            
+            // Look at the car's position
+            camera.lookAt(carModel.position);
+            
+            // Ensure camera up vector is aligned with world up
+            camera.up.set(0, 1, 0);
+        }
+        
+        // Position car at a specific waypoint index
+        function positionCarAtWaypoint(index) {
+            if (!carModel || waypoints.length === 0) return;
+            
+            // Get position on the path
+            const position = pathCurve.getPointAt(index / (waypoints.length - 1));
+            carModel.position.copy(position);
+            
+            // Orient car to face the next waypoint
+            const tangent = pathCurve.getTangentAt(index / (waypoints.length - 1));
+            carModel.lookAt(position.clone().add(tangent));
+            
+            // Update camera and section text
+            updateCamera();
+            
+            // Set current waypoint index
+            currentWaypointIndex = index;
+            checkAndUpdateSection();
+        }
+        
+        // Update car position along the path
+        function updateCarPosition() {
+            if (!pathCurve || !carModel) return;
+            
+            // Get point on path at current progress
+            const point = pathCurve.getPointAt(pathProgress);
+            
+            // Position car at point
+            carModel.position.copy(point);
+            
+            // Get tangent to path at current point to orient car
+            const tangent = pathCurve.getTangentAt(pathProgress).normalize();
+            
+            // Calculate rotation to align car with tangent
+            const angle = Math.atan2(tangent.x, tangent.z);
+            carModel.rotation.set(0, angle, 0);
+            
+            // Determine the current waypoint index based on path progress
+            updateCurrentWaypointIndex();
+            
+            // Check if we've entered a new section
+            checkAndUpdateSection();
+            
+            // Update camera position and orientation
+            updateCamera();
+        }
+        
+        // Update current waypoint index based on path progress
+        function updateCurrentWaypointIndex() {
+            if (!waypoints.length) return;
+            
+            // Calculate the total number of points
+            const totalPoints = waypoints.length;
+            
+            // Calculate the estimated current index based on progress
+            currentWaypointIndex = Math.floor(pathProgress * totalPoints) % totalPoints;
+            
+            // Next target waypoint is the next point in sequence
+            targetWaypointIndex = (currentWaypointIndex + 1) % totalPoints;
+        }
+        
+        // Check if we've entered a new section and update the displayed text
+        function checkAndUpdateSection() {
+            // Find which section we're currently in
+            let newSectionIndex = -1;
+            for (let i = 0; i < sections.length; i++) {
+                const section = sections[i];
+                
+                // Handle normal range and wrapped range (if end < start)
+                if (section.start <= section.end) {
+                    // Normal range
+                    if (currentWaypointIndex >= section.start && currentWaypointIndex <= section.end) {
+                        newSectionIndex = i;
+                        break;
+                    }
+                } else {
+                    // Wrapped range (e.g., 62 to 55 means 62-99 and 0-55)
+                    if (currentWaypointIndex >= section.start || currentWaypointIndex <= section.end) {
+                        newSectionIndex = i;
+                        break;
+                    }
+                }
+            }
+            
+            // If we've entered a new section, update the displayed text
+            if (newSectionIndex !== currentSectionIndex) {
+                currentSectionIndex = newSectionIndex;
+                updateSectionText();
+            }
+        }
+        
+        // SVG icons for each section with updated colors
+        const sectionIcons = {
+            Camera: `<svg class="icon-camera" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="12" cy="12" r="1" fill="#f47a23" />
+                <rect x="16" y="2" width="4" height="4" rx="1" />
+            </svg>`,
+            Village: `<svg class="icon-village" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M1,21V10L8,3L15,10V21H1Z" />
+                <path d="M12,21V14H22V21H12Z" />
+                <path d="M5,12V14H8V12H5Z" fill="#f47a23" />
+                <path d="M15,18V20H18V18H15Z" fill="#f47a23" />
+            </svg>`,
+            Playground: `<svg class="icon-playground" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M8,2V8H4L8,22H10L6,8H8V2Z" class="swing" />
+                <path d="M16,2V8H12L16,22H18L14,8H16V2Z" class="swing" />
+                <path d="M2,8H22V10H2V8Z" stroke="#74c047" stroke-width="0.5" />
+            </svg>`,
+            Tata: `<svg class="icon-tata" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M4,4H20V20H4V4Z" stroke-width="2" fill="none" stroke="#f47a23" />
+                <path d="M8,8V16" stroke-width="2" stroke="#10afef" />
+                <path d="M12,8V16" stroke-width="2" stroke="#10afef" />
+                <path d="M16,8V16" stroke-width="2" stroke="#10afef" />
+                <path d="M8,8H16" stroke-width="2" stroke="#10afef" />
+                <path d="M8,12H16" stroke-width="2" stroke="#10afef" />
+            </svg>`,
+            Empty: `<svg class="icon-research" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12,2L14,7H20L16,12L18,18L12,15L6,18L8,12L4,7H10L12,2Z" />
+                <circle cx="12" cy="12" r="2" fill="#74c047" />
+            </svg>`,
+            Plane: `<svg class="icon-plane" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22,16L14,8L14,3C14,2.4477 13.5523,2 13,2L11,2C10.4477,2 10,2.4477 10,3L10,8L2,16L2,18L10,16L10,21C10,21.5523 10.4477,22 11,22L13,22C13.5523,22 14,21.5523 14,21L14,16L22,18L22,16Z" />
+            </svg>`
+        };
+        
+        // Update the section text display with expandable content
+        function updateSectionText() {
+            const sectionTextContainer = document.getElementById('section-text-container');
+            const sectionText = document.getElementById('section-text');
+            
+            if (currentSectionIndex === -1) {
+                // Not in any defined section, hide the text
+                sectionTextContainer.style.opacity = '0';
+                return;
+            }
+            
+            // We're in a defined section, update and show the text
+            const section = sections[currentSectionIndex];
+            
+            // Create SVG icon for this section
+            const iconSvg = sectionIcons[section.name] || '';
+            
+            // Create media element HTML if available
+            let mediaHTML = '';
+            if (section.imageSrc) {
+                mediaHTML = `
+                    <div class="section-media section-media-${section.name.toLowerCase()}">
+                        <div class="section-media-icon">${sectionIcons[section.name] || ''}</div>
+                        <div class="section-media-title">${section.title}</div>
+                    </div>
+                `;
+            } else if (section.videoSrc && section.videoSrc !== '#') {
+                mediaHTML = `
+                    <div class="section-media">
+                        <video controls>
+                            <source src="${section.videoSrc}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                `;
+            }
+            
+            sectionText.innerHTML = `
+                <div class="section-header">
+                    <div class="section-icon" id="icon-${section.name.toLowerCase()}">${iconSvg}</div>
+                    <div class="section-header-text">
+                        <div class="section-title">${section.title}</div>
+                        <div class="section-subtitle">${section.subtitle || section.content}</div>
+                    </div>
+                </div>
+                <div class="section-content">
+                    <div class="section-content-inner">
+                        <p>${section.expandedContent || section.content}</p>
+                        ${mediaHTML}
+                    </div>
+                </div>
+            `;
+            
+            // Show the text
+            sectionTextContainer.style.opacity = '1';
+            
+            // Add event listener for header click to expand
+            setupExpandableHeader();
+            
+            console.log(`Entered section: ${section.name} (Waypoints ${section.start}-${section.end})`);
+        }
+        
+        // Setup expandable header functionality and icon click
+        function setupExpandableHeader() {
+            const sectionText = document.getElementById('section-text');
+            const sectionHeader = sectionText.querySelector('.section-header');
+            const sectionIcon = sectionText.querySelector('.section-icon');
+            
+            if (sectionHeader) {
+                // Make the header expandable (excluding the icon)
+                sectionHeader.addEventListener('click', function(e) {
+                    // Prevent expanding if the icon was clicked
+                    if (e.target.closest('.section-icon')) {
+                        return;
+                    }
+                    
+                    e.preventDefault();
+                    sectionText.classList.toggle('expanded');
+                    
+                    // Ensure the section content scrolls to the top when collapsed
+                    if (!sectionText.classList.contains('expanded')) {
+                        const sectionContent = sectionText.querySelector('.section-content');
+                        if (sectionContent) {
+                            sectionContent.scrollTop = 0;
+                        }
+                    }
+                });
+            }
+            
+            // Add special click behavior for the icon
+            if (sectionIcon) {
+                sectionIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevent the header click from also triggering
+                    
+                    // Get current section
+                    const section = sections[currentSectionIndex];
+                    
+                    // Focus the car on the center of this section's waypoint range
+                    const middleWaypoint = Math.floor((section.start + section.end) / 2);
+                    const totalWaypoints = waypoints.length;
+                    
+                    // Calculate the path progress for this waypoint
+                    pathProgress = middleWaypoint / totalWaypoints;
+                    
+                    // Update car position to center of this section
+                    updateCarPosition();
+                    
+                    // Visual feedback for the click
+                    sectionIcon.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        sectionIcon.style.transform = '';
+                    }, 300);
+                });
+            }
+        }
+
+        // Handle keyboard input - keydown
+        function onKeyDown(event) {
+            if (!pathCurve) return;
+            
+            // Update key state when key is pressed
+            if (event.key in keys) {
+                keys[event.key] = true;
+                event.preventDefault(); // Prevent default browser behavior
+            }
+        }
+        
+        // Handle keyboard input - keyup
+        function onKeyUp(event) {
+            // Update key state when key is released
+            if (event.key in keys) {
+                keys[event.key] = false;
+                event.preventDefault(); // Prevent default browser behavior
+            }
+        }
+        
+        // Mouse panning variables
+        let isPanning = false;
+        let startPanX = 0, startPanY = 0;
+        let currentPanX = 0, currentPanY = 0;
+        
+        // Add mouse panning controls
+        function setupMouseControls() {
+            const container = document.getElementById('scene-container');
+            
+            // Mouse down event
+            container.addEventListener('mousedown', (e) => {
+                if (e.button === 0) { // Left mouse button
+                    isPanning = true;
+                    startPanX = e.clientX; startPanY = e.clientY;
+                    currentPanX = e.clientX; currentPanY = e.clientY;
+                    container.style.cursor = 'grabbing';
+                }
+            });
+            
+            // Mouse move event
+            container.addEventListener('mousemove', (e) => {
+                if (!isPanning) return;
+                const deltaX = e.clientX - currentPanX;
+                const deltaY = e.clientY - currentPanY;
+                
+                // Horizontal panning moves the car along the path
+                pathProgress += deltaX * PATH_SENSITIVITY;
+                if (pathProgress < 0) pathProgress = 1 + pathProgress; // Loop around
+                if (pathProgress > 1) pathProgress = pathProgress - 1; // Loop around
+                
+                // Vertical panning adjusts camera tilt
+                cameraPitch -= deltaY * CAMERA_PITCH_SENSITIVITY; // Inverted for more intuitive control
+                cameraPitch = Math.max(MIN_CAMERA_PITCH, Math.min(MAX_CAMERA_PITCH, cameraPitch)); // Clamp pitch
+                
+                currentPanX = e.clientX; currentPanY = e.clientY;
+                updateCarPosition();
+            });
+            
+            // Mouse up event
+            container.addEventListener('mouseup', () => {
+                if (isPanning) {
+                    isPanning = false;
+                    container.style.cursor = 'grab';
+                }
+            });
+            
+            // Mouse leave event
+            container.addEventListener('mouseleave', () => {
+                if (isPanning) {
+                    isPanning = false;
+                    container.style.cursor = 'grab';
+                }
+            });
+            
+            // Set initial cursor
+            container.style.cursor = 'grab';
+            
+            // Touch events for mobile
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isPanning = true;
+                    startPanX = e.touches[0].clientX; startPanY = e.touches[0].clientY;
+                    currentPanX = e.touches[0].clientX; currentPanY = e.touches[0].clientY;
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            container.addEventListener('touchmove', (e) => {
+                if (!isPanning || e.touches.length !== 1) return;
+                const deltaX = e.touches[0].clientX - currentPanX;
+                const deltaY = e.touches[0].clientY - currentPanY;
+                
+                // Adjust sensitivity for touch
+                const touchPathSensitivity = PATH_SENSITIVITY * 1.5;
+                const touchPitchSensitivity = CAMERA_PITCH_SENSITIVITY * 1.5;
+                
+                // Horizontal panning moves the car along the path
+                pathProgress += deltaX * touchPathSensitivity;
+                if (pathProgress < 0) pathProgress = 1 + pathProgress; // Loop around
+                if (pathProgress > 1) pathProgress = pathProgress - 1; // Loop around
+                
+                // Vertical panning adjusts camera tilt
+                cameraPitch -= deltaY * touchPitchSensitivity; // Inverted for more intuitive control
+                cameraPitch = Math.max(MIN_CAMERA_PITCH, Math.min(MAX_CAMERA_PITCH, cameraPitch)); // Clamp pitch
+                
+                currentPanX = e.touches[0].clientX; currentPanY = e.touches[0].clientY;
+                updateCarPosition();
+                e.preventDefault();
+            }, { passive: false });
+            
+            container.addEventListener('touchend', () => {
+                isPanning = false;
+            });
+            
+            container.addEventListener('touchcancel', () => {
+                isPanning = false;
+            });
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Update car movement based on key states
+            updateCarMovement();
+            
+            // Update animations
+            const delta = clock.getDelta();
+            mixers.forEach(mixer => mixer.update(delta));
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Update the animation list in the UI
+        function updateAnimationList() {
+            const animationList = document.getElementById('animation-list');
+            if (!animationList) return;
+            
+            if (animations.length === 0) {
+                animationList.innerHTML = '<p>No animations found in models</p>';
+                return;
+            }
+            
+            // Clear the list
+            animationList.innerHTML = '';
+            
+            // Group animations by model
+            const groupedAnimations = {};
+            animations.forEach(anim => {
+                if (!groupedAnimations[anim.model]) {
+                    groupedAnimations[anim.model] = [];
+                }
+                groupedAnimations[anim.model].push(anim);
+            });
+            
+            // Create UI elements for each animation group
+            for (const [model, anims] of Object.entries(groupedAnimations)) {
+                const modelHeader = document.createElement('h5');
+                modelHeader.textContent = model.charAt(0).toUpperCase() + model.slice(1) + ' Animations';
+                animationList.appendChild(modelHeader);
+                
+                const animGroup = document.createElement('div');
+                animGroup.className = 'animation-group';
+                
+                anims.forEach(anim => {
+                    const animRow = document.createElement('div');
+                    animRow.className = 'animation-row';
+                    
+                    const animName = document.createElement('span');
+                    animName.className = 'animation-name';
+                    animName.textContent = anim.name;
+                    
+                    const animControls = document.createElement('div');
+                    animControls.className = 'animation-controls';
+                    
+                    const playBtn = document.createElement('button');
+                    playBtn.className = 'play-btn';
+                    playBtn.textContent = 'Play';
+                    playBtn.dataset.animId = anim.id;
+                    playBtn.addEventListener('click', () => playAnimation(anim.id));
+                    
+                    const stopBtn = document.createElement('button');
+                    stopBtn.className = 'stop-btn';
+                    stopBtn.textContent = 'Stop';
+                    stopBtn.dataset.animId = anim.id;
+                    stopBtn.addEventListener('click', () => stopAnimation(anim.id));
+                    
+                    animControls.appendChild(playBtn);
+                    animControls.appendChild(stopBtn);
+                    
+                    animRow.appendChild(animName);
+                    animRow.appendChild(animControls);
+                    
+                    animGroup.appendChild(animRow);
+                });
+                
+                animationList.appendChild(animGroup);
+            }
+            
+            // Setup play all and stop all buttons
+            document.getElementById('play-all').addEventListener('click', playAllAnimations);
+            document.getElementById('stop-all').addEventListener('click', stopAllAnimations);
+            
+            // Setup animation speed control
+            document.getElementById('animation-speed').addEventListener('input', updateAnimationSpeed);
+        }
+        
+        // Play a specific animation
+        function playAnimation(animId) {
+            const anim = animations.find(a => a.id === animId);
+            if (!anim) return;
+            
+            // Stop any existing animation action for this animation
+            if (activeAnimations.has(animId)) {
+                activeAnimations.get(animId).stop();
+            }
+            
+            // Create and play the animation action
+            const action = anim.mixer.clipAction(anim.clip);
+            action.reset();
+            action.play();
+            
+            // Store the active animation
+            activeAnimations.set(animId, action);
+            
+            // Update button states
+            updateAnimationButtonStates();
+        }
+        
+        // Stop a specific animation
+        function stopAnimation(animId) {
+            if (activeAnimations.has(animId)) {
+                activeAnimations.get(animId).stop();
+                activeAnimations.delete(animId);
+            }
+            
+            // Update button states
+            updateAnimationButtonStates();
+        }
+        
+        // Play all animations
+        function playAllAnimations() {
+            animations.forEach(anim => {
+                playAnimation(anim.id);
+            });
+        }
+        
+        // Stop all animations
+        function stopAllAnimations() {
+            const animIds = [...activeAnimations.keys()];
+            animIds.forEach(id => stopAnimation(id));
+        }
+        
+        // Update animation speed
+        function updateAnimationSpeed(e) {
+            const speed = parseFloat(e.target.value);
+            activeAnimations.forEach(action => {
+                action.timeScale = speed;
+            });
+        }
+        
+        // Update animation button states
+        function updateAnimationButtonStates() {
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                const animId = btn.dataset.animId;
+                if (activeAnimations.has(animId)) {
+                    btn.disabled = true;
+                    btn.classList.add('active');
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.stop-btn').forEach(btn => {
+                const animId = btn.dataset.animId;
+                if (activeAnimations.has(animId)) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            });
+        }
+        
+        // Create custom animation for objects like the plane
+        function createCustomAnimation(object) {
+            // Create a mixer for this specific object
+            const objectMixer = new THREE.AnimationMixer(object);
+            mixers.push(objectMixer);
+            
+            // Get the object name for better identification
+            const objectName = object.name.replace(/\d+/g, '').trim() || 'Object';
+            
+            // Create different types of animations based on object name
+            if (objectName.toLowerCase().includes('plane')) {
+                // Create a wiggle animation for the plane
+                createPlaneAnimation(object, objectMixer, objectName);
+            } else {
+                // Create a generic animation
+                createGenericAnimation(object, objectMixer, objectName);
+            }
+        }
+        
+        // Create a plane-specific wiggle animation
+        function createPlaneAnimation(plane, mixer, name) {
+            // Store the original position and rotation
+            const originalPosition = plane.position.clone();
+            const originalRotation = plane.rotation.clone();
+            
+            // Create keyframe tracks for position and rotation
+            const times = [0, 0.5, 1, 1.5, 2];
+            
+            // Position keyframes - slight up and down movement
+            const positionValues = [
+                originalPosition.x, originalPosition.y, originalPosition.z,
+                originalPosition.x, originalPosition.y + 0.2, originalPosition.z,
+                originalPosition.x, originalPosition.y, originalPosition.z,
+                originalPosition.x, originalPosition.y - 0.1, originalPosition.z,
+                originalPosition.x, originalPosition.y, originalPosition.z
+            ];
+            
+            // Rotation keyframes - slight tilting
+            const rotationValues = [
+                originalRotation.x, originalRotation.y, originalRotation.z,
+                originalRotation.x + 0.05, originalRotation.y, originalRotation.z + 0.05,
+                originalRotation.x, originalRotation.y, originalRotation.z,
+                originalRotation.x - 0.05, originalRotation.y, originalRotation.z - 0.05,
+                originalRotation.x, originalRotation.y, originalRotation.z
+            ];
+            
+            // Create the keyframe tracks
+            const positionTrack = new THREE.KeyframeTrack(
+                `${plane.name}.position`, 
+                times, 
+                positionValues
+            );
+            
+            const rotationTrack = new THREE.KeyframeTrack(
+                `${plane.name}.rotation`, 
+                times, 
+                rotationValues
+            );
+            
+            // Create the animation clip
+            const clip = new THREE.AnimationClip(`${name} Wiggle`, 2, [positionTrack, rotationTrack]);
+            
+            // Add to animations list
+            const animId = `custom-plane-${animations.length}`;
+            animations.push({
+                id: animId,
+                name: `${name} Wiggle`,
+                clip: clip,
+                mixer: mixer,
+                model: 'custom'
+            });
+            
+            // Auto-play the plane animation
+            setTimeout(() => {
+                playAnimation(animId);
+                console.log(`Auto-playing custom plane animation: ${name} Wiggle`);
+            }, 1000);
+            
+            // Update the animation list in the UI
+            updateAnimationList();
+        }
+        
+        // Create a generic animation for other objects
+        function createGenericAnimation(object, mixer, name) {
+            // Store the original position and rotation
+            const originalPosition = object.position.clone();
+            const originalRotation = object.rotation.clone();
+            const originalScale = object.scale.clone();
+            
+            // Create keyframe tracks
+            const times = [0, 1, 2];
+            
+            // Position keyframes
+            const positionValues = [
+                originalPosition.x, originalPosition.y, originalPosition.z,
+                originalPosition.x, originalPosition.y + 0.1, originalPosition.z,
+                originalPosition.x, originalPosition.y, originalPosition.z
+            ];
+            
+            // Rotation keyframes
+            const rotationValues = [
+                originalRotation.x, originalRotation.y, originalRotation.z,
+                originalRotation.x, originalRotation.y + 0.1, originalRotation.z,
+                originalRotation.x, originalRotation.y, originalRotation.z
+            ];
+            
+            // Scale keyframes
+            const scaleValues = [
+                originalScale.x, originalScale.y, originalScale.z,
+                originalScale.x * 1.05, originalScale.y * 1.05, originalScale.z * 1.05,
+                originalScale.x, originalScale.y, originalScale.z
+            ];
+            
+            // Create the keyframe tracks
+            const positionTrack = new THREE.KeyframeTrack(
+                `${object.name}.position`, 
+                times, 
+                positionValues
+            );
+            
+            const rotationTrack = new THREE.KeyframeTrack(
+                `${object.name}.rotation`, 
+                times, 
+                rotationValues
+            );
+            
+            const scaleTrack = new THREE.KeyframeTrack(
+                `${object.name}.scale`, 
+                times, 
+                scaleValues
+            );
+            
+            // Create the animation clip
+            const clip = new THREE.AnimationClip(`${name} Animation`, 2, [positionTrack, rotationTrack, scaleTrack]);
+            
+            // Add to animations list
+            animations.push({
+                id: `custom-${animations.length}`,
+                name: `${name} Animation`,
+                clip: clip,
+                mixer: mixer,
+                model: 'custom'
+            });
+            
+            // Update the animation list in the UI
+            updateAnimationList();
+        }
+        
+        // Update car movement with smooth acceleration/deceleration
+        function updateCarMovement() {
+            if (!pathCurve) return;
+            
+            // Calculate target speed based on key states
+            let targetSpeed = 0;
+            
+            if (keys.ArrowRight) targetSpeed = maxSpeed;
+            if (keys.ArrowLeft) targetSpeed = -maxSpeed;
+            
+            // Apply acceleration or deceleration
+            if (targetSpeed !== 0) {
+                // Accelerate towards target speed
+                if (targetSpeed > currentSpeed) {
+                    currentSpeed = Math.min(targetSpeed, currentSpeed + acceleration);
+                } else {
+                    currentSpeed = Math.max(targetSpeed, currentSpeed - acceleration);
+                }
+            } else {
+                // Decelerate towards zero when no keys are pressed
+                if (currentSpeed > 0) {
+                    currentSpeed = Math.max(0, currentSpeed - deceleration);
+                } else if (currentSpeed < 0) {
+                    currentSpeed = Math.min(0, currentSpeed + deceleration);
+                }
+            }
+            
+            // Only update position if there's any speed
+            if (currentSpeed !== 0) {
+                // Move car along the path
+                pathProgress += currentSpeed;
+                
+                // Handle looping around the path
+                if (pathProgress < 0) pathProgress = 1 + pathProgress;
+                if (pathProgress > 1) pathProgress = pathProgress - 1;
+                
+                // Update car position
+                updateCarPosition();
+            }
+        }
+        
+        // Loading progress functions
+        function updateLoadingProgress(progress) {
+            const enterButton = document.getElementById('enter-button');
+            const loadingStatus = document.getElementById('loading-status');
+            
+            // Update the loading button fill using the CSS variable for the :before pseudo-element
+            enterButton.style.setProperty('--loading-width', `${progress}%`);
+            
+            // Update the loading status text
+            loadingStatus.innerHTML = `Loading... ${Math.round(progress)}%`;
+            
+            // When loading is complete, make the button clickable
+            if (progress >= 100) {
+                setTimeout(() => {
+                    enterButton.classList.add('ready');
+                    enterButton.innerHTML = '<span>Enter Experience</span>';
+                    loadingStatus.innerHTML = 'Ready to explore';
+                }, 500);
+            }
+        }
+        
+        // Function called when environment is fully loaded
+        function onEnvironmentLoaded() {
+            console.log('Environment fully loaded');
+            
+            // Enable the enter button
+            const enterButton = document.getElementById('enter-button');
+            if (enterButton) {
+                enterButton.classList.add('ready');
+                enterButton.innerHTML = '<span>Enter Experience</span>';
+            }
+            
+            // Update loading status
+            const loadingStatus = document.getElementById('loading-status');
+            if (loadingStatus) {
+                loadingStatus.innerHTML = 'Ready to explore';
+            }
+        }
+        
+        // Function to start the 3D experience
+        function startExperience() {
+            // Hide the landing page
+            const landingPage = document.getElementById('landing-page');
+            landingPage.style.opacity = '0';
+            setTimeout(() => {
+                landingPage.style.display = 'none';
+            }, 1000);
+            
+            // Show the 3D scene
+            const sceneContainer = document.getElementById('scene-container');
+            const sectionTextContainer = document.getElementById('section-text-container');
+            sceneContainer.style.opacity = '1';
+            sectionTextContainer.style.opacity = '1';
+            
+            // Show the controls guide temporarily
+            const controlsInfo = document.getElementById('controls-info');
+            setTimeout(() => {
+                controlsInfo.style.opacity = '1';
+                
+                // Auto-hide the controls guide after 7 seconds
+                setTimeout(() => {
+                    controlsInfo.style.opacity = '0';
+                }, 7000);
+            }, 1500);
+            
+            // Start the animation
+            animate();
+        }
+        
+        // Initialize the scene
+        init();
+        
+        // Setup mouse controls
+        setupMouseControls();
+        
+        // Add event listener for the enter button
+        document.getElementById('enter-button').addEventListener('click', function() {
+            if (this.classList.contains('ready')) {
+                startExperience();
+            }
+        });
+        
+        // Setup navbar functionality
+        function setupNavbar() {
+            const hamburgerMenu = document.getElementById('hamburger-menu');
+            const sideNavbar = document.getElementById('side-navbar');
+            let navbarTimer;
+            
+            // Toggle navbar on hamburger click
+            hamburgerMenu.addEventListener('click', () => {
+                hamburgerMenu.classList.toggle('active');
+                sideNavbar.classList.toggle('open');
+            });
+            
+            // Open navbar on hamburger hover
+            hamburgerMenu.addEventListener('mouseenter', () => {
+                clearTimeout(navbarTimer);
+                hamburgerMenu.classList.add('active');
+                sideNavbar.classList.add('open');
+            });
+            
+            // Close navbar when mouse leaves both hamburger and navbar
+            const closeNavOnMouseLeave = () => {
+                navbarTimer = setTimeout(() => {
+                    hamburgerMenu.classList.remove('active');
+                    sideNavbar.classList.remove('open');
+                }, 500);
+            };
+            
+            hamburgerMenu.addEventListener('mouseleave', () => {
+                // Only start timer if mouse isn't over navbar
+                if (!sideNavbar.matches(':hover')) {
+                    closeNavOnMouseLeave();
+                }
+            });
+            
+            sideNavbar.addEventListener('mouseleave', () => {
+                // Only start timer if mouse isn't over hamburger
+                if (!hamburgerMenu.matches(':hover')) {
+                    closeNavOnMouseLeave();
+                }
+            });
+            
+            // Keep navbar open when mouse enters navbar
+            sideNavbar.addEventListener('mouseenter', () => {
+                clearTimeout(navbarTimer);
+            });
+            
+            // Close navbar when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!hamburgerMenu.contains(e.target) && !sideNavbar.contains(e.target) && sideNavbar.classList.contains('open')) {
+                    hamburgerMenu.classList.remove('active');
+                    sideNavbar.classList.remove('open');
+                }
+            });
+        }
+        
+        // Initialize navbar functionality
+        setupNavbar();
+        
+        // Environment Controls Functionality
+        let ambientLight, directionalLight;
+        let originalMaterials = new Map(); // Store original materials for reset
+        
+        function setupEnvironmentControls() {
+            // Get references to lights
+            ambientLight = scene.children.find(child => child instanceof THREE.AmbientLight);
+            directionalLight = scene.children.find(child => child instanceof THREE.DirectionalLight);
+            
+            // Toggle controls panel
+            const controlsPanel = document.getElementById('environment-controls');
+            const toggleButton = document.getElementById('toggle-controls');
+            
+            toggleButton.addEventListener('click', () => {
+                controlsPanel.classList.toggle('collapsed');
+            });
+            
+            // Initialize with collapsed state on mobile
+            if (window.innerWidth < 768) {
+                controlsPanel.classList.add('collapsed');
+            }
+            
+            // Setup range input value displays
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                const valueDisplay = slider.nextElementSibling;
+                if (valueDisplay && valueDisplay.classList.contains('value-display')) {
+                    valueDisplay.textContent = slider.value;
+                    
+                    slider.addEventListener('input', () => {
+                        valueDisplay.textContent = slider.value;
+                    });
+                }
+            });
+            
+            // Lighting Controls
+            document.getElementById('ambient-intensity').addEventListener('input', (e) => {
+                if (ambientLight) {
+                    ambientLight.intensity = parseFloat(e.target.value);
+                }
+            });
+            
+            document.getElementById('directional-intensity').addEventListener('input', (e) => {
+                if (directionalLight) {
+                    directionalLight.intensity = parseFloat(e.target.value);
+                }
+            });
+            
+            document.getElementById('light-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                if (ambientLight) ambientLight.color = color;
+                if (directionalLight) directionalLight.color = color;
+            });
+            
+            // Environment Controls
+            document.getElementById('fog-density').addEventListener('input', (e) => {
+                if (scene.fog) {
+                    scene.fog.density = parseFloat(e.target.value);
+                }
+            });
+            
+            document.getElementById('sky-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                scene.background = color;
+                if (scene.fog) {
+                    scene.fog.color = color;
+                }
+            });
+            
+            // Store original materials when models are loaded
+            function storeOriginalMaterials() {
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            // Store a clone of the original material
+                            originalMaterials.set(node.uuid, node.material.clone());
+                        }
+                    });
+                }
+                
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            originalMaterials.set(node.uuid, node.material.clone());
+                        }
+                    });
+                }
+            }
+            
+            // Call once models are loaded
+            if (mainScene && carModel) {
+                storeOriginalMaterials();
+            } else {
+                // Set up a check to store materials once models are loaded
+                const checkInterval = setInterval(() => {
+                    if (mainScene && carModel) {
+                        storeOriginalMaterials();
+                        clearInterval(checkInterval);
+                    }
+                }, 1000);
+            }
+            
+            // Island Model Controls
+            document.getElementById('island-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            // Apply tint by multiplying with the base color
+                            if (node.material.color) {
+                                node.material.color = color;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('island-metalness').addEventListener('input', (e) => {
+                const metalness = parseFloat(e.target.value);
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.metalness !== undefined) {
+                            node.material.metalness = metalness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('island-roughness').addEventListener('input', (e) => {
+                const roughness = parseFloat(e.target.value);
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.roughness !== undefined) {
+                            node.material.roughness = roughness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            // Car Model Controls
+            document.getElementById('car-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            if (node.material.color) {
+                                node.material.color = color;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('car-metalness').addEventListener('input', (e) => {
+                const metalness = parseFloat(e.target.value);
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.metalness !== undefined) {
+                            node.material.metalness = metalness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('car-roughness').addEventListener('input', (e) => {
+                const roughness = parseFloat(e.target.value);
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.roughness !== undefined) {
+                            node.material.roughness = roughness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            // Preset Atmospheres
+            const presets = {
+                default: {
+                    ambientIntensity: 0.2,
+                    directionalIntensity: 0.5,
+                    lightColor: '#ffffff',
+                    skyColor: '#87CEEB',
+                    fogDensity: 0.01,
+                    islandColor: '#ffffff',
+                    islandMetalness: 0.1,
+                    islandRoughness: 0.5,
+                    carColor: '#ff4400',
+                    carMetalness: 0.8,
+                    carRoughness: 0.2
+                },
+                sunset: {
+                    ambientIntensity: 0.3,
+                    directionalIntensity: 0.7,
+                    lightColor: '#ff7e00',
+                    skyColor: '#ff5500',
+                    fogDensity: 0.015,
+                    islandColor: '#ffaa77',
+                    islandMetalness: 0.1,
+                    islandRoughness: 0.7,
+                    carColor: '#ff4400',
+                    carMetalness: 0.9,
+                    carRoughness: 0.1
+                },
+                night: {
+                    ambientIntensity: 0.1,
+                    directionalIntensity: 0.2,
+                    lightColor: '#0077ff',
+                    skyColor: '#001133',
+                    fogDensity: 0.02,
+                    islandColor: '#0055aa',
+                    islandMetalness: 0.3,
+                    islandRoughness: 0.8,
+                    carColor: '#3366ff',
+                    carMetalness: 1.0,
+                    carRoughness: 0.1
+                },
+                foggy: {
+                    ambientIntensity: 0.4,
+                    directionalIntensity: 0.3,
+                    lightColor: '#aabbcc',
+                    skyColor: '#aabbcc',
+                    fogDensity: 0.04,
+                    islandColor: '#cccccc',
+                    islandMetalness: 0.05,
+                    islandRoughness: 0.9,
+                    carColor: '#dddddd',
+                    carMetalness: 0.2,
+                    carRoughness: 0.8
+                },
+                dystopian: {
+                    ambientIntensity: 0.15,
+                    directionalIntensity: 0.4,
+                    lightColor: '#ff3300',
+                    skyColor: '#330000',
+                    fogDensity: 0.025,
+                    islandColor: '#661100',
+                    islandMetalness: 0.4,
+                    islandRoughness: 0.7,
+                    carColor: '#990000',
+                    carMetalness: 0.6,
+                    carRoughness: 0.5
+                }
+            };
+            
+            document.querySelectorAll('.preset-buttons button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const presetName = button.dataset.preset;
+                    if (presets[presetName]) {
+                        applyPreset(presets[presetName]);
+                    }
+                });
+            });
+            
+            function applyPreset(preset) {
+                // Update sliders and colors
+                document.getElementById('ambient-intensity').value = preset.ambientIntensity;
+                document.getElementById('ambient-intensity').nextElementSibling.textContent = preset.ambientIntensity;
+                
+                document.getElementById('directional-intensity').value = preset.directionalIntensity;
+                document.getElementById('directional-intensity').nextElementSibling.textContent = preset.directionalIntensity;
+                
+                document.getElementById('light-color').value = preset.lightColor;
+                
+                document.getElementById('fog-density').value = preset.fogDensity;
+                document.getElementById('fog-density').nextElementSibling.textContent = preset.fogDensity;
+                
+                document.getElementById('sky-color').value = preset.skyColor;
+                
+                document.getElementById('island-color').value = preset.islandColor;
+                
+                document.getElementById('island-metalness').value = preset.islandMetalness;
+                document.getElementById('island-metalness').nextElementSibling.textContent = preset.islandMetalness;
+                
+                document.getElementById('island-roughness').value = preset.islandRoughness;
+                document.getElementById('island-roughness').nextElementSibling.textContent = preset.islandRoughness;
+                
+                document.getElementById('car-color').value = preset.carColor;
+                
+                document.getElementById('car-metalness').value = preset.carMetalness;
+                document.getElementById('car-metalness').nextElementSibling.textContent = preset.carMetalness;
+                
+                document.getElementById('car-roughness').value = preset.carRoughness;
+                document.getElementById('car-roughness').nextElementSibling.textContent = preset.carRoughness;
+                
+                // Apply changes to scene
+                if (ambientLight) {
+                    ambientLight.intensity = preset.ambientIntensity;
+                    ambientLight.color = new THREE.Color(preset.lightColor);
+                }
+                
+                if (directionalLight) {
+                    directionalLight.intensity = preset.directionalIntensity;
+                    directionalLight.color = new THREE.Color(preset.lightColor);
+                }
+                
+                const skyColor = new THREE.Color(preset.skyColor);
+                scene.background = skyColor;
+                if (scene.fog) {
+                    scene.fog.color = skyColor;
+                    scene.fog.density = preset.fogDensity;
+                }
+                
+                if (mainScene) {
+                    const islandColor = new THREE.Color(preset.islandColor);
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            if (node.material.color) {
+                                node.material.color = islandColor;
+                            }
+                            if (node.material.metalness !== undefined) {
+                                node.material.metalness = preset.islandMetalness;
+                                node.material.roughness = preset.islandRoughness;
+                                node.material.needsUpdate = true;
+                            }
+                        }
+                    });
+                }
+                
+                if (carModel) {
+                    const carColor = new THREE.Color(preset.carColor);
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            if (node.material.color) {
+                                node.material.color = carColor;
+                            }
+                            if (node.material.metalness !== undefined) {
+                                node.material.metalness = preset.carMetalness;
+                                node.material.roughness = preset.carRoughness;
+                                node.material.needsUpdate = true;
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Initialize environment controls after scene is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for models to load before initializing controls
+            const checkInterval = setInterval(() => {
+                if (scene && mainScene && carModel) {
+                    setupEnvironmentControls();
+                    clearInterval(checkInterval);
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

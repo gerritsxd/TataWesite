@@ -651,6 +651,236 @@
             font-size: 0.9rem;
             opacity: 0.7;
         }
+        
+        /* Environment Controls Panel */
+        #environment-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 320px;
+            background-color: var(--semi-transparent);
+            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            z-index: 100;
+            overflow: hidden;
+            border: 1px solid var(--blue);
+            transition: all 0.3s ease;
+            max-height: 500px;
+            color: var(--light-text);
+        }
+        
+        #environment-controls.collapsed {
+            max-height: 50px;
+        }
+        
+        .controls-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: rgba(16, 175, 239, 0.3);
+            border-bottom: 1px solid var(--blue);
+        }
+        
+        .controls-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            color: var(--light-text);
+        }
+        
+        #toggle-controls {
+            background: none;
+            border: none;
+            color: var(--light-text);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+            transition: transform 0.3s ease;
+        }
+        
+        #environment-controls.collapsed #toggle-controls {
+            transform: rotate(180deg);
+        }
+        
+        .controls-body {
+            padding: 15px;
+            overflow-y: auto;
+            max-height: 450px;
+            transition: all 0.3s ease;
+        }
+        
+        #environment-controls.collapsed .controls-body {
+            max-height: 0;
+            padding: 0 15px;
+            overflow: hidden;
+        }
+        
+        .control-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .control-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+        
+        .control-section h4 {
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            color: var(--orange);
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+        
+        .control-row label {
+            flex: 0 0 120px;
+            font-size: 0.9rem;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            accent-color: var(--orange);
+        }
+        
+        .control-row input[type="color"] {
+            width: 40px;
+            height: 25px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            flex: 0 0 40px;
+            text-align: right;
+            font-size: 0.9rem;
+        }
+        
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .preset-buttons button {
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--blue);
+            color: var(--light-text);
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .preset-buttons button:hover {
+            background-color: var(--blue);
+            transform: translateY(-2px);
+        }
+        
+        /* Animation Controls Styles */
+        .animation-group {
+            margin-bottom: 15px;
+        }
+        
+        #animation-list h5 {
+            margin: 10px 0 5px 0;
+            font-size: 0.95rem;
+            color: var(--orange);
+        }
+        
+        .animation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .animation-name {
+            flex: 1;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding-right: 10px;
+        }
+        
+        .animation-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .animation-controls button {
+            padding: 3px 8px;
+            font-size: 0.8rem;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--blue);
+            color: var(--light-text);
+            border-radius: 3px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .animation-controls button:hover:not(:disabled) {
+            background-color: var(--blue);
+        }
+        
+        .animation-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .animation-controls button.active {
+            background-color: var(--orange);
+            border-color: var(--orange);
+        }
+        
+        .animation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .animation-buttons button {
+            flex: 1;
+            padding: 5px 0;
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid var(--blue);
+            color: var(--light-text);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .animation-buttons button:hover {
+            background-color: var(--blue);
+            transform: translateY(-2px);
+        }
+        
+        #play-all {
+            border-color: var(--green);
+        }
+        
+        #play-all:hover {
+            background-color: var(--green);
+        }
+        
+        #stop-all {
+            border-color: var(--orange);
+        }
+        
+        #stop-all:hover {
+            background-color: var(--orange);
+        }
     </style>
 </head>
 <body>
@@ -706,21 +936,132 @@
         </div>
     </div>
     
+    <!-- Controls Info -->
     <div id="controls-info">
         <h3>Controls Guide</h3>
-        <div class="control-keys">
-            <div class="key">←</div>
-            <div class="key">→</div>
-        </div>
-        <div class="control-gif">
-            <!-- Replaced GIF with an animated arrow indicator -->
-            <div class="animated-arrow-container">
-                <div class="animated-car"></div>
-                <div class="animated-arrow left"></div>
-                <div class="animated-arrow right"></div>
+        <div class="control-icons">
+            <div class="control-icon">
+                <div class="arrow left"></div>
+                <span>Previous</span>
+            </div>
+            <div class="control-icon">
+                <div class="car-icon"></div>
+            </div>
+            <div class="control-icon">
+                <div class="arrow right"></div>
+                <span>Next</span>
             </div>
         </div>
         <p>Use arrow keys to navigate</p>
+    </div>
+    
+    <!-- Environment Controls Panel -->
+    <div id="environment-controls">
+        <div class="controls-header">
+            <h3>Environment Controls</h3>
+            <button id="toggle-controls">▼</button>
+        </div>
+        <div class="controls-body">
+            <!-- Lighting Controls -->
+            <div class="control-section">
+                <h4>Lighting</h4>
+                <div class="control-row">
+                    <label for="ambient-intensity">Ambient Light:</label>
+                    <input type="range" id="ambient-intensity" min="0" max="1" step="0.05" value="0.2">
+                    <span class="value-display">0.2</span>
+                </div>
+                <div class="control-row">
+                    <label for="directional-intensity">Directional Light:</label>
+                    <input type="range" id="directional-intensity" min="0" max="2" step="0.05" value="0.5">
+                    <span class="value-display">0.5</span>
+                </div>
+                <div class="control-row">
+                    <label for="light-color">Light Color:</label>
+                    <input type="color" id="light-color" value="#ffffff">
+                </div>
+            </div>
+            
+            <!-- Environment Controls -->
+            <div class="control-section">
+                <h4>Environment</h4>
+                <div class="control-row">
+                    <label for="fog-density">Fog Density:</label>
+                    <input type="range" id="fog-density" min="0" max="0.05" step="0.001" value="0.01">
+                    <span class="value-display">0.01</span>
+                </div>
+                <div class="control-row">
+                    <label for="sky-color">Sky Color:</label>
+                    <input type="color" id="sky-color" value="#87CEEB">
+                </div>
+            </div>
+            
+            <!-- Island Model Controls -->
+            <div class="control-section">
+                <h4>Island</h4>
+                <div class="control-row">
+                    <label for="island-color">Tint Color:</label>
+                    <input type="color" id="island-color" value="#ffffff">
+                </div>
+                <div class="control-row">
+                    <label for="island-metalness">Metalness:</label>
+                    <input type="range" id="island-metalness" min="0" max="1" step="0.05" value="0.1">
+                    <span class="value-display">0.1</span>
+                </div>
+                <div class="control-row">
+                    <label for="island-roughness">Roughness:</label>
+                    <input type="range" id="island-roughness" min="0" max="1" step="0.05" value="0.5">
+                    <span class="value-display">0.5</span>
+                </div>
+            </div>
+            
+            <!-- Car Model Controls -->
+            <div class="control-section">
+                <h4>Car</h4>
+                <div class="control-row">
+                    <label for="car-color">Color:</label>
+                    <input type="color" id="car-color" value="#ff4400">
+                </div>
+                <div class="control-row">
+                    <label for="car-metalness">Metalness:</label>
+                    <input type="range" id="car-metalness" min="0" max="1" step="0.05" value="0.8">
+                    <span class="value-display">0.8</span>
+                </div>
+                <div class="control-row">
+                    <label for="car-roughness">Roughness:</label>
+                    <input type="range" id="car-roughness" min="0" max="1" step="0.05" value="0.2">
+                    <span class="value-display">0.2</span>
+                </div>
+            </div>
+            
+            <!-- Animation Controls -->
+            <div class="control-section">
+                <h4>Animations</h4>
+                <div id="animation-list">
+                    <p>Loading animations...</p>
+                </div>
+                <div class="control-row">
+                    <label for="animation-speed">Speed:</label>
+                    <input type="range" id="animation-speed" min="0.1" max="2" step="0.1" value="1">
+                    <span class="value-display">1.0</span>
+                </div>
+                <div class="animation-buttons">
+                    <button id="play-all">Play All</button>
+                    <button id="stop-all">Stop All</button>
+                </div>
+            </div>
+            
+            <!-- Preset Atmospheres -->
+            <div class="control-section presets">
+                <h4>Atmosphere Presets</h4>
+                <div class="preset-buttons">
+                    <button data-preset="default">Default</button>
+                    <button data-preset="sunset">Sunset</button>
+                    <button data-preset="night">Night</button>
+                    <button data-preset="foggy">Foggy</button>
+                    <button data-preset="dystopian">Dystopian</button>
+                </div>
+            </div>
+        </div>
     </div>
     <div id="section-text-container">
         <div id="section-text">
@@ -752,6 +1093,13 @@
         let mainScene, carModel;
         let waypoints = [];
         let currentWaypointIndex = 0;
+        
+        // Animation variables
+        let mixer;
+        let mixers = [];
+        let clock = new THREE.Clock();
+        let animations = [];
+        let activeAnimations = new Map();
         let targetWaypointIndex = 1;
         let pathCurve;
         let pathProgress = 0;
@@ -860,18 +1208,25 @@
             // Create camera with wider field of view
             camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
             
-            // Create renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            // Create renderer with improved settings for texture quality
+            renderer = new THREE.WebGLRenderer({ 
+                antialias: true,
+                powerPreference: 'high-performance',
+                precision: 'highp'
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Better shadow quality
+            renderer.outputEncoding = THREE.sRGBEncoding; // Proper color space for textures
+            renderer.gammaFactor = 2.2; // Standard gamma correction
             document.getElementById('scene-container').appendChild(renderer.domElement);
             
-            // Add lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            // Add lights with reduced intensity to prevent overexposure
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Reduced from 0.5 to 0.2
             scene.add(ambientLight);
             
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5); // Reduced from 1.0 to 0.5
             directionalLight.position.set(10, 20, 10);
             directionalLight.castShadow = true;
             directionalLight.shadow.mapSize.width = 2048;
@@ -918,38 +1273,180 @@
             
             loadingManager.onError = function(url) {
                 console.error('Error loading', url);
-                document.getElementById('loading-text').innerHTML = 'Error loading resources. Please refresh.';
+                const loadingStatus = document.getElementById('loading-status');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = 'Error loading resources. Please refresh.';
+                }
             };
             
+            // Create texture loader with same loading manager
+            const textureLoader = new THREE.TextureLoader(loadingManager);
+            
+            // Create GLTF loader with improved settings
             const gltfLoader = new THREE.GLTFLoader(loadingManager);
             
-            // Load main scene (IslandGerrit.glb)
-            gltfLoader.load('./models/IslandGerrit.glb', (gltf) => {
+            // Set DRACO decoder path if needed (uncomment if models use DRACO compression)
+            // THREE.DRACOLoader.setDecoderPath('./js/libs/draco/');
+            // gltfLoader.setDRACOLoader(new THREE.DRACOLoader());
+            
+            // Load the island model directly
+            gltfLoader.load('./models/Safespacecopy.glb', (gltf) => {
                 mainScene = gltf.scene;
                 
-                // Enable shadows for scene objects
+                // Enable shadows and improve material settings for scene objects
                 mainScene.traverse((node) => {
                     if (node.isMesh) {
                         node.castShadow = true;
                         node.receiveShadow = true;
+                        
+                        // Fix material settings if needed
+                        if (node.material) {
+                            // Ensure proper texture encoding
+                            if (node.material.map) node.material.map.encoding = THREE.sRGBEncoding;
+                            if (node.material.emissiveMap) node.material.emissiveMap.encoding = THREE.sRGBEncoding;
+                            
+                            // Improve material quality
+                            node.material.side = THREE.DoubleSide; // Render both sides
+                            node.material.needsUpdate = true; // Force material update
+                        }
                     }
                 });
                 
                 scene.add(mainScene);
-                console.log('Main scene loaded');
+                console.log('Main scene loaded successfully');
+                
+                // DETAILED ANIMATION DEBUGGING
+                console.log('===== DETAILED GLB ANIMATION DEBUGGING =====');
+                console.log('Complete gltf object:', gltf);
+                
+                // Extract animations from the model
+                if (gltf.animations && gltf.animations.length > 0) {
+                    console.log(`Found ${gltf.animations.length} animations in island model`);
+                    
+                    // Create a mixer for this model
+                    const islandMixer = new THREE.AnimationMixer(mainScene);
+                    mixers.push(islandMixer);
+                    
+                    // Process each animation
+                    gltf.animations.forEach((clip, index) => {
+                        console.log(`Animation ${index}: ${clip.name}`);
+                        console.log('Animation clip details:', {
+                            duration: clip.duration,
+                            tracks: clip.tracks.map(track => ({
+                                name: track.name,
+                                type: track.ValueTypeName,
+                                times: Array.from(track.times),
+                                values: Array.from(track.values)
+                            }))
+                        });
+                        
+                        // Check for airbus320action specifically
+                        if (clip.name.toLowerCase().includes('airbus') || 
+                            clip.name.toLowerCase().includes('320')) {
+                            console.log('FOUND AIRBUS ANIMATION!');
+                            console.log('Full airbus animation details:', clip);
+                        }
+                        
+                        // Store animation data
+                        animations.push({
+                            id: `island-anim-${index}`,
+                            name: clip.name || `Island Animation ${index + 1}`,
+                            clip: clip,
+                            mixer: islandMixer,
+                            model: 'island'
+                        });
+                        
+                        // Auto-play the airbus animation if found
+                        if (clip.name.toLowerCase().includes('airbus') || 
+                            clip.name.toLowerCase().includes('320')) {
+                            setTimeout(() => {
+                                playAnimation(`island-anim-${index}`);
+                                console.log(`Auto-playing airbus animation: ${clip.name}`);
+                            }, 1000);
+                        }
+                    });
+                    
+                    // Update the animation list in the UI
+                    updateAnimationList();
+                } else {
+                    console.log('No animations found in island model');
+                    
+                    // Try to find animated objects within the model
+                    console.log('Searching for animated objects within the model...');
+                    let foundAnimatedObjects = false;
+                    
+                    // Log all object names in the scene for debugging
+                    console.log('All objects in the scene:');
+                    mainScene.traverse((node) => {
+                        if (node.name) {
+                            console.log(`- ${node.name} (type: ${node.type})`);
+                        }
+                    });
+                    
+                    // Look for specific objects like airbus
+                    mainScene.traverse((node) => {
+                        // Look for objects with names that might indicate animation
+                        if (node.name && (node.name.toLowerCase().includes('plane') || 
+                                          node.name.toLowerCase().includes('fly') || 
+                                          node.name.toLowerCase().includes('anim') ||
+                                          node.name.toLowerCase().includes('airbus') ||
+                                          node.name.toLowerCase().includes('320'))) {
+                            console.log(`Found potential animated object: ${node.name}`);
+                            console.log('Object details:', {
+                                position: node.position,
+                                rotation: node.rotation,
+                                scale: node.scale,
+                                visible: node.visible,
+                                type: node.type,
+                                children: node.children ? node.children.length : 0
+                            });
+                            foundAnimatedObjects = true;
+                            
+                            // Create a custom animation for this object
+                            createCustomAnimation(node);
+                        }
+                    });
+                    
+                    if (!foundAnimatedObjects) {
+                        console.log('No animated objects found in the model');
+                    }
+                }
                 
                 // Extract waypoints from the scene
                 extractWaypoints(gltf);
+            }, 
+            // Progress callback
+            (xhr) => {
+                console.log(`Island model: ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
+            },
+            // Error callback 
+            (error) => {
+                console.error('Error loading island model:', error);
+                const loadingStatus = document.getElementById('loading-status');
+                if (loadingStatus) {
+                    loadingStatus.innerHTML = 'Error loading island model. Please refresh.';
+                }
             });
             
-            // Load car model (Car.glb)
+            // Load car model (Car.glb) with improved texture handling
             gltfLoader.load('./models/Car.glb', (gltf) => {
                 carModel = gltf.scene;
                 
-                // Enable shadows for car
+                // Enable shadows and improve material settings for car
                 carModel.traverse((node) => {
                     if (node.isMesh) {
                         node.castShadow = true;
+                        node.receiveShadow = true;
+                        
+                        // Fix material settings if needed
+                        if (node.material) {
+                            // Ensure proper texture encoding
+                            if (node.material.map) node.material.map.encoding = THREE.sRGBEncoding;
+                            if (node.material.emissiveMap) node.material.emissiveMap.encoding = THREE.sRGBEncoding;
+                            
+                            // Improve material quality
+                            node.material.needsUpdate = true; // Force material update
+                        }
                     }
                 });
                 
@@ -957,12 +1454,46 @@
                 carModel.scale.set(0.28125, 0.28125, 0.28125); // 28.125% of original size
                 
                 scene.add(carModel);
-                console.log('Car model loaded');
+                console.log('Car model loaded with improved textures');
+                
+                // Extract animations from the car model
+                if (gltf.animations && gltf.animations.length > 0) {
+                    console.log(`Found ${gltf.animations.length} animations in car model`);
+                    
+                    // Create a mixer for the car model
+                    const carMixer = new THREE.AnimationMixer(carModel);
+                    mixers.push(carMixer);
+                    
+                    // Process each animation
+                    gltf.animations.forEach((clip, index) => {
+                        // Store animation data
+                        animations.push({
+                            id: `car-anim-${index}`,
+                            name: clip.name || `Car Animation ${index + 1}`,
+                            clip: clip,
+                            mixer: carMixer,
+                            model: 'car'
+                        });
+                    });
+                    
+                    // Update the animation list in the UI
+                    updateAnimationList();
+                } else {
+                    console.log('No animations found in car model');
+                }
                 
                 // Position car at first waypoint if waypoints are already loaded
                 if (waypoints.length > 0) {
                     positionCarAtWaypoint(0);
                 }
+            }, 
+            // Progress callback
+            (xhr) => {
+                console.log(`Car model: ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded`);
+            }, 
+            // Error callback
+            (error) => {
+                console.error('Error loading car model:', error);
             });
         }
         
@@ -1415,7 +1946,310 @@
             // Update car movement based on key states
             updateCarMovement();
             
+            // Update animations
+            const delta = clock.getDelta();
+            mixers.forEach(mixer => mixer.update(delta));
+            
             renderer.render(scene, camera);
+        }
+        
+        // Update the animation list in the UI
+        function updateAnimationList() {
+            const animationList = document.getElementById('animation-list');
+            if (!animationList) return;
+            
+            if (animations.length === 0) {
+                animationList.innerHTML = '<p>No animations found in models</p>';
+                return;
+            }
+            
+            // Clear the list
+            animationList.innerHTML = '';
+            
+            // Group animations by model
+            const groupedAnimations = {};
+            animations.forEach(anim => {
+                if (!groupedAnimations[anim.model]) {
+                    groupedAnimations[anim.model] = [];
+                }
+                groupedAnimations[anim.model].push(anim);
+            });
+            
+            // Create UI elements for each animation group
+            for (const [model, anims] of Object.entries(groupedAnimations)) {
+                const modelHeader = document.createElement('h5');
+                modelHeader.textContent = model.charAt(0).toUpperCase() + model.slice(1) + ' Animations';
+                animationList.appendChild(modelHeader);
+                
+                const animGroup = document.createElement('div');
+                animGroup.className = 'animation-group';
+                
+                anims.forEach(anim => {
+                    const animRow = document.createElement('div');
+                    animRow.className = 'animation-row';
+                    
+                    const animName = document.createElement('span');
+                    animName.className = 'animation-name';
+                    animName.textContent = anim.name;
+                    
+                    const animControls = document.createElement('div');
+                    animControls.className = 'animation-controls';
+                    
+                    const playBtn = document.createElement('button');
+                    playBtn.className = 'play-btn';
+                    playBtn.textContent = 'Play';
+                    playBtn.dataset.animId = anim.id;
+                    playBtn.addEventListener('click', () => playAnimation(anim.id));
+                    
+                    const stopBtn = document.createElement('button');
+                    stopBtn.className = 'stop-btn';
+                    stopBtn.textContent = 'Stop';
+                    stopBtn.dataset.animId = anim.id;
+                    stopBtn.addEventListener('click', () => stopAnimation(anim.id));
+                    
+                    animControls.appendChild(playBtn);
+                    animControls.appendChild(stopBtn);
+                    
+                    animRow.appendChild(animName);
+                    animRow.appendChild(animControls);
+                    
+                    animGroup.appendChild(animRow);
+                });
+                
+                animationList.appendChild(animGroup);
+            }
+            
+            // Setup play all and stop all buttons
+            document.getElementById('play-all').addEventListener('click', playAllAnimations);
+            document.getElementById('stop-all').addEventListener('click', stopAllAnimations);
+            
+            // Setup animation speed control
+            document.getElementById('animation-speed').addEventListener('input', updateAnimationSpeed);
+        }
+        
+        // Play a specific animation
+        function playAnimation(animId) {
+            const anim = animations.find(a => a.id === animId);
+            if (!anim) return;
+            
+            // Stop any existing animation action for this animation
+            if (activeAnimations.has(animId)) {
+                activeAnimations.get(animId).stop();
+            }
+            
+            // Create and play the animation action
+            const action = anim.mixer.clipAction(anim.clip);
+            action.reset();
+            action.play();
+            
+            // Store the active animation
+            activeAnimations.set(animId, action);
+            
+            // Update button states
+            updateAnimationButtonStates();
+        }
+        
+        // Stop a specific animation
+        function stopAnimation(animId) {
+            if (activeAnimations.has(animId)) {
+                activeAnimations.get(animId).stop();
+                activeAnimations.delete(animId);
+            }
+            
+            // Update button states
+            updateAnimationButtonStates();
+        }
+        
+        // Play all animations
+        function playAllAnimations() {
+            animations.forEach(anim => {
+                playAnimation(anim.id);
+            });
+        }
+        
+        // Stop all animations
+        function stopAllAnimations() {
+            const animIds = [...activeAnimations.keys()];
+            animIds.forEach(id => stopAnimation(id));
+        }
+        
+        // Update animation speed
+        function updateAnimationSpeed(e) {
+            const speed = parseFloat(e.target.value);
+            activeAnimations.forEach(action => {
+                action.timeScale = speed;
+            });
+        }
+        
+        // Update animation button states
+        function updateAnimationButtonStates() {
+            document.querySelectorAll('.play-btn').forEach(btn => {
+                const animId = btn.dataset.animId;
+                if (activeAnimations.has(animId)) {
+                    btn.disabled = true;
+                    btn.classList.add('active');
+                } else {
+                    btn.disabled = false;
+                    btn.classList.remove('active');
+                }
+            });
+            
+            document.querySelectorAll('.stop-btn').forEach(btn => {
+                const animId = btn.dataset.animId;
+                if (activeAnimations.has(animId)) {
+                    btn.disabled = false;
+                } else {
+                    btn.disabled = true;
+                }
+            });
+        }
+        
+        // Create custom animation for objects like the plane
+        function createCustomAnimation(object) {
+            // Create a mixer for this specific object
+            const objectMixer = new THREE.AnimationMixer(object);
+            mixers.push(objectMixer);
+            
+            // Get the object name for better identification
+            const objectName = object.name.replace(/\d+/g, '').trim() || 'Object';
+            
+            // Create different types of animations based on object name
+            if (objectName.toLowerCase().includes('plane')) {
+                // Create a wiggle animation for the plane
+                createPlaneAnimation(object, objectMixer, objectName);
+            } else {
+                // Create a generic animation
+                createGenericAnimation(object, objectMixer, objectName);
+            }
+        }
+        
+        // Create a plane-specific wiggle animation
+        function createPlaneAnimation(plane, mixer, name) {
+            // Store the original position and rotation
+            const originalPosition = plane.position.clone();
+            const originalRotation = plane.rotation.clone();
+            
+            // Create keyframe tracks for position and rotation
+            const times = [0, 0.5, 1, 1.5, 2];
+            
+            // Position keyframes - slight up and down movement
+            const positionValues = [
+                originalPosition.x, originalPosition.y, originalPosition.z,
+                originalPosition.x, originalPosition.y + 0.2, originalPosition.z,
+                originalPosition.x, originalPosition.y, originalPosition.z,
+                originalPosition.x, originalPosition.y - 0.1, originalPosition.z,
+                originalPosition.x, originalPosition.y, originalPosition.z
+            ];
+            
+            // Rotation keyframes - slight tilting
+            const rotationValues = [
+                originalRotation.x, originalRotation.y, originalRotation.z,
+                originalRotation.x + 0.05, originalRotation.y, originalRotation.z + 0.05,
+                originalRotation.x, originalRotation.y, originalRotation.z,
+                originalRotation.x - 0.05, originalRotation.y, originalRotation.z - 0.05,
+                originalRotation.x, originalRotation.y, originalRotation.z
+            ];
+            
+            // Create the keyframe tracks
+            const positionTrack = new THREE.KeyframeTrack(
+                `${plane.name}.position`, 
+                times, 
+                positionValues
+            );
+            
+            const rotationTrack = new THREE.KeyframeTrack(
+                `${plane.name}.rotation`, 
+                times, 
+                rotationValues
+            );
+            
+            // Create the animation clip
+            const clip = new THREE.AnimationClip(`${name} Wiggle`, 2, [positionTrack, rotationTrack]);
+            
+            // Add to animations list
+            const animId = `custom-plane-${animations.length}`;
+            animations.push({
+                id: animId,
+                name: `${name} Wiggle`,
+                clip: clip,
+                mixer: mixer,
+                model: 'custom'
+            });
+            
+            // Auto-play the plane animation
+            setTimeout(() => {
+                playAnimation(animId);
+                console.log(`Auto-playing custom plane animation: ${name} Wiggle`);
+            }, 1000);
+            
+            // Update the animation list in the UI
+            updateAnimationList();
+        }
+        
+        // Create a generic animation for other objects
+        function createGenericAnimation(object, mixer, name) {
+            // Store the original position and rotation
+            const originalPosition = object.position.clone();
+            const originalRotation = object.rotation.clone();
+            const originalScale = object.scale.clone();
+            
+            // Create keyframe tracks
+            const times = [0, 1, 2];
+            
+            // Position keyframes
+            const positionValues = [
+                originalPosition.x, originalPosition.y, originalPosition.z,
+                originalPosition.x, originalPosition.y + 0.1, originalPosition.z,
+                originalPosition.x, originalPosition.y, originalPosition.z
+            ];
+            
+            // Rotation keyframes
+            const rotationValues = [
+                originalRotation.x, originalRotation.y, originalRotation.z,
+                originalRotation.x, originalRotation.y + 0.1, originalRotation.z,
+                originalRotation.x, originalRotation.y, originalRotation.z
+            ];
+            
+            // Scale keyframes
+            const scaleValues = [
+                originalScale.x, originalScale.y, originalScale.z,
+                originalScale.x * 1.05, originalScale.y * 1.05, originalScale.z * 1.05,
+                originalScale.x, originalScale.y, originalScale.z
+            ];
+            
+            // Create the keyframe tracks
+            const positionTrack = new THREE.KeyframeTrack(
+                `${object.name}.position`, 
+                times, 
+                positionValues
+            );
+            
+            const rotationTrack = new THREE.KeyframeTrack(
+                `${object.name}.rotation`, 
+                times, 
+                rotationValues
+            );
+            
+            const scaleTrack = new THREE.KeyframeTrack(
+                `${object.name}.scale`, 
+                times, 
+                scaleValues
+            );
+            
+            // Create the animation clip
+            const clip = new THREE.AnimationClip(`${name} Animation`, 2, [positionTrack, rotationTrack, scaleTrack]);
+            
+            // Add to animations list
+            animations.push({
+                id: `custom-${animations.length}`,
+                name: `${name} Animation`,
+                clip: clip,
+                mixer: mixer,
+                model: 'custom'
+            });
+            
+            // Update the animation list in the UI
+            updateAnimationList();
         }
         
         // Update car movement with smooth acceleration/deceleration
@@ -1480,6 +2314,24 @@
             }
         }
         
+        // Function called when environment is fully loaded
+        function onEnvironmentLoaded() {
+            console.log('Environment fully loaded');
+            
+            // Enable the enter button
+            const enterButton = document.getElementById('enter-button');
+            if (enterButton) {
+                enterButton.classList.add('ready');
+                enterButton.innerHTML = '<span>Enter Experience</span>';
+            }
+            
+            // Update loading status
+            const loadingStatus = document.getElementById('loading-status');
+            if (loadingStatus) {
+                loadingStatus.innerHTML = 'Ready to explore';
+            }
+        }
+        
         // Function to start the 3D experience
         function startExperience() {
             // Hide the landing page
@@ -1508,12 +2360,6 @@
             
             // Start the animation
             animate();
-        }
-        
-        // Function called when environment is fully loaded
-        function onEnvironmentLoaded() {
-            console.log('Environment fully loaded and ready');
-            // The button will be updated by the updateLoadingProgress function
         }
         
         // Initialize the scene
@@ -1586,6 +2432,356 @@
         
         // Initialize navbar functionality
         setupNavbar();
+        
+        // Environment Controls Functionality
+        let ambientLight, directionalLight;
+        let originalMaterials = new Map(); // Store original materials for reset
+        
+        function setupEnvironmentControls() {
+            // Get references to lights
+            ambientLight = scene.children.find(child => child instanceof THREE.AmbientLight);
+            directionalLight = scene.children.find(child => child instanceof THREE.DirectionalLight);
+            
+            // Toggle controls panel
+            const controlsPanel = document.getElementById('environment-controls');
+            const toggleButton = document.getElementById('toggle-controls');
+            
+            toggleButton.addEventListener('click', () => {
+                controlsPanel.classList.toggle('collapsed');
+            });
+            
+            // Initialize with collapsed state on mobile
+            if (window.innerWidth < 768) {
+                controlsPanel.classList.add('collapsed');
+            }
+            
+            // Setup range input value displays
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                const valueDisplay = slider.nextElementSibling;
+                if (valueDisplay && valueDisplay.classList.contains('value-display')) {
+                    valueDisplay.textContent = slider.value;
+                    
+                    slider.addEventListener('input', () => {
+                        valueDisplay.textContent = slider.value;
+                    });
+                }
+            });
+            
+            // Lighting Controls
+            document.getElementById('ambient-intensity').addEventListener('input', (e) => {
+                if (ambientLight) {
+                    ambientLight.intensity = parseFloat(e.target.value);
+                }
+            });
+            
+            document.getElementById('directional-intensity').addEventListener('input', (e) => {
+                if (directionalLight) {
+                    directionalLight.intensity = parseFloat(e.target.value);
+                }
+            });
+            
+            document.getElementById('light-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                if (ambientLight) ambientLight.color = color;
+                if (directionalLight) directionalLight.color = color;
+            });
+            
+            // Environment Controls
+            document.getElementById('fog-density').addEventListener('input', (e) => {
+                if (scene.fog) {
+                    scene.fog.density = parseFloat(e.target.value);
+                }
+            });
+            
+            document.getElementById('sky-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                scene.background = color;
+                if (scene.fog) {
+                    scene.fog.color = color;
+                }
+            });
+            
+            // Store original materials when models are loaded
+            function storeOriginalMaterials() {
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            // Store a clone of the original material
+                            originalMaterials.set(node.uuid, node.material.clone());
+                        }
+                    });
+                }
+                
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            originalMaterials.set(node.uuid, node.material.clone());
+                        }
+                    });
+                }
+            }
+            
+            // Call once models are loaded
+            if (mainScene && carModel) {
+                storeOriginalMaterials();
+            } else {
+                // Set up a check to store materials once models are loaded
+                const checkInterval = setInterval(() => {
+                    if (mainScene && carModel) {
+                        storeOriginalMaterials();
+                        clearInterval(checkInterval);
+                    }
+                }, 1000);
+            }
+            
+            // Island Model Controls
+            document.getElementById('island-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            // Apply tint by multiplying with the base color
+                            if (node.material.color) {
+                                node.material.color = color;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('island-metalness').addEventListener('input', (e) => {
+                const metalness = parseFloat(e.target.value);
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.metalness !== undefined) {
+                            node.material.metalness = metalness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('island-roughness').addEventListener('input', (e) => {
+                const roughness = parseFloat(e.target.value);
+                if (mainScene) {
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.roughness !== undefined) {
+                            node.material.roughness = roughness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            // Car Model Controls
+            document.getElementById('car-color').addEventListener('input', (e) => {
+                const color = new THREE.Color(e.target.value);
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            if (node.material.color) {
+                                node.material.color = color;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('car-metalness').addEventListener('input', (e) => {
+                const metalness = parseFloat(e.target.value);
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.metalness !== undefined) {
+                            node.material.metalness = metalness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            document.getElementById('car-roughness').addEventListener('input', (e) => {
+                const roughness = parseFloat(e.target.value);
+                if (carModel) {
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material && node.material.roughness !== undefined) {
+                            node.material.roughness = roughness;
+                            node.material.needsUpdate = true;
+                        }
+                    });
+                }
+            });
+            
+            // Preset Atmospheres
+            const presets = {
+                default: {
+                    ambientIntensity: 0.2,
+                    directionalIntensity: 0.5,
+                    lightColor: '#ffffff',
+                    skyColor: '#87CEEB',
+                    fogDensity: 0.01,
+                    islandColor: '#ffffff',
+                    islandMetalness: 0.1,
+                    islandRoughness: 0.5,
+                    carColor: '#ff4400',
+                    carMetalness: 0.8,
+                    carRoughness: 0.2
+                },
+                sunset: {
+                    ambientIntensity: 0.3,
+                    directionalIntensity: 0.7,
+                    lightColor: '#ff7e00',
+                    skyColor: '#ff5500',
+                    fogDensity: 0.015,
+                    islandColor: '#ffaa77',
+                    islandMetalness: 0.1,
+                    islandRoughness: 0.7,
+                    carColor: '#ff4400',
+                    carMetalness: 0.9,
+                    carRoughness: 0.1
+                },
+                night: {
+                    ambientIntensity: 0.1,
+                    directionalIntensity: 0.2,
+                    lightColor: '#0077ff',
+                    skyColor: '#001133',
+                    fogDensity: 0.02,
+                    islandColor: '#0055aa',
+                    islandMetalness: 0.3,
+                    islandRoughness: 0.8,
+                    carColor: '#3366ff',
+                    carMetalness: 1.0,
+                    carRoughness: 0.1
+                },
+                foggy: {
+                    ambientIntensity: 0.4,
+                    directionalIntensity: 0.3,
+                    lightColor: '#aabbcc',
+                    skyColor: '#aabbcc',
+                    fogDensity: 0.04,
+                    islandColor: '#cccccc',
+                    islandMetalness: 0.05,
+                    islandRoughness: 0.9,
+                    carColor: '#dddddd',
+                    carMetalness: 0.2,
+                    carRoughness: 0.8
+                },
+                dystopian: {
+                    ambientIntensity: 0.15,
+                    directionalIntensity: 0.4,
+                    lightColor: '#ff3300',
+                    skyColor: '#330000',
+                    fogDensity: 0.025,
+                    islandColor: '#661100',
+                    islandMetalness: 0.4,
+                    islandRoughness: 0.7,
+                    carColor: '#990000',
+                    carMetalness: 0.6,
+                    carRoughness: 0.5
+                }
+            };
+            
+            document.querySelectorAll('.preset-buttons button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const presetName = button.dataset.preset;
+                    if (presets[presetName]) {
+                        applyPreset(presets[presetName]);
+                    }
+                });
+            });
+            
+            function applyPreset(preset) {
+                // Update sliders and colors
+                document.getElementById('ambient-intensity').value = preset.ambientIntensity;
+                document.getElementById('ambient-intensity').nextElementSibling.textContent = preset.ambientIntensity;
+                
+                document.getElementById('directional-intensity').value = preset.directionalIntensity;
+                document.getElementById('directional-intensity').nextElementSibling.textContent = preset.directionalIntensity;
+                
+                document.getElementById('light-color').value = preset.lightColor;
+                
+                document.getElementById('fog-density').value = preset.fogDensity;
+                document.getElementById('fog-density').nextElementSibling.textContent = preset.fogDensity;
+                
+                document.getElementById('sky-color').value = preset.skyColor;
+                
+                document.getElementById('island-color').value = preset.islandColor;
+                
+                document.getElementById('island-metalness').value = preset.islandMetalness;
+                document.getElementById('island-metalness').nextElementSibling.textContent = preset.islandMetalness;
+                
+                document.getElementById('island-roughness').value = preset.islandRoughness;
+                document.getElementById('island-roughness').nextElementSibling.textContent = preset.islandRoughness;
+                
+                document.getElementById('car-color').value = preset.carColor;
+                
+                document.getElementById('car-metalness').value = preset.carMetalness;
+                document.getElementById('car-metalness').nextElementSibling.textContent = preset.carMetalness;
+                
+                document.getElementById('car-roughness').value = preset.carRoughness;
+                document.getElementById('car-roughness').nextElementSibling.textContent = preset.carRoughness;
+                
+                // Apply changes to scene
+                if (ambientLight) {
+                    ambientLight.intensity = preset.ambientIntensity;
+                    ambientLight.color = new THREE.Color(preset.lightColor);
+                }
+                
+                if (directionalLight) {
+                    directionalLight.intensity = preset.directionalIntensity;
+                    directionalLight.color = new THREE.Color(preset.lightColor);
+                }
+                
+                const skyColor = new THREE.Color(preset.skyColor);
+                scene.background = skyColor;
+                if (scene.fog) {
+                    scene.fog.color = skyColor;
+                    scene.fog.density = preset.fogDensity;
+                }
+                
+                if (mainScene) {
+                    const islandColor = new THREE.Color(preset.islandColor);
+                    mainScene.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            if (node.material.color) {
+                                node.material.color = islandColor;
+                            }
+                            if (node.material.metalness !== undefined) {
+                                node.material.metalness = preset.islandMetalness;
+                                node.material.roughness = preset.islandRoughness;
+                                node.material.needsUpdate = true;
+                            }
+                        }
+                    });
+                }
+                
+                if (carModel) {
+                    const carColor = new THREE.Color(preset.carColor);
+                    carModel.traverse((node) => {
+                        if (node.isMesh && node.material) {
+                            if (node.material.color) {
+                                node.material.color = carColor;
+                            }
+                            if (node.material.metalness !== undefined) {
+                                node.material.metalness = preset.carMetalness;
+                                node.material.roughness = preset.carRoughness;
+                                node.material.needsUpdate = true;
+                            }
+                        }
+                    });
+                }
+            }
+        }
+        
+        // Initialize environment controls after scene is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for models to load before initializing controls
+            const checkInterval = setInterval(() => {
+                if (scene && mainScene && carModel) {
+                    setupEnvironmentControls();
+                    clearInterval(checkInterval);
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
