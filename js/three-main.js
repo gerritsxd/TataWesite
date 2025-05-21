@@ -48,12 +48,56 @@ let currentPanX = 0, currentPanY = 0;
 
 let onModelsLoadedCallback = null;
 
+// Helper function to create a sky gradient texture
+function createSkyGradientTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 2; // Small width is fine for a vertical gradient
+    canvas.height = 256; // Taller for smoother gradient
+
+    const context = canvas.getContext('2d');
+    const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+    
+    // Example gradient: Light blue at top, fading to a slightly darker/hazier blue
+    gradient.addColorStop(0, '#87CEEB'); // Light sky blue (top)
+    gradient.addColorStop(0.7, '#ADD8E6'); // Lighter blue (middle)
+    gradient.addColorStop(1, '#B0E0E6'); // Powder blue / hazy (bottom) - this will be fog color too
+
+    context.fillStyle = gradient;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.needsUpdate = true;
+    return texture;
+}
+
+// Helper function to create a horizon plane
+function createHorizonPlane() {
+    const horizonSize = 2000; // Make it very large
+    const planeGeometry = new THREE.PlaneGeometry(horizonSize, horizonSize);
+    // Color should match the bottom of the sky gradient for a seamless blend
+    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xB0E0E6, side: THREE.DoubleSide }); 
+    
+    const horizonPlane = new THREE.Mesh(planeGeometry, planeMaterial);
+    horizonPlane.rotation.x = -Math.PI / 2; // Rotate to be horizontal
+    horizonPlane.position.y = -10; // Position it below the main content, adjust as needed
+                                   // This value might need tweaking based on your island's y-position and scale.
+    horizonPlane.renderOrder = -1; // Render it first to avoid z-fighting with transparent objects if any
+    return horizonPlane;
+}
+
 export function initThreeScene(callback) {
     onModelsLoadedCallback = callback;
     // Create scene
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky blue background
-    scene.fog = new THREE.FogExp2(0x87CEEB, 0.01);
+    // scene.background = new THREE.Color(0x87CEEB); // Old sky blue background
+    scene.background = createSkyGradientTexture(); // New gradient background
+    
+    // Adjust fog to match the bottom of the gradient
+    scene.fog = new THREE.FogExp2(0xB0E0E6, 0.01); // Fog color matches gradient bottom
+
+    // Add horizon plane
+    const horizon = createHorizonPlane();
+    scene.add(horizon);
 
     // Create camera
     camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);

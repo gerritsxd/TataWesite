@@ -373,90 +373,6 @@ body {
     padding-bottom: 0;
 }
 
-#section-text.expanded { /* When the main container is expanded */
-    /* height: auto; /* Not needed if max-height is set on content */
-    /* max-height: calc(100vh - 150px); /* This might be too large, let content drive it */
-}
-
-
-.section-expand-button { /* This button is not in the current dynamic HTML, but styles are kept */
-    background-color: var(--orange);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    display: block;
-    margin: 16px auto;
-    width: 80%;
-    transition: all 0.2s ease;
-    text-align: center;
-    text-decoration: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.section-expand-button:hover {
-    background-color: #ff8c3a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-}
-
-.section-media {
-    margin: 20px 0;
-    border-radius: 6px;
-    overflow: hidden;
-    background-color: rgba(5, 20, 40, 0.3);
-    min-height: 180px; /* Use min-height for flexibility */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.section-media-icon {
-    width: 80px;
-    height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 15px;
-}
-
-.section-media-icon svg { /* Copied from .section-icon svg */
-    width: 60px; /* Larger for media display */
-    height: 60px; /* Larger for media display */
-    fill: var(--blue);
-    stroke: var(--light-text);
-    stroke-width: 0.5;
-    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
-}
-
-.section-media-title {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--blue);
-    text-align: center;
-    padding: 0 10px; /* Add some padding */
-}
-
-
-.section-media img {
-    width: 100%;
-    height: auto; /* Maintain aspect ratio */
-    display: block;
-}
-
-.section-media video {
-    width: 100%;
-    height: auto; /* Maintain aspect ratio */
-    display: block;
-}
-
 /* Landing Page Styles */
 #landing-page {
     position: fixed;
@@ -931,3 +847,410 @@ body {
 }
 
 /* Removed Environment Controls CSS as per instruction */
+
+/* General Static Page Styles */
+.page-container {
+    padding: 80px 40px 40px; /* Top padding to avoid overlap with fixed nav */
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow-y: auto; /* Allow scrolling for page content */
+    height: 100vh; /* Make page container scrollable within viewport */
+    color: var(--light-text);
+}
+
+.page-header h1 {
+    color: var(--orange);
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    border-bottom: 2px solid var(--blue);
+    padding-bottom: 10px;
+}
+
+.page-content section {
+    margin-bottom: 40px;
+}
+
+.page-content h2 {
+    color: var(--blue);
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+}
+
+.page-content p,
+.page-content li {
+    line-height: 1.7;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+}
+
+.page-content ul {
+    list-style-position: inside;
+    padding-left: 0; /* Remove default padding, use margin on li if needed */
+}
+
+.page-content a {
+    color: var(--orange);
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.page-content a:hover {
+    color: var(--blue);
+    text-decoration: underline;
+}
+
+.page-footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--semi-transparent);
+    margin-top: 40px;
+}
+
+/* About Page - Team Section Styles */
+#team-section h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+#team-section > p {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+}
+
+.team-group-photo {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.team-group-photo img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    border: 3px solid var(--blue);
+}
+
+.team-members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.team-member-profile {
+    background-color: var(--semi-transparent);
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.team-member-profile:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.team-member-profile img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+    border: 3px solid var(--orange);
+    object-fit: cover;
+}
+
+.team-member-profile h3 {
+    color: var(--orange);
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.team-member-profile .role {
+    font-weight: 500;
+    color: var(--blue);
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+
+.team-member-profile .bio {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+.team-member-profile .email a {
+    font-size: 0.9rem;
+    color: var(--green);
+}
+
+.team-member-profile .email a:hover {
+    color: var(--orange);
+}
+
+/* Contact Page - MNH Info Styles */
+#contact-info-mnh .mnh-contact-details {
+    background-color: var(--semi-transparent);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#contact-info-mnh h3 {
+    color: var(--orange);
+    font-size: 1.6rem;
+    margin-bottom: 15px;
+}
+
+#contact-info-mnh h4 {
+    color: var(--blue);
+    font-size: 1.3rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#contact-info-mnh p,
+#contact-info-mnh .availability,
+#contact-info-mnh .note {
+    margin-bottom: 12px;
+    font-size: 1rem;
+}
+
+#contact-info-mnh .availability,
+#contact-info-mnh .note {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+#contact-info-mnh strong {
+    font-weight: 600;
+}
+
+#contact-info-mnh .social-media-links {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 10px;
+}
+
+#contact-info-mnh .social-media-links li {
+    margin-bottom: 8px;
+}
+
+#contact-info-mnh .social-media-links a {
+    color: var(--green);
+}
+
+#contact-info-mnh .social-media-links a:hover {
+    color: var(--orange);
+}
+
+#tata-steel-contact ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#tata-steel-contact li {
+    margin-bottom: 10px;
+}
+
+/* Ensure Side Nav links also get active styling */
+.side-nav .nav-links a.active {
+    color: var(--orange);
+    font-weight: 700;
+    border-left: 3px solid var(--orange);
+    padding-left: 12px; /* Adjust as needed */
+}
+
+/* Ensure body allows scrolling for static pages */
+html.static-page-scroll body {
+    overflow: auto;
+}
+
+/* --- What You Can Do Page --- */
+.action-intro {
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 1.1rem;
+    color: var(--light-text);
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 30px;
+    padding: 20px;
+    max-width: 900px; /* Max width for the grid */
+    margin: 0 auto; /* Center the grid */
+}
+
+.action-box {
+    background-color: var(--semi-transparent); /* Changed from var(--green) */
+    color: var(--light-text); /* Changed from var(--dark-bg) */
+    text-decoration: none;
+    padding: 30px 20px; /* Adjusted padding */
+    border-radius: 10px; /* Slightly adjusted border-radius */
+    text-align: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.5rem; /* Adjusted font size */
+    font-weight: 600; /* Adjusted font weight */
+    border: 1px solid var(--orange); /* Changed to orange accent border */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px; /* Adjusted min-height */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3); /* Adjusted shadow */
+    transition: all 0.25s ease-in-out;
+}
+
+.action-box:hover,
+.action-box:focus {
+    background-color: rgba(5, 20, 40, 0.95); /* Slightly less transparent dark background */
+    color: var(--light-text);
+    border-color: var(--blue); /* Change border to blue on hover/focus for variety */
+    transform: translateY(-5px); /* Adjusted transform */
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+    outline: none; /* Remove focus outline if custom styles are sufficient */
+}
+
+.action-box span {
+    display: inline-block;
+}
+
+/* Responsive adjustments for action grid if needed */
+@media (max-width: 768px) {
+    .action-grid {
+        grid-template-columns: 1fr; /* Stack boxes on smaller screens */
+        gap: 20px;
+    }
+    .action-box {
+        font-size: 1.5rem;
+        padding: 30px 15px;
+        min-height: 120px;
+    }
+     .mnh-contact-details p, .mnh-contact-details ul {
+        font-size: 0.9rem;
+    }
+    .side-nav .nav-header h2 {
+        font-size: 1.5rem;
+    }
+    .side-nav .nav-link {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+    .text-box-expanded {
+        max-height: 35vh; /* Limit height more on mobile */
+        font-size: 0.85rem;
+    }
+
+    .text-box-expanded h2 {
+        font-size: 1.1rem;
+    }
+}
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+    .action-box {
+        font-size: 1.3rem; /* Further adjust action box text */
+        min-height: 100px;
+    }
+     .mnh-contact-details p, .mnh-contact-details ul {
+        font-size: 0.9rem;
+    }
+    .side-nav .nav-header h2 {
+        font-size: 1.5rem;
+    }
+    .side-nav .nav-link {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+    .text-box-expanded {
+        max-height: 35vh; /* Limit height more on mobile */
+        font-size: 0.85rem;
+    }
+
+    .text-box-expanded h2 {
+        font-size: 1.1rem;
+    }
+}
+
+/* --- General Mobile Responsiveness Enhancements --- */
+
+/* Ensure side navigation doesn't cause overflow if it's wider than screen */
+@media (max-width: 768px) {
+    /* Page headers on static pages */
+    .page-header h1 {
+        font-size: 2.2rem; /* Slightly smaller header on mobile */
+    }
+
+    /* Team member profiles - already have some responsiveness */
+    .team-member-profile {
+        flex-basis: calc(100% - 20px); /* Stack them fully on smaller mobile */
+    }
+
+    /* MNH Contact Details */
+    .mnh-contact-details {
+        padding: 15px;
+    }
+    .mnh-contact-details h3, .mnh-contact-details h4 {
+        font-size: 1.3rem;
+    }
+
+    /* Ensure hamburger menu is easily clickable */
+    .hamburger-menu {
+        padding: 15px; /* Ensure enough tap area */
+        top: 15px;
+        left: 15px;
+    }
+
+     /* Adjust expanded text box size on mobile for main scene */
+    .text-box-expanded {
+        max-height: 40vh; /* Limit height more on mobile */
+        font-size: 0.9rem;
+        padding: 15px;
+    }
+
+    .text-box-expanded h2 {
+        font-size: 1.2rem;
+    }
+}
+
+/* Ensure footer is styled consistently for static pages */
+.page-footer {
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid var(--semi-transparent);
+    margin-top: 40px;
+}
+
+/* --- Orientation Prompt --- */
+#orientation-prompt {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--dark-bg); /* Using site's dark background */
+    color: var(--light-text);
+    /* display: flex;  Will be controlled by JS, default is none from inline style */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    z-index: 10000; /* Ensure it's on top of everything */
+    font-family: 'Rajdhani', sans-serif;
+    padding: 20px;
+    box-sizing: border-box;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#orientation-prompt.visible {
+    opacity: 1;
+    visibility: visible;
+    display: flex; /* Make sure flex is applied when visible */
+    flex-direction: column; /* Stack content vertically if needed */
+}
+
+#orientation-prompt p {
+    font-size: 1.3rem;
+    line-height: 1.7;
+    max-width: 80%;
+}

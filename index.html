@@ -23,6 +23,14 @@
 
     <div id="scene-container"></div>
 
+    <!-- Custom JavaScript Modules -->
+    <script src="js/app.js" type="module"></script>
+    <script src="js/orientation-handler.js" type="module"></script>
+
+    <div id="orientation-prompt" style="display:none;">
+        <p data-en="For the best experience, please rotate your device to landscape mode." data-nl="Voor de beste ervaring, draai uw apparaat naar landschapsmodus.">For the best experience, please rotate your device to landscape mode.</p>
+    </div>
+
     <!-- Left Hamburger Menu Button (for Page Navigation) -->
     <div class="hamburger-menu" id="left-nav-toggle">
         <div class="hamburger-line"></div>
@@ -127,7 +135,5 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/loaders/GLTFLoader.js"></script>
 
-    <!-- Custom JavaScript Modules -->
-    <script src="js/app.js" type="module"></script>
 </body>
 </html>
