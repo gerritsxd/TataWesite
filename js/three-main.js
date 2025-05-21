@@ -32,6 +32,15 @@ const MAX_CAMERA_PITCH = Math.PI / 6;   // Max camera look up
 const CAMERA_LERP_FACTOR = 0.1; // Smoothness for camera following car
 let cameraPitch = 0; // Current camera pitch angle
 
+// Constants for swipe detection
+const SWIPE_THRESHOLD_X = 40; // Min horizontal distance for a swipe (pixels)
+const SWIPE_THRESHOLD_Y_SINGLE_FINGER = 75; // Max vertical distance for a horizontal swipe (to distinguish from vertical scroll)
+const SWIPE_VERTICAL_THRESHOLD_FOR_ZOOM = 30; // Min vertical distance for a two-finger zoom swipe
+const SWIPE_HORIZONTAL_MAX_FOR_ZOOM = 75; // Max horizontal distance for a two-finger zoom swipe
+const SWIPE_TIME_LIMIT = 500; // Max time in ms for a swipe gesture
+const SIMULATED_KEY_PRESS_DURATION = 200; // ms for simulated key press
+const TWO_FINGER_ZOOM_SENSITIVITY_FACTOR = 0.03; // Adjust how much two-finger swipe affects zoom
+
 // Car movement physics
 const maxSpeed = 0.001; // Max speed along path
 const acceleration = 0.00002; // Acceleration rate
@@ -41,10 +50,12 @@ const deceleration = 0.00001; // Deceleration rate
 const keys = { ArrowLeft: false, ArrowRight: false };
 let currentSpeed = 0;
 
-// Mouse panning state
-let isPanning = false;
-let startPanX = 0, startPanY = 0;
-let currentPanX = 0, currentPanY = 0;
+// Touch state variables
+let touchStartX = 0, touchStartY = 0;
+let touchStartTime = 0;
+let twoFingerInitialMidY = 0;
+let twoFingerLastMidY = 0;
+let isTwoFingerActive = false;
 
 let onModelsLoadedCallback = null;
 
@@ -331,6 +342,135 @@ function updateCamera() {
     camera.up.set(0, 1, 0); // Ensure world up is maintained
 }
 
+// Unified Pan Handlers
+function setupMouseControls() {
+    const container = document.getElementById('scene-container');
+    if (!container) return;
+
+    let isMousePanning = false;
+    let mousePanStartX = 0, mousePanStartY = 0;
+    let currentMousePanX = 0, currentMousePanY = 0;
+
+    container.addEventListener('mousedown', (e) => {
+        if (e.button === 0) { // Left mouse button
+            isMousePanning = true;
+            mousePanStartX = e.clientX; 
+            mousePanStartY = e.clientY;
+            currentMousePanX = e.clientX; 
+            currentMousePanY = e.clientY;
+            container.classList.add('grabbing');
+        }
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isMousePanning) return;
+        const deltaX = e.clientX - currentMousePanX;
+        const deltaY = e.clientY - currentMousePanY;
+
+        pathProgress += deltaX * PATH_SENSITIVITY;
+        pathProgress = (pathProgress % 1 + 1) % 1;
+
+        cameraPitch -= deltaY * CAMERA_PITCH_SENSITIVITY;
+        cameraPitch = Math.max(MIN_CAMERA_PITCH, Math.min(MAX_CAMERA_PITCH, cameraPitch));
+
+        currentMousePanX = e.clientX; 
+        currentMousePanY = e.clientY;
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isMousePanning) {
+            isMousePanning = false;
+            container.classList.remove('grabbing');
+        }
+    });
+    
+    container.addEventListener('mouseleave', () => {
+        if (isMousePanning) {
+            isMousePanning = false;
+            container.classList.remove('grabbing');
+        }
+    });
+
+    // --- Touch Controls: Swipe for Arrows, Two-finger swipe for Zoom ---
+    container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+            isTwoFingerActive = false;
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+        } else if (e.touches.length === 2) {
+            isTwoFingerActive = true;
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            twoFingerInitialMidY = (touch1.clientY + touch2.clientY) / 2;
+            twoFingerLastMidY = twoFingerInitialMidY;
+            e.preventDefault(); // Prevent default actions like page zoom/scroll for two fingers
+        }
+    }, { passive: false });
+
+    container.addEventListener('touchmove', (e) => {
+        if (isTwoFingerActive && e.touches.length === 2) {
+            e.preventDefault(); // Continue to prevent default during two-finger move
+            const touch1 = e.touches[0];
+            const touch2 = e.touches[1];
+            const currentMidY = (touch1.clientY + touch2.clientY) / 2;
+            const deltaMidY = currentMidY - twoFingerLastMidY;
+
+            // Apply zoom based on deltaMidY
+            if (deltaMidY > 0) { // Swipe Down (zoom out)
+                currentCameraDistance += Math.abs(deltaMidY) * ZOOM_SENSITIVITY * TWO_FINGER_ZOOM_SENSITIVITY_FACTOR;
+            } else if (deltaMidY < 0) { // Swipe Up (zoom in)
+                currentCameraDistance -= Math.abs(deltaMidY) * ZOOM_SENSITIVITY * TWO_FINGER_ZOOM_SENSITIVITY_FACTOR;
+            }
+            currentCameraDistance = Math.max(MIN_ZOOM_DISTANCE, Math.min(MAX_ZOOM_DISTANCE, currentCameraDistance));
+            
+            twoFingerLastMidY = currentMidY; // Update for next move event
+        } else if (!isTwoFingerActive && e.touches.length === 1) {
+             // If single finger is moving, could be a swipe or a drag for other purposes.
+             // For now, only allow horizontal scroll to be prevented if it's part of a swipe gesture.
+             // More aggressive preventDefault here might block vertical page scrolling.
+        }
+    }, { passive: false });
+
+    container.addEventListener('touchend', (e) => {
+        if (!isTwoFingerActive && e.changedTouches.length === 1) { // Single finger swipe ended
+            const touch = e.changedTouches[0];
+            const deltaX = touch.clientX - touchStartX;
+            const deltaY = touch.clientY - touchStartY;
+            const deltaTime = Date.now() - touchStartTime;
+
+            if (deltaTime < SWIPE_TIME_LIMIT) {
+                // Check for primarily horizontal swipe
+                if (Math.abs(deltaX) > SWIPE_THRESHOLD_X && Math.abs(deltaY) < SWIPE_THRESHOLD_Y_SINGLE_FINGER) {
+                    e.preventDefault(); // Prevent any click or other action after a recognized swipe
+                    if (deltaX < 0) { // Swipe Left
+                        console.log("Touch Swipe Left -> ArrowLeft");
+                        keys.ArrowLeft = true;
+                        setTimeout(() => { keys.ArrowLeft = false; }, SIMULATED_KEY_PRESS_DURATION);
+                    } else { // Swipe Right
+                        console.log("Touch Swipe Right -> ArrowRight");
+                        keys.ArrowRight = true;
+                        setTimeout(() => { keys.ArrowRight = false; }, SIMULATED_KEY_PRESS_DURATION);
+                    }
+                }
+            }
+        }
+
+        // Reset two-finger state if touches are ending
+        if (e.touches.length < 2) {
+            isTwoFingerActive = false;
+            twoFingerInitialMidY = 0;
+            twoFingerLastMidY = 0;
+        }
+    }, { passive: false });
+
+    container.addEventListener('touchcancel', () => {
+        isTwoFingerActive = false;
+        twoFingerInitialMidY = 0;
+        twoFingerLastMidY = 0;
+    }, { passive: false });
+}
 
 function positionCarAtWaypoint(index) {
     if (!carModel || !pathCurve || waypoints.length === 0) return;
@@ -351,7 +491,6 @@ function positionCarAtWaypoint(index) {
 
     updateCarPosition(); // This will set position, orientation, and call checkAndUpdateSection
 }
-
 
 function updateCarPosition() {
     if (!pathCurve || !carModel) return;
@@ -383,7 +522,6 @@ function updateCurrentWaypointIndex() {
     }
 }
 
-
 function onKeyDown(event) {
     if (event.key in keys) {
         keys[event.key] = true;
@@ -413,90 +551,6 @@ function onMouseWheel(event) {
     
     // The camera position will be updated in the main animate() loop via updateCamera()
 }
-
-function setupMouseControls() {
-    const container = document.getElementById('scene-container');
-    if (!container) return;
-
-    container.addEventListener('mousedown', (e) => {
-        if (e.button === 0) { // Left mouse button
-            isPanning = true;
-            startPanX = e.clientX; startPanY = e.clientY;
-            currentPanX = e.clientX; currentPanY = e.clientY;
-            container.classList.add('grabbing');
-        }
-    });
-
-    container.addEventListener('mousemove', (e) => {
-        if (!isPanning) return;
-        const deltaX = e.clientX - currentPanX;
-        const deltaY = e.clientY - currentPanY;
-
-        pathProgress += deltaX * PATH_SENSITIVITY;
-        pathProgress = (pathProgress % 1 + 1) % 1; // Loop pathProgress between 0 and 1
-
-        cameraPitch -= deltaY * CAMERA_PITCH_SENSITIVITY;
-        cameraPitch = Math.max(MIN_CAMERA_PITCH, Math.min(MAX_CAMERA_PITCH, cameraPitch));
-
-        currentPanX = e.clientX; currentPanY = e.clientY;
-        // No need to call updateCarPosition() here if animate loop handles it based on pathProgress
-    });
-
-    document.addEventListener('mouseup', () => { // Listen on document to catch mouseup outside container
-        if (isPanning) {
-            isPanning = false;
-            container.classList.remove('grabbing');
-        }
-    });
-    
-    container.addEventListener('mouseleave', () => { // If mouse leaves container while panning
-        // Optional: could stop panning or let it continue if mouse re-enters while button held
-        // For now, let mouseup on document handle it.
-    });
-
-    // Touch events
-    container.addEventListener('touchstart', (e) => {
-        if (e.touches.length === 1) {
-            isPanning = true;
-            startPanX = e.touches[0].clientX; startPanY = e.touches[0].clientY;
-            currentPanX = e.touches[0].clientX; currentPanY = e.touches[0].clientY;
-            container.classList.add('grabbing');
-            e.preventDefault();
-        }
-    }, { passive: false });
-
-    container.addEventListener('touchmove', (e) => {
-        if (!isPanning || e.touches.length !== 1) return;
-        const deltaX = e.touches[0].clientX - currentPanX;
-        const deltaY = e.touches[0].clientY - currentPanY;
-        
-        const touchPathSensitivity = PATH_SENSITIVITY * 1.5;
-        const touchPitchSensitivity = CAMERA_PITCH_SENSITIVITY * 1.5;
-
-        pathProgress += deltaX * touchPathSensitivity;
-        pathProgress = (pathProgress % 1 + 1) % 1; // Loop
-
-        cameraPitch -= deltaY * touchPitchSensitivity;
-        cameraPitch = Math.max(MIN_CAMERA_PITCH, Math.min(MAX_CAMERA_PITCH, cameraPitch));
-
-        currentPanX = e.touches[0].clientX; currentPanY = e.touches[0].clientY;
-        e.preventDefault();
-    }, { passive: false });
-
-    container.addEventListener('touchend', () => {
-        if (isPanning) {
-            isPanning = false;
-            container.classList.remove('grabbing');
-        }
-    });
-    container.addEventListener('touchcancel', () => {
-        if (isPanning) {
-            isPanning = false;
-            container.classList.remove('grabbing');
-        }
-    });
-}
-
 
 function updateCarMovement() {
     if (!pathCurve) return;
