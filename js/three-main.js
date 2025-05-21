@@ -4,9 +4,12 @@ import { registerAnimations, updateMixers, getMixers, clearAnimations } from './
 
 let scene, camera, renderer;
 let mainScene, carModel; // GLTF model of the island and car
+let videoPlaneMesh = null; // Make videoPlaneMesh globally accessible
+let raycaster; // Make raycaster global
+let mouse;     // Make mouse global
 let waypoints = [];
+let cameraPoints = []; // Added for new camera points
 let currentWaypointIndex = 0;
-
 let clock = new THREE.Clock();
 
 // Path and car movement
@@ -58,6 +61,13 @@ let twoFingerLastMidY = 0;
 let isTwoFingerActive = false;
 
 let onModelsLoadedCallback = null;
+
+// Camera Zoom State
+let isZoomedToPlane = false;
+let originalCameraPosition = null;
+let originalCameraQuaternion = null;
+let targetPlaneCenter = null;
+let targetPlaneCameraPosition = null;
 
 // Helper function to create a sky gradient texture
 function createSkyGradientTexture() {
@@ -127,6 +137,69 @@ export function initThreeScene(callback) {
     renderer.gammaFactor = 2.2;
     document.getElementById('scene-container').appendChild(renderer.domElement);
 
+    // Initialize raycaster and mouse for global use
+    raycaster = new THREE.Raycaster();
+    mouse = new THREE.Vector2();
+
+    // Add click listener for video plane interaction
+    const sceneContainer = document.getElementById('scene-container');
+
+    sceneContainer.addEventListener('click', (event) => {
+        if (!videoPlaneMesh || !camera || !raycaster || !mouse) return; // Ensure all are initialized
+
+        // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
+        // Using renderer.domElement.getBoundingClientRect() for accuracy, consistent with other listeners
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObject(videoPlaneMesh, false); // false means don't check children
+
+        if (intersects.length > 0) {
+            console.log('Video plane clicked!', intersects[0].point);
+
+            if (!isZoomedToPlane) {
+                // Zoom IN
+                originalCameraPosition = camera.position.clone();
+                originalCameraQuaternion = camera.quaternion.clone();
+
+                // Calculate targetPlaneCenter: average of the 4 cameraPoints
+                if (cameraPoints.length === 4) {
+                    targetPlaneCenter = new THREE.Vector3();
+                    cameraPoints.forEach(p => targetPlaneCenter.add(p.position));
+                    targetPlaneCenter.divideScalar(4);
+
+                    // Calculate targetPlaneCameraPosition: offset from center along plane normal
+                    // Use the vertices that defined the plane for normal calculation
+                    const p1 = cameraPoints[0].position; // cam1
+                    const p2 = cameraPoints[1].position; // cam2
+                    const p4 = cameraPoints[3].position; // cam4 (used for one of the plane's triangles: p1,p2,p4)
+                    
+                    const vA = new THREE.Vector3().subVectors(p2, p1);
+                    const vB = new THREE.Vector3().subVectors(p4, p1);
+                    const planeNormal = new THREE.Vector3().crossVectors(vA, vB).normalize();
+
+                    planeNormal.negate(); // Invert the normal to view from the other side
+
+                    const zoomDistance = 1.5; // How far from the plane to position camera, adjust as needed
+                    targetPlaneCameraPosition = new THREE.Vector3().copy(targetPlaneCenter).addScaledVector(planeNormal, zoomDistance);
+                    
+                    isZoomedToPlane = true;
+                    console.log("Zooming IN to video plane.");
+                    console.log("Target Center:", targetPlaneCenter);
+                    console.log("Target Cam Pos:", targetPlaneCameraPosition);
+                } else {
+                    console.error("Cannot zoom: Not enough cameraPoints defined for video plane.");
+                }
+            } else {
+                // Zoom OUT (back to original)
+                isZoomedToPlane = false;
+                console.log("Zooming OUT from video plane.");
+            }
+        }
+    });
+
     // Add lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
     scene.add(ambientLight);
@@ -195,11 +268,12 @@ function loadModels() {
             if (onModelsLoadedCallback) {
                 onModelsLoadedCallback();
             }
+            createVideoPlane(); // Call to create the video plane
         }
     };
 
 
-    gltfLoader.load('./models/Safespacecopy.glb', (gltf) => {
+    gltfLoader.load('./models/TATA-Islandcam.glb', (gltf) => {
         mainScene = gltf.scene;
         mainScene.traverse((node) => {
             if (node.isMesh) {
@@ -243,9 +317,21 @@ function loadModels() {
 
 function extractWaypoints(gltf) {
     waypoints = []; // Reset waypoints
+    cameraPoints = []; // Reset camera points
+    console.log('Traversing GLTF scene to find waypoints and camera points:');
+
     gltf.scene.traverse((node) => {
-        if (node.name && (node.name.toLowerCase().includes('waypoint') || node.name.includes('Empty'))) {
-            waypoints.push(node);
+        if (node.name) {
+            const isWaypoint = /^Empty\d+$/i.test(node.name);
+            const isCameraPoint = /^cam\d$/i.test(node.name);
+            // console.log(`Node found: '${node.name}', isWaypoint: ${isWaypoint}, isCameraPoint: ${isCameraPoint}`, node); // Cleaned up verbose log
+
+            if (isWaypoint) {
+                waypoints.push(node);
+            }
+            else if (isCameraPoint) {
+                cameraPoints.push(node);
+            }
         }
     });
 
@@ -253,18 +339,25 @@ function extractWaypoints(gltf) {
         console.error(`Error: Found only ${waypoints.length} waypoints. Need at least 2 for a path.`);
         // Create dummy waypoints if none are found to prevent errors
         if (waypoints.length === 0) {
-            const wp1 = new THREE.Object3D(); wp1.position.set(0,0,0); wp1.name = "Empty.000";
-            const wp2 = new THREE.Object3D(); wp2.position.set(5,0,0); wp2.name = "Empty.001";
+            const wp1 = new THREE.Object3D(); wp1.position.set(0,0,0); wp1.name = "Empty000";
+            const wp2 = new THREE.Object3D(); wp2.position.set(5,0,0); wp2.name = "Empty001";
             waypoints.push(wp1, wp2);
             console.log("Created dummy waypoints.");
         } else if (waypoints.length === 1) {
-             const wp2 = new THREE.Object3D(); wp2.position.copy(waypoints[0].position).x += 5; wp2.name = "Empty.001";
+             const wp2 = new THREE.Object3D(); wp2.position.copy(waypoints[0].position).x += 5; wp2.name = "Empty001";
              waypoints.push(wp2);
              console.log("Created a second dummy waypoint.");
         }
     }
 
     waypoints.sort((a, b) => {
+        const numA = parseInt(a.name.match(/\d+$/)?.[0]);
+        const numB = parseInt(b.name.match(/\d+$/)?.[0]);
+        if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+        return a.name.localeCompare(b.name);
+    });
+
+    cameraPoints.sort((a, b) => {
         const numA = parseInt(a.name.match(/\d+$/)?.[0]);
         const numB = parseInt(b.name.match(/\d+$/)?.[0]);
         if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
@@ -283,6 +376,7 @@ function extractWaypoints(gltf) {
         }
     }
     console.log(`Found and sorted ${waypoints.length} waypoints.`);
+    console.log(`Found and sorted ${cameraPoints.length} camera points:`, cameraPoints.map(cp => cp.name));
     if(carModel) positionCarAtWaypoint(0);
 }
 
@@ -297,6 +391,11 @@ function visualizePath() {
 }
 
 function updateCamera() {
+    if (isZoomedToPlane || (originalCameraPosition && !isZoomedToPlane)) {
+        // If zooming in/out or returning to original, let animate() handle camera exclusively
+        return; 
+    }
+
     if (!carModel || !camera) return;
 
     const carPosition = carModel.position.clone();
@@ -353,44 +452,111 @@ function setupMouseControls() {
 
     container.addEventListener('mousedown', (e) => {
         if (e.button === 0) { // Left mouse button
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const intersectsVideoPlane = videoPlaneMesh ? raycaster.intersectObject(videoPlaneMesh, false) : [];
+
+            if (intersectsVideoPlane.length > 0) {
+                container.style.cursor = 'pointer'; // Indicate clickable video plane
+                console.log("Mousedown on video plane, preventing pan. Cursor: pointer.");
+                // The 'click' event listener in initThreeScene will handle the interaction.
+                // e.stopPropagation(); // May not be needed if we just return
+                return; 
+            }
+            // If not on video plane, proceed with panning
             isMousePanning = true;
             mousePanStartX = e.clientX; 
             mousePanStartY = e.clientY;
             currentMousePanX = e.clientX; 
             currentMousePanY = e.clientY;
-            container.classList.add('grabbing');
+            container.style.cursor = 'grabbing'; // Set cursor for panning
+            // container.classList.add('grabbing'); // Class might still be useful for other CSS effects
+            console.log("Mousedown on scene, starting pan. Cursor: grabbing.");
         }
     });
 
     container.addEventListener('mousemove', (e) => {
-        if (!isMousePanning) return;
-        const deltaX = e.clientX - currentMousePanX;
-        const deltaY = e.clientY - currentMousePanY;
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
 
-        pathProgress += deltaX * PATH_SENSITIVITY;
-        pathProgress = (pathProgress % 1 + 1) % 1;
-
-        cameraPitch -= deltaY * CAMERA_PITCH_SENSITIVITY;
-        cameraPitch = Math.max(MIN_CAMERA_PITCH, Math.min(MAX_CAMERA_PITCH, cameraPitch));
-
-        currentMousePanX = e.clientX; 
-        currentMousePanY = e.clientY;
-    });
-
-    document.addEventListener('mouseup', () => {
         if (isMousePanning) {
-            isMousePanning = false;
-            container.classList.remove('grabbing');
+            container.style.cursor = 'grabbing';
+            const deltaX = e.clientX - currentMousePanX;
+            const deltaY = e.clientY - currentMousePanY;
+            currentMousePanX = e.clientX;
+            currentMousePanY = e.clientY;
+            
+            if (camera && camera.isPerspectiveCamera) {
+                // Adjust panning sensitivity as needed
+                const panSpeed = 0.002;
+                camera.translateX(-deltaX * panSpeed * (camera.position.distanceTo(scene.position) / 10)); 
+                camera.translateY(deltaY * panSpeed * (camera.position.distanceTo(scene.position) / 10));
+                camera.updateProjectionMatrix(); 
+            }
+            console.log("Mousemove during pan. Cursor: grabbing.");
+        } else {
+            // Not panning, just hovering. Check for video plane.
+            const intersectsVideoPlane = videoPlaneMesh ? raycaster.intersectObject(videoPlaneMesh, false) : [];
+            if (intersectsVideoPlane.length > 0) {
+                container.style.cursor = 'pointer';
+                // console.log("Hovering over video plane. Cursor: pointer.");
+            } else {
+                container.style.cursor = 'grab'; // Default pannable cursor
+                // console.log("Hovering over scene. Cursor: grab.");
+            }
         }
     });
-    
+
+    container.addEventListener('mouseup', (e) => {
+        if (e.button === 0) {
+            isMousePanning = false;
+            // container.classList.remove('grabbing');
+            console.log("Mouseup. Panning stopped.");
+            // After mouseup, set cursor based on what's underneath
+            const rect = renderer.domElement.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersectsVideoPlane = videoPlaneMesh ? raycaster.intersectObject(videoPlaneMesh, false) : [];
+            if (intersectsVideoPlane.length > 0) {
+                container.style.cursor = 'pointer';
+                console.log("Mouseup over video plane. Cursor: pointer.");
+            } else {
+                container.style.cursor = 'grab';
+                console.log("Mouseup over scene. Cursor: grab.");
+            }
+        }
+    });
+
     container.addEventListener('mouseleave', () => {
-        if (isMousePanning) {
-            isMousePanning = false;
-            container.classList.remove('grabbing');
-        }
+        isMousePanning = false;
+        // container.classList.remove('grabbing');
+        container.style.cursor = 'default'; // Reset cursor when mouse leaves container
+        console.log("Mouse left scene container. Cursor: default.");
     });
 
+    container.addEventListener('mouseenter', (e) => {
+        // Set initial cursor based on what's underneath when mouse enters
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersectsVideoPlane = videoPlaneMesh ? raycaster.intersectObject(videoPlaneMesh, false) : [];
+        if (intersectsVideoPlane.length > 0) {
+            container.style.cursor = 'pointer';
+        } else {
+            container.style.cursor = 'grab';
+        }
+        console.log("Mouse entered scene container.");
+    });
+
+    window.addEventListener('resize', onWindowResize, false);
+    
     // --- Touch Controls: Swipe for Arrows, Two-finger swipe for Zoom ---
     container.addEventListener('touchstart', (e) => {
         if (e.touches.length === 1) {
@@ -591,19 +757,43 @@ function updateCarMovement() {
 function animate() {
     requestAnimationFrame(animate);
     const delta = clock.getDelta();
+    updateMixers(delta); // Update GLTF animations
 
-    updateCarMovement(); // Update speed and pathProgress based on keys
-    
-    // Only call updateCarPosition if pathProgress changed or panning
-    // (keys or mouse panning modify pathProgress directly)
-    updateCarPosition(); 
+    // Camera Zoom/Unzoom Animation Logic
+    const lerpFactor = 0.07; // Speed of interpolation, adjust as needed
+    if (isZoomedToPlane && targetPlaneCameraPosition && targetPlaneCenter) {
+        camera.position.lerp(targetPlaneCameraPosition, lerpFactor);
+        
+        // Create a temporary matrix to calculate target quaternion
+        const tempMatrix = new THREE.Matrix4();
+        tempMatrix.lookAt(camera.position, targetPlaneCenter, camera.up);
+        const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(tempMatrix);
+        camera.quaternion.slerp(targetQuaternion, lerpFactor);
 
+    } else if (!isZoomedToPlane && originalCameraPosition && originalCameraQuaternion) {
+        camera.position.lerp(originalCameraPosition, lerpFactor);
+        camera.quaternion.slerp(originalCameraQuaternion, lerpFactor);
 
-    updateMixers(delta); // Update all registered animation mixers
-
-    if (renderer && scene && camera) {
-        renderer.render(scene, camera);
+        // If close enough to original state, stop zooming out and release control
+        if (camera.position.distanceTo(originalCameraPosition) < 0.01 && 
+            camera.quaternion.angleTo(originalCameraQuaternion) < 0.01) {
+            console.log("Camera returned to original state.");
+            camera.position.copy(originalCameraPosition);
+            camera.quaternion.copy(originalCameraQuaternion);
+            originalCameraPosition = null;
+            originalCameraQuaternion = null;
+            targetPlaneCenter = null; 
+            targetPlaneCameraPosition = null;
+        }
     }
+    // Only call updateCamera if not in a zoom transition
+    if (!isZoomedToPlane && !originalCameraPosition) {
+        updateCarMovement(); // Ensure car movement is updated
+        updateCamera(); 
+        updateCarPosition(); // Ensure car position is updated
+    }
+
+    renderer.render(scene, camera);
 }
 
 export function applyPreset(presetName) {
@@ -635,4 +825,118 @@ export function applyPreset(presetName) {
         directionalLight.color = new THREE.Color(preset.lightColor);
     }
     console.log(`Applied preset: ${presetName}`);
+}
+
+function createVideoPlane() {
+    console.log("Attempting to create video plane...");
+    if (cameraPoints.length < 4) {
+        console.error("Not enough camera points to create video plane. Need 4, found:", cameraPoints.length);
+        return;
+    }
+
+    console.log("Camera points for video plane:");
+    for (let i = 0; i < 4; i++) {
+        if (cameraPoints[i] && cameraPoints[i].position) {
+            console.log(`  ${cameraPoints[i].name}: x=${cameraPoints[i].position.x.toFixed(2)}, y=${cameraPoints[i].position.y.toFixed(2)}, z=${cameraPoints[i].position.z.toFixed(2)}`);
+        }
+    }
+
+    // 1. Create video element
+    const video = document.createElement('video');
+    video.src = 'video/tata.mp4'; // Path relative to index.html
+    video.loop = true;
+    video.muted = true; // Essential for autoplay in many browsers
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous'; // If video is from another domain, or for certain operations
+    // video.style.display = 'none'; // Keep it off-screen if not needed in DOM
+    // document.body.appendChild(video); // Not strictly necessary if only used for texture
+
+    video.play().then(() => {
+        console.log("Video playback started for texture.");
+    }).catch(error => {
+        console.error("Error attempting to play video for texture:", error);
+        // Add a click listener to play video if autoplay fails
+        const playVideo = () => {
+            video.play().then(() => {
+                console.log("Video played after user interaction.");
+                document.removeEventListener('click', playVideo);
+            }).catch(e => console.error("Still failed to play video:", e));
+        };
+        document.addEventListener('click', playVideo, { once: true });
+        console.log("Video autoplay failed. Click anywhere on the page to attempt to start it.");
+    });
+
+    // 2. Create video texture
+    const videoTexture = new THREE.VideoTexture(video);
+    videoTexture.minFilter = THREE.LinearFilter;
+    videoTexture.magFilter = THREE.LinearFilter;
+    videoTexture.format = THREE.RGBFormat; // Or RGBAFormat if video has alpha
+    videoTexture.flipY = true; // Corrects upside-down video
+
+    // 3. Define plane geometry vertices from cameraPoints, with a slight offset forward
+    const p1_orig = cameraPoints[0].position.clone(); // cam1
+    const p2_orig = cameraPoints[1].position.clone(); // cam2
+    const p3_orig = cameraPoints[2].position.clone(); // cam3
+    const p4_orig = cameraPoints[3].position.clone(); // cam4
+
+    // Calculate the plane normal (points 'out' from the front face if vertices are ordered correctly for front view)
+    const vA_geom = new THREE.Vector3().subVectors(p2_orig, p1_orig);
+    const vB_geom = new THREE.Vector3().subVectors(p4_orig, p1_orig);
+    const planeNormal_geom = new THREE.Vector3().crossVectors(vA_geom, vB_geom).normalize();
+    planeNormal_geom.negate(); // Ensure it points towards the typical viewing direction (front of video)
+
+    const planeOffsetDistance = 0.1; // How much to move the plane forward. Adjust as needed.
+
+    const p1 = p1_orig.clone().addScaledVector(planeNormal_geom, planeOffsetDistance);
+    const p2 = p2_orig.clone().addScaledVector(planeNormal_geom, planeOffsetDistance);
+    const p3 = p3_orig.clone().addScaledVector(planeNormal_geom, planeOffsetDistance);
+    const p4 = p4_orig.clone().addScaledVector(planeNormal_geom, planeOffsetDistance);
+
+    const geometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array([
+        p1.x, p1.y, p1.z, // Vertex 0 (cam1 offset)
+        p2.x, p2.y, p2.z, // Vertex 1 (cam2 offset)
+        p4.x, p4.y, p4.z, // Vertex 2 (cam4 offset) - for first triangle (cam1, cam2, cam4)
+
+        p2.x, p2.y, p2.z, // Vertex 3 (cam2 offset) - for second triangle (cam2, cam3, cam4)
+        p3.x, p3.y, p3.z, // Vertex 4 (cam3 offset)
+        p4.x, p4.y, p4.z  // Vertex 5 (cam4 offset)
+    ]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+    // 4. Define UV coordinates
+    // Assuming p1=bottom-left, p2=bottom-right, p3=top-right, p4=top-left for standard quad UVs
+    // If video appears upside down or mirrored, these UVs or vertex order might need adjustment.
+    const uvs = new Float32Array([
+        0, 0, // UV for p1 (cam1)
+        1, 0, // UV for p2 (cam2)
+        0, 1, // UV for p4 (cam4) 
+
+        1, 0, // UV for p2 (cam2)
+        1, 1, // UV for p3 (cam3)
+        0, 1  // UV for p4 (cam4)
+    ]);
+    geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+
+    geometry.computeVertexNormals(); // For lighting, if needed, though MeshBasicMaterial doesn't use them
+
+    // 5. Create material
+    const material = new THREE.MeshBasicMaterial({
+        map: videoTexture,
+        side: THREE.DoubleSide,
+        // transparent: true, // If video has alpha and you use RGBAFormat
+    });
+
+    // 6. Create mesh
+    const newVideoPlaneMesh = new THREE.Mesh(geometry, material);
+    newVideoPlaneMesh.name = "TataVideoPlane";
+    videoPlaneMesh = newVideoPlaneMesh; // Assign to global variable
+
+    // 7. Add to scene
+    if (scene) {
+        scene.add(videoPlaneMesh);
+        console.log("Video plane added to scene.");
+    } else {
+        console.error("Scene object not found, cannot add video plane.");
+    }
 }

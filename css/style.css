@@ -31,7 +31,7 @@ body {
     height: 100%;
     opacity: 0;
     transition: opacity 1s ease-in-out;
-    cursor: grab; /* For mouse panning */
+    cursor: default; /* For mouse panning */
 }
 
 #scene-container.grabbing {
