@@ -436,24 +436,37 @@ function setupMouseControls() {
     container.addEventListener('touchend', (e) => {
         if (!isTwoFingerActive && e.changedTouches.length === 1) { // Single finger swipe ended
             const touch = e.changedTouches[0];
-            const deltaX = touch.clientX - touchStartX;
-            const deltaY = touch.clientY - touchStartY;
+            const endX = touch.clientX;
+            const endY = touch.clientY;
+            const deltaX = endX - touchStartX;
+            const deltaY = endY - touchStartY;
             const deltaTime = Date.now() - touchStartTime;
+            const orientation = window.screen && window.screen.orientation ? window.screen.orientation.type : 'N/A';
+
+            console.log(`Swipe End Debug: Orientation: ${orientation}`);
+            console.log(`  Start: (${touchStartX.toFixed(2)}, ${touchStartY.toFixed(2)})`);
+            console.log(`  End:   (${endX.toFixed(2)}, ${endY.toFixed(2)})`);
+            console.log(`  Delta: (${deltaX.toFixed(2)}, ${deltaY.toFixed(2)}), Time: ${deltaTime}ms`);
 
             if (deltaTime < SWIPE_TIME_LIMIT) {
+                console.log(`  Attempting swipe detection: abs(deltaX) > ${SWIPE_THRESHOLD_X} (${Math.abs(deltaX) > SWIPE_THRESHOLD_X}), abs(deltaY) < ${SWIPE_THRESHOLD_Y_SINGLE_FINGER} (${Math.abs(deltaY) < SWIPE_THRESHOLD_Y_SINGLE_FINGER})`);
                 // Check for primarily horizontal swipe
                 if (Math.abs(deltaX) > SWIPE_THRESHOLD_X && Math.abs(deltaY) < SWIPE_THRESHOLD_Y_SINGLE_FINGER) {
                     e.preventDefault(); // Prevent any click or other action after a recognized swipe
                     if (deltaX < 0) { // Swipe Left
-                        console.log("Touch Swipe Left -> ArrowLeft");
+                        console.log("  --> Swipe Left Detected (Attempting ArrowLeft)");
                         keys.ArrowLeft = true;
                         setTimeout(() => { keys.ArrowLeft = false; }, SIMULATED_KEY_PRESS_DURATION);
                     } else { // Swipe Right
-                        console.log("Touch Swipe Right -> ArrowRight");
+                        console.log("  --> Swipe Right Detected (Attempting ArrowRight)");
                         keys.ArrowRight = true;
                         setTimeout(() => { keys.ArrowRight = false; }, SIMULATED_KEY_PRESS_DURATION);
                     }
+                } else {
+                    console.log("  Swipe did not meet horizontal swipe criteria.");
                 }
+            } else {
+                console.log("  Swipe time too long, not a swipe.");
             }
         }
 
