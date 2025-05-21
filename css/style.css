@@ -1,0 +1,933 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --orange: #f47a23;
+    --blue: #10afef;
+    --green: #74c047;
+    --dark-bg: #051428;
+    --light-text: #ffffff;
+    --semi-transparent: rgba(5, 20, 40, 0.85);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Rajdhani', sans-serif;
+    background-color: var(--dark-bg);
+    color: var(--light-text);
+    overflow: hidden;
+    letter-spacing: 0.03em;
+}
+
+#scene-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    cursor: grab; /* For mouse panning */
+}
+
+#scene-container.grabbing {
+    cursor: grabbing;
+}
+
+
+#controls-info {
+    position: fixed;
+    bottom: 50%;
+    left: 50%;
+    transform: translate(-50%, 50%);
+    background-color: rgba(5, 20, 40, 0.85);
+    padding: 20px;
+    border-radius: 8px;
+    z-index: 999;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    backdrop-filter: blur(5px);
+    border: 2px solid var(--orange);
+    max-width: 320px;
+}
+
+#controls-info h3 {
+    margin-bottom: 10px;
+    color: var(--blue);
+}
+
+#controls-info .control-keys {
+    margin: 15px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+#controls-info .key {
+    background-color: var(--orange);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+/* Animated arrows for the controls guide */
+.animated-arrow-container {
+    position: relative;
+    width: 250px;
+    height: 140px;
+    margin: 15px auto;
+    background-color: rgba(5, 20, 40, 0.3);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.animated-car {
+    position: absolute;
+    width: 40px;
+    height: 20px;
+    background-color: var(--blue);
+    border-radius: 3px;
+    top: 60px;
+    left: 105px;
+    z-index: 2;
+}
+
+.animated-car:before {
+    content: "";
+    position: absolute;
+    top: -8px;
+    left: 5px;
+    width: 30px;
+    height: 12px;
+    background-color: var(--blue);
+    border-radius: 3px 3px 0 0;
+}
+
+.animated-arrow {
+    position: absolute;
+    width: 0; /* Changed for CSS triangle arrows */
+    height: 0; /* Changed for CSS triangle arrows */
+    top: 60px; /* Adjusted for centering with car */
+    opacity: 0.2;
+    transition: opacity 0.5s ease;
+}
+
+.animated-arrow.left {
+    left: 40px; /* Adjusted position */
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 20px solid var(--orange);
+    animation: pulse-left 2s infinite alternate;
+}
+
+.animated-arrow.right {
+    right: 40px; /* Adjusted position */
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-left: 20px solid var(--orange);
+    animation: pulse-right 2s infinite alternate;
+}
+
+@keyframes pulse-left {
+    0% { opacity: 0.2; transform: translateX(5px) translateY(-50%); } /* Adjusted for centering */
+    100% { opacity: 1; transform: translateX(0) translateY(-50%); } /* Adjusted for centering */
+}
+
+@keyframes pulse-right {
+    0% { opacity: 0.2; transform: translateX(-5px) translateY(-50%); } /* Adjusted for centering */
+    100% { opacity: 1; transform: translateX(0) translateY(-50%); } /* Adjusted for centering */
+}
+
+
+/* Section Text Display Styles - Based on reference image */
+#section-text-container {
+    position: fixed;
+    top: 100px;
+    left: 50px;
+    width: 360px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+    pointer-events: auto; /* Allow interaction */
+    max-height: calc(100vh - 150px); /* Allow for expansion without extending past viewport */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Style for links in the navigation */
+.nav-section a, #left-side-nav a { /* Added #left-side-nav a */
+    color: var(--blue);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.nav-section a:hover, #left-side-nav a:hover { /* Added #left-side-nav a:hover */
+    color: var(--orange);
+    text-decoration: underline;
+}
+
+/* Style for lists in the navigation */
+.nav-section ul {
+    padding-left: 20px;
+    margin-bottom: 15px;
+}
+
+.nav-section li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+#section-text {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--semi-transparent);
+    color: var(--light-text);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    transition: all 0.4s ease-in-out;
+    border: 1px solid rgba(16, 175, 239, 0.2);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    background-color: rgba(16, 175, 239, 0.1);
+    cursor: pointer;
+    flex-shrink: 0;
+    z-index: 20; /* Ensure header is above content for click */
+    border: 2px solid var(--orange);
+    border-radius: 6px 6px 0 0; /* Keep top radius */
+    box-shadow: 0 0 6px rgba(244, 122, 35, 0.4);
+}
+
+.section-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 6px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: rgba(16, 175, 239, 0.15);
+    margin-right: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer; /* Make icon itself clickable */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+.section-icon:hover {
+    transform: scale(1.1);
+    background-color: rgba(16, 175, 239, 0.3);
+}
+
+.section-icon svg {
+    width: 36px;
+    height: 36px;
+    fill: var(--blue);
+    stroke: var(--light-text);
+    stroke-width: 0.5;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+}
+
+/* Camera section icon animation */
+.icon-camera circle,
+.icon-camera rect {
+    transform-origin: center;
+    animation: pulse 2s infinite alternate ease-in-out;
+}
+
+/* Village section icon animation */
+.icon-village path {
+    transform-origin: bottom center;
+    animation: sway 3s infinite alternate ease-in-out;
+}
+
+/* Playground section icon animation */
+.icon-playground .swing {
+    transform-origin: top center;
+    animation: swing 3s infinite alternate ease-in-out;
+}
+
+/* Tata section icon animation */
+.icon-tata path {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: draw 4s infinite alternate forwards;
+}
+
+/* Research section icon animation */
+.icon-research path {
+    transform-origin: center;
+    animation: rotate 4s infinite linear;
+}
+
+/* Plane section icon animation */
+.icon-plane path {
+    transform-origin: center;
+    animation: flyUpDown 4s infinite alternate ease-in-out;
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+}
+
+@keyframes sway {
+    0% { transform: rotate(-5deg); }
+    100% { transform: rotate(5deg); }
+}
+
+@keyframes swing {
+    0% { transform: rotate(-15deg); }
+    100% { transform: rotate(15deg); }
+}
+
+@keyframes draw {
+    0% { stroke-dashoffset: 100; }
+    100% { stroke-dashoffset: 0; }
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes flyUpDown {
+    0% { transform: translateY(-5px) rotate(0deg); }
+    100% { transform: translateY(5px) rotate(0deg); }
+}
+
+.section-header-text {
+    flex: 1;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: var(--blue);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.section-subtitle {
+    font-size: 1rem;
+    opacity: 0.9;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--light-text);
+}
+
+.section-content {
+    padding: 0; /* Initial padding removed, handled by inner */
+    max-height: 0;
+    overflow-y: auto;
+    transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, padding 0.5s ease-in-out; /* Added padding transition */
+    opacity: 0;
+    border-left: 2px solid var(--orange);
+    border-right: 2px solid var(--orange);
+    border-bottom: 2px solid var(--orange);
+    border-radius: 0 0 6px 6px; /* Keep bottom radius */
+    box-shadow: 0 4px 8px rgba(244, 122, 35, 0.3); /* Added shadow for depth */
+}
+
+.section-content-inner {
+    padding: 24px;
+    padding-bottom: 30px; /* Ensure space for scrollbar if content is long */
+}
+
+.section-content-inner p {
+    color: var(--light-text);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+#section-text.expanded .section-content { /* Use parent .expanded */
+    max-height: calc(100vh - 300px); /* Adjusted max-height for better fit */
+    opacity: 1;
+    padding-top: 0; /* Ensure padding is applied correctly when expanded */
+    padding-bottom: 0;
+}
+
+#section-text.expanded { /* When the main container is expanded */
+    /* height: auto; /* Not needed if max-height is set on content */
+    /* max-height: calc(100vh - 150px); /* This might be too large, let content drive it */
+}
+
+
+.section-expand-button { /* This button is not in the current dynamic HTML, but styles are kept */
+    background-color: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: block;
+    margin: 16px auto;
+    width: 80%;
+    transition: all 0.2s ease;
+    text-align: center;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.section-expand-button:hover {
+    background-color: #ff8c3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.section-media {
+    margin: 20px 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: rgba(5, 20, 40, 0.3);
+    min-height: 180px; /* Use min-height for flexibility */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.section-media-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.section-media-icon svg { /* Copied from .section-icon svg */
+    width: 60px; /* Larger for media display */
+    height: 60px; /* Larger for media display */
+    fill: var(--blue);
+    stroke: var(--light-text);
+    stroke-width: 0.5;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3));
+}
+
+.section-media-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--blue);
+    text-align: center;
+    padding: 0 10px; /* Add some padding */
+}
+
+
+.section-media img {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+}
+
+.section-media video {
+    width: 100%;
+    height: auto; /* Maintain aspect ratio */
+    display: block;
+}
+
+/* Landing Page Styles */
+#landing-page {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--dark-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000; /* Ensure it's on top */
+    transition: opacity 0.8s ease-in-out;
+    color: var(--light-text);
+    font-family: 'Rajdhani', sans-serif;
+}
+
+.landing-content {
+    text-align: center;
+    max-width: 800px;
+    padding: 20px;
+}
+
+.landing-title {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+    text-shadow: 0 2px 10px rgba(244, 122, 35, 0.5);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--orange);
+}
+
+.landing-subtitle {
+    font-size: 1.6rem;
+    margin-bottom: 40px;
+    font-weight: 400;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto; /* Center if max-width is applied */
+    margin-right: auto; /* Center if max-width is applied */
+    color: var(--blue); /* Updated to match var */
+    letter-spacing: 0.03em;
+}
+
+.loading-container { /* Wrapper for button and status */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; /* Space between button and status */
+}
+
+.loading-button {
+    width: 280px; /* Fixed width */
+    height: 60px; /* Fixed height */
+    border-radius: 4px;
+    border: 2px solid var(--orange);
+    background-color: rgba(244, 122, 35, 0.1);
+    color: var(--light-text);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    cursor: default;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.5s ease;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    text-transform: uppercase;
+    font-family: 'Rajdhani', sans-serif;
+    display: flex; /* For centering span */
+    align-items: center; /* For centering span */
+    justify-content: center; /* For centering span */
+}
+
+.loading-button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--loading-width, 0%); /* Use CSS variable for progress */
+    background-color: var(--orange);
+    opacity: 0.7;
+    transition: width 0.5s ease;
+    z-index: 0;
+}
+
+.loading-button span {
+    position: relative;
+    z-index: 1;
+}
+
+.loading-button.ready {
+    background-color: rgba(244, 122, 35, 0.2);
+    cursor: pointer;
+    box-shadow: 0 0 15px rgba(244, 122, 35, 0.5);
+}
+
+.loading-button.ready:hover {
+    background-color: rgba(244, 122, 35, 0.4);
+    transform: translateY(-2px);
+}
+
+.loading-button.ready:before {
+    width: 100%; /* Fill when ready, or keep dynamic if preferred */
+}
+
+.loading-status {
+    /* Removed absolute positioning, now part of .loading-container flow */
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    color: var(--light-text); /* Ensure visibility */
+}
+
+
+/* ----- Left Navigation Menu ----- */
+#left-nav-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px; /* Positioned to the left */
+    width: 40px;
+    height: 40px;
+    background-color: var(--orange);
+    border-radius: 4px;
+    z-index: 1002; /* Above side-nav */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+#left-nav-toggle:hover {
+    background-color: #d86a1e;
+    transform: scale(1.05);
+}
+
+#left-nav-toggle .hamburger-line { /* Specific to left toggle lines */
+    width: 24px;
+    height: 3px;
+    background-color: white;
+    margin: 2px 0; /* Adjusted margin for standard hamburger */
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    border-radius: 1px; /* Slight rounding */
+}
+
+/* Animation for left toggle when its nav is open */
+#left-nav-toggle.open .hamburger-line:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+}
+
+#left-nav-toggle.open .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+#left-nav-toggle.open .hamburger-line:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+}
+
+.side-nav { /* Renamed from #side-nav for consistency, ID is #left-side-nav */
+    position: fixed;
+    top: 0;
+    left: -300px; /* Start off-screen */
+    width: 300px;
+    height: 100%;
+    background-color: var(--semi-transparent);
+    z-index: 1001; /* Below toggle */
+    transition: left 0.4s ease-in-out; /* Changed from 0.3s */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-right: 2px solid var(--orange); /* Matched var */
+    overflow-y: auto;
+    padding-top: 70px; /* Space for toggle */
+}
+
+.side-nav.open { /* Use .open class for JS control */
+    left: 0;
+}
+/* Keep hover effect if desired, though click is primary now */
+#left-nav-toggle:hover + #left-side-nav, #left-side-nav:hover {
+    left: 0;
+}
+
+
+.nav-header { /* Styles for header within nav panels */
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between; /* Or center if no close button */
+    align-items: center;
+}
+
+.nav-header h2 {
+    color: var(--orange);
+    margin: 0;
+    font-size: 1.5rem; /* Consistent size */
+}
+
+.nav-links { /* Container for links in left-side-nav */
+    padding: 20px;
+    /* border-bottom: 1px solid rgba(255, 255, 255, 0.1); */ /* Optional */
+    display: flex;
+    flex-direction: column;
+}
+
+.nav-link { /* Individual link style */
+    color: var(--light-text);
+    text-decoration: none;
+    padding: 12px 0; /* Increased padding */
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: var(--orange);
+    padding-left: 10px; /* Indent on hover */
+}
+
+.nav-link:last-child {
+    border-bottom: none;
+}
+
+/* ----- Right Info Panel ----- */
+#right-nav-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px; /* Positioned to the right */
+    left: auto; /* Override potential inherited left */
+    width: 40px;
+    height: 40px;
+    background-color: var(--orange); /* Or var(--blue) for distinction */
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px; /* Original gap */
+    cursor: pointer;
+    z-index: 1001; /* Same level as side-navbar toggle */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+#right-nav-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+    background-color: #d86a1e; /* Darken on hover */
+}
+
+#right-nav-toggle .hamburger-line { /* Specific to right toggle lines */
+    width: 24px;
+    height: 3px;
+    background-color: white;
+    transition: all 0.3s ease;
+    border-radius: 2px; /* Original radius */
+}
+
+/* Animation for right toggle when its nav is active/open */
+#right-nav-toggle.active .hamburger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg); /* Original transform */
+}
+
+#right-nav-toggle.active .hamburger-line:nth-child(2) {
+    opacity: 0;
+}
+
+#right-nav-toggle.active .hamburger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg); /* Original transform */
+}
+
+.side-navbar { /* Renamed ID to #right-side-navbar */
+    position: fixed;
+    top: 0;
+    right: -300px; /* Start off-screen */
+    width: 300px;
+    height: 100%;
+    background-color: var(--semi-transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px); /* Add prefix for wider compatibility */
+    z-index: 1000; /* Below its toggle */
+    transition: right 0.4s ease-in-out;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.2);
+    padding: 80px 30px 30px 30px; /* Original padding, gives space for toggle */
+    overflow-y: auto;
+    border-left: 2px solid var(--blue);
+}
+
+.side-navbar.open { /* Use .open class for JS control */
+    right: 0;
+}
+
+.nav-section { /* General section styling for nav panels */
+    margin-bottom: 30px; /* Original: 40px, or 30px from other definition */
+}
+
+.nav-section h2 { /* Titles in right-side-navbar */
+    color: var(--orange);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--blue);
+    padding-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+/* For .side-nav if it uses .nav-section h3 */
+.nav-section h3 {
+    color: var(--blue);
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    border-bottom: 1px solid rgba(16, 175, 239, 0.3);
+    padding-bottom: 5px;
+}
+
+
+.nav-section p {
+    color: var(--light-text);
+    line-height: 1.6;
+    margin-bottom: 15px;
+    font-size: 1rem;
+    letter-spacing: 0.03em;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.contact-icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--blue);
+    flex-shrink: 0; /* Prevent icon from shrinking */
+}
+
+.contact-text {
+    color: var(--light-text);
+    font-size: 0.95rem; /* Slightly smaller for contact details */
+}
+
+/* Language Toggle */
+#language-toggle {
+    position: fixed;
+    top: 20px;
+    /* Adjusted to be next to the right hamburger or centered if only one hamburger exists */
+    right: 70px; /* Example: 20px (right toggle) + 40px (width) + 10px (spacing) */
+    z-index: 1000; /* Same level as navbars */
+}
+
+#lang-button {
+    background-color: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+#lang-button:hover {
+    background-color: #d86a1e;
+}
+
+
+/* Animation Controls Styles (Kept for completeness, HTML elements not present) */
+.animation-group {
+    margin-bottom: 15px;
+}
+
+#animation-list h5 { /* Assuming #animation-list is a container for these groups */
+    margin: 10px 0 5px 0;
+    font-size: 0.95rem;
+    color: var(--orange);
+}
+
+.animation-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.animation-name {
+    flex: 1;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
+
+.animation-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.animation-controls button {
+    padding: 3px 8px;
+    font-size: 0.8rem;
+    background-color: rgba(255,255,255,0.1);
+    border: 1px solid var(--blue);
+    color: var(--light-text);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.animation-controls button:hover:not(:disabled) {
+    background-color: var(--blue);
+}
+
+.animation-controls button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.animation-controls button.active {
+    background-color: var(--orange);
+    border-color: var(--orange);
+}
+
+.animation-buttons { /* Container for Play All / Stop All */
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.animation-buttons button {
+    flex: 1;
+    padding: 5px 0; /* Adjusted padding */
+    background-color: rgba(255,255,255,0.1);
+    border: 1px solid var(--blue);
+    color: var(--light-text);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.animation-buttons button:hover {
+    background-color: var(--blue);
+    transform: translateY(-2px);
+}
+
+#play-all { /* Specific styling for play all */
+    border-color: var(--green);
+}
+
+#play-all:hover {
+    background-color: var(--green);
+}
+
+#stop-all { /* Specific styling for stop all */
+    border-color: var(--orange);
+}
+
+#stop-all:hover {
+    background-color: var(--orange);
+}
+
+/* Removed Environment Controls CSS as per instruction */
