@@ -90,10 +90,10 @@ function createSkyGradientTexture() {
     const context = canvas.getContext('2d');
     const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
     
-    // Example gradient: Light blue at top, fading to a slightly darker/hazier blue
-    gradient.addColorStop(0, '#87CEEB'); // Light sky blue (top)
-    gradient.addColorStop(0.7, '#ADD8E6'); // Lighter blue (middle)
-    gradient.addColorStop(1, '#B0E0E6'); // Powder blue / hazy (bottom) - this will be fog color too
+    // Night time gradient
+    gradient.addColorStop(0, '#0C1445');    // Very dark blue/indigo (top)
+    gradient.addColorStop(0.6, '#1F2A6D'); // Dark blue/purple (middle)
+    gradient.addColorStop(1, '#05081F');    // Darkest grey-blue (bottom) - this will be fog color
 
     context.fillStyle = gradient;
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -108,7 +108,7 @@ function createHorizonPlane() {
     const horizonSize = 2000; // Make it very large
     const planeGeometry = new THREE.PlaneGeometry(horizonSize, horizonSize);
     // Color should match the bottom of the sky gradient for a seamless blend
-    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xB0E0E6, side: THREE.DoubleSide }); 
+    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x05081F, side: THREE.DoubleSide }); 
     
     const horizonPlane = new THREE.Mesh(planeGeometry, planeMaterial);
     horizonPlane.rotation.x = -Math.PI / 2; // Rotate to be horizontal
@@ -125,8 +125,8 @@ export function initThreeScene(callback) {
     // scene.background = new THREE.Color(0x87CEEB); // Old sky blue background
     scene.background = createSkyGradientTexture(); // New gradient background
     
-    // Adjust fog to match the bottom of the gradient
-    scene.fog = new THREE.FogExp2(0xB0E0E6, 0.01); // Fog color matches gradient bottom
+    // Adjust fog to match the bottom of the gradient and increase density for night
+    scene.fog = new THREE.FogExp2(0x05081F, 0.015); // Dark fog, slightly denser
 
     // Add horizon plane
     const horizon = createHorizonPlane();
@@ -170,14 +170,13 @@ export function initThreeScene(callback) {
     }, false);
 
     // Add lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+    const ambientLight = new THREE.AmbientLight(0x404060, 0.05); // Cool, very dim ambient light
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(10, 20, 10);
+    const directionalLight = new THREE.DirectionalLight(0x7080B0, 0.15); // Pale moonlight blue, dim
+    directionalLight.position.set(-10, 10, -10); // Moon position (e.g., from side/back)
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
-    directionalLight.shadow.mapSize.height = 2048;
     scene.add(directionalLight);
 
     window.addEventListener('resize', onWindowResize);
@@ -255,7 +254,7 @@ function loadModels() {
     };
 
 
-    gltfLoader.load('./models/TATA-Islandcam.glb', (gltf) => {
+    gltfLoader.load('./models/WindMILLisTURNING.glb', (gltf) => {
         mainScene = gltf.scene;
         mainScene.traverse((node) => {
             if (node.isMesh) {
