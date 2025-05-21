@@ -2,6 +2,13 @@ import { getCurrentLanguage } from './ui-language.js';
 import { checkAndUpdateSection } from './ui-sections.js';
 import { registerAnimations, updateMixers, getMixers, clearAnimations } from './animation-handler.js';
 
+// --- Constants ---
+const MAX_SPEED_WAYPOINTS = 0.002; // Max speed for waypoint navigation
+const ACCELERATION_WAYPOINTS = 0.0001;
+const DECELERATION_WAYPOINTS = 0.0002;
+const SHOW_OVERLAY_DISTANCE_THRESHOLD = 75; // Distance to show video overlay (tune as needed)
+// Note: Other constants like MIN_ZOOM_DISTANCE, MAX_ZOOM_DISTANCE are defined further down or as needed.
+
 let scene, camera, renderer;
 let mainScene, carModel; // GLTF model of the island and car
 let videoPlaneMesh = null; // Make videoPlaneMesh globally accessible
@@ -68,6 +75,11 @@ let originalCameraPosition = null;
 let originalCameraQuaternion = null;
 let targetPlaneCenter = null;
 let targetPlaneCameraPosition = null;
+
+// For dynamic positioning of controls-info div
+let controlsInfoDivElement = null; // To store the #controls-info div
+const videoPlaneWorldCenter = new THREE.Vector3(); // Center of the video plane in world coords
+let videoPlaneInitialized = false; // Flag to check if video plane center is set
 
 // Helper function to create a sky gradient texture
 function createSkyGradientTexture() {
@@ -141,64 +153,21 @@ export function initThreeScene(callback) {
     raycaster = new THREE.Raycaster();
     mouse = new THREE.Vector2();
 
-    // Add click listener for video plane interaction
+    // Add click listener for general scene clicks (NO LONGER FOR VIDEO PLANE ZOOM)
     const sceneContainer = document.getElementById('scene-container');
-
     sceneContainer.addEventListener('click', (event) => {
-        if (!videoPlaneMesh || !camera || !raycaster || !mouse) return; // Ensure all are initialized
-
-        // Calculate mouse position in normalized device coordinates (-1 to +1) for both components
-        // Using renderer.domElement.getBoundingClientRect() for accuracy, consistent with other listeners
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObject(videoPlaneMesh, false); // false means don't check children
+        // const intersects = raycaster.intersectObject(videoPlaneMesh, true);
+        // console.log(`Scene Click Listener: Fired. Intersects count: ${intersects.length}`);
+        
+        // Existing video plane click logic for zoom is REMOVED from here.
+        // If you need to detect clicks on other 3D objects, that logic could go here.
 
-        if (intersects.length > 0) {
-            console.log('Video plane clicked!', intersects[0].point);
-
-            if (!isZoomedToPlane) {
-                // Zoom IN
-                originalCameraPosition = camera.position.clone();
-                originalCameraQuaternion = camera.quaternion.clone();
-
-                // Calculate targetPlaneCenter: average of the 4 cameraPoints
-                if (cameraPoints.length === 4) {
-                    targetPlaneCenter = new THREE.Vector3();
-                    cameraPoints.forEach(p => targetPlaneCenter.add(p.position));
-                    targetPlaneCenter.divideScalar(4);
-
-                    // Calculate targetPlaneCameraPosition: offset from center along plane normal
-                    // Use the vertices that defined the plane for normal calculation
-                    const p1 = cameraPoints[0].position; // cam1
-                    const p2 = cameraPoints[1].position; // cam2
-                    const p4 = cameraPoints[3].position; // cam4 (used for one of the plane's triangles: p1,p2,p4)
-                    
-                    const vA = new THREE.Vector3().subVectors(p2, p1);
-                    const vB = new THREE.Vector3().subVectors(p4, p1);
-                    const planeNormal = new THREE.Vector3().crossVectors(vA, vB).normalize();
-
-                    planeNormal.negate(); // Invert the normal to view from the other side
-
-                    const zoomDistance = 1.5; // How far from the plane to position camera, adjust as needed
-                    targetPlaneCameraPosition = new THREE.Vector3().copy(targetPlaneCenter).addScaledVector(planeNormal, zoomDistance);
-                    
-                    isZoomedToPlane = true;
-                    console.log("Zooming IN to video plane.");
-                    console.log("Target Center:", targetPlaneCenter);
-                    console.log("Target Cam Pos:", targetPlaneCameraPosition);
-                } else {
-                    console.error("Cannot zoom: Not enough cameraPoints defined for video plane.");
-                }
-            } else {
-                // Zoom OUT (back to original)
-                isZoomedToPlane = false;
-                console.log("Zooming OUT from video plane.");
-            }
-        }
-    });
+    }, false);
 
     // Add lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
@@ -225,6 +194,19 @@ export function getThreeJSComponents() {
     return { scene, camera, renderer, mainScene, carModel, waypoints, pathCurve, clock, mixers: getMixers() };
 }
 
+// New exported function to receive the div from landing.js
+export function setControlsInfoDiv(htmlElement) {
+    controlsInfoDivElement = htmlElement;
+    if (controlsInfoDivElement) {
+        // Prepare the div for dynamic positioning
+        controlsInfoDivElement.style.position = 'fixed'; // Ensure it's fixed
+        controlsInfoDivElement.style.transform = 'translate(-50%, -50%)'; // Center the div on its (left, top)
+        controlsInfoDivElement.style.opacity = '0'; // Start hidden, logic will show it
+        controlsInfoDivElement.style.pointerEvents = 'none'; // Start non-interactive
+        // Transition can be defined in CSS for #controls-info for opacity
+        // controlsInfoDivElement.style.transition = 'opacity 0.3s ease-in-out'; 
+    }
+}
 
 function onWindowResize() {
     if (camera && renderer) {
@@ -775,8 +757,8 @@ function animate() {
         camera.quaternion.slerp(originalCameraQuaternion, lerpFactor);
 
         // If close enough to original state, stop zooming out and release control
-        if (camera.position.distanceTo(originalCameraPosition) < 0.01 && 
-            camera.quaternion.angleTo(originalCameraQuaternion) < 0.01) {
+        if (camera.position.distanceTo(originalCameraPosition) < 0.05 && 
+            camera.quaternion.angleTo(originalCameraQuaternion) < 0.05) { 
             console.log("Camera returned to original state.");
             camera.position.copy(originalCameraPosition);
             camera.quaternion.copy(originalCameraQuaternion);
@@ -793,38 +775,118 @@ function animate() {
         updateCarPosition(); // Ensure car position is updated
     }
 
+    // Update the controls-info div's position
+    updateAttachedDivPosition();
+
     renderer.render(scene, camera);
 }
 
-export function applyPreset(presetName) {
-    const presets = {
-        default: { skyColor: '#87CEEB', fogDensity: 0.01, ambientIntensity: 0.2, directionalIntensity: 0.5, lightColor: '#ffffff' },
-        sunset: { skyColor: '#FF7F50', fogDensity: 0.015, ambientIntensity: 0.3, directionalIntensity: 0.7, lightColor: '#FF8C00' },
-        night: { skyColor: '#0A1A2A', fogDensity: 0.03, ambientIntensity: 0.1, directionalIntensity: 0.2, lightColor: '#CCCCFF' },
-        foggy: { skyColor: '#DCDCDC', fogDensity: 0.04, ambientIntensity: 0.4, directionalIntensity: 0.3, lightColor: '#FFFFFF' },
-        dystopian: { skyColor: '#1A0A0A', fogDensity: 0.025, ambientIntensity: 0.15, directionalIntensity: 0.4, lightColor: '#A52A2A' }
-    };
-    const preset = presets[presetName] || presets.default;
+function updateAttachedDivPosition() {
+    if (!controlsInfoDivElement || !videoPlaneInitialized || !camera || !renderer || !carModel || !videoPlaneWorldCenter) {
+        if (controlsInfoDivElement && controlsInfoDivElement.style.opacity !== '0') {
+            controlsInfoDivElement.style.opacity = '0';
+            controlsInfoDivElement.style.pointerEvents = 'none';
+        }
+        return;
+    }
 
-    if (scene) {
-        const skyColor = new THREE.Color(preset.skyColor);
-        scene.background = skyColor;
-        if (scene.fog) {
-            scene.fog.color = skyColor;
-            scene.fog.density = preset.fogDensity;
+    // Calculate distance from car to video plane center
+    const distanceToPlane = carModel.position.distanceTo(videoPlaneWorldCenter);
+    const carIsCloseEnough = distanceToPlane < SHOW_OVERLAY_DISTANCE_THRESHOLD;
+
+    const screenPosition = videoPlaneWorldCenter.clone();
+    screenPosition.project(camera); // Project 3D point to NDC
+
+    // Check if the point is within the camera's view frustum (simple check)
+    const pointIsOnScreen = 
+        screenPosition.x >= -1 && screenPosition.x <= 1 &&
+        screenPosition.y >= -1 && screenPosition.y <= 1 &&
+        screenPosition.z < 1; // z < 1 means in front of camera / not clipped by far plane
+
+    // Show if: point is on screen AND (car is close OR already zoomed in to the plane)
+    if (pointIsOnScreen && (carIsCloseEnough || isZoomedToPlane)) {
+        const x = (screenPosition.x * 0.5 + 0.5) * renderer.domElement.clientWidth;
+        const y = (-screenPosition.y * 0.5 + 0.5) * renderer.domElement.clientHeight;
+
+        controlsInfoDivElement.style.left = `${x}px`;
+        controlsInfoDivElement.style.top = `${y}px`;
+
+        if (controlsInfoDivElement.style.opacity === '0') {
+            controlsInfoDivElement.style.opacity = '1';
+            controlsInfoDivElement.style.pointerEvents = 'auto'; // Make it clickable
+        }
+    } else {
+        if (controlsInfoDivElement.style.opacity !== '0') {
+            controlsInfoDivElement.style.opacity = '0';
+            controlsInfoDivElement.style.pointerEvents = 'none';
         }
     }
-    const ambientLight = scene.children.find(child => child instanceof THREE.AmbientLight);
-    const directionalLight = scene.children.find(child => child instanceof THREE.DirectionalLight);
-    if (ambientLight) {
-        ambientLight.intensity = preset.ambientIntensity;
-        ambientLight.color = new THREE.Color(preset.lightColor);
+}
+
+export function toggleVideoZoom() {
+    if (!videoPlaneMesh || !camera || cameraPoints.length < 4) { 
+        console.warn("Video plane, camera, or cameraPoints not ready for zoom toggle.");
+        return;
     }
-    if (directionalLight) {
-        directionalLight.intensity = preset.directionalIntensity;
-        directionalLight.color = new THREE.Color(preset.lightColor);
+
+    isZoomedToPlane = !isZoomedToPlane; // Toggle the zoom state
+
+    if (isZoomedToPlane) {
+        // Zoom IN
+        console.log("UI Click: Zooming IN to video plane.");
+        if (camera) {
+            // Save current camera state if not already in a zoom-out transition being reverted
+            if (!originalCameraPosition) { // Only save if not already set (e.g. mid-zoom-out)
+                originalCameraPosition = camera.position.clone();
+            }
+            if (!originalCameraQuaternion) { // Only save if not already set
+                originalCameraQuaternion = camera.quaternion.clone();
+            }
+        } else {
+            console.error("Camera not initialized for zoom IN.");
+            isZoomedToPlane = false; // Revert state
+            return;
+        }
+
+        // targetPlaneCenter is effectively videoPlaneWorldCenter for looking at
+        // videoPlaneWorldCenter is already calculated and stored.
+
+        // Calculate the normal of the video plane to position camera in front of it.
+        // We use the original points that defined the plane for robust normal calculation.
+        const p1 = cameraPoints.find(p => p.name === 'cam1').position;
+        const p2 = cameraPoints.find(p => p.name === 'cam2').position;
+        // const p3 = cameraPoints.find(p => p.name === 'cam3').position; // Not needed for AB AC normal
+        const p4 = cameraPoints.find(p => p.name === 'cam4').position;
+
+        const vA = new THREE.Vector3().subVectors(p2, p1); // Edge vector p1 -> p2
+        const vB = new THREE.Vector3().subVectors(p4, p1); // Edge vector p1 -> p4
+        const planeNormal = new THREE.Vector3().crossVectors(vA, vB).normalize();
+        
+        // The cross product (p2-p1) x (p4-p1) should give a normal pointing out from the front face
+        // if p1, p2, p4 are ordered counter-clockwise when viewed from the front.
+        // We might need to negate it if it points away from the desired viewing direction.
+        // Let's check its direction relative to the current camera's view of the plane's center.
+        const viewDirection = new THREE.Vector3().subVectors(videoPlaneWorldCenter, camera.position).normalize();
+        if (planeNormal.dot(viewDirection) > 0) { // If normal points towards camera rather than away from plane's front
+            planeNormal.negate(); // We want normal to point from plane's back to its front
+        }
+
+        const zoomDistance = 0.75; // Adjust as needed for how close to zoom
+        if (!targetPlaneCameraPosition) targetPlaneCameraPosition = new THREE.Vector3();
+        targetPlaneCameraPosition.copy(videoPlaneWorldCenter).addScaledVector(planeNormal, zoomDistance);
+        
+        // The animate() function will handle tweening to targetPlaneCameraPosition
+        // and looking at videoPlaneWorldCenter (which is also targetPlaneCenter).
+        targetPlaneCenter = videoPlaneWorldCenter.clone(); // Explicitly set for animate loop logic
+
+    } else {
+        // Zoom OUT
+        console.log("UI Click: Zooming OUT from video plane.");
+        // The animate() function handles lerping back to originalCameraPosition/Quaternion
+        // when isZoomedToPlane is false and originalCameraPosition is set.
+        // targetPlaneCameraPosition and targetPlaneCenter will be (or should be) cleared 
+        // in animate() once the camera returns to its original state.
     }
-    console.log(`Applied preset: ${presetName}`);
 }
 
 function createVideoPlane() {
@@ -874,10 +936,15 @@ function createVideoPlane() {
     videoTexture.flipY = true; // Corrects upside-down video
 
     // 3. Define plane geometry vertices from cameraPoints, with a slight offset forward
-    const p1_orig = cameraPoints[0].position.clone(); // cam1
-    const p2_orig = cameraPoints[1].position.clone(); // cam2
-    const p3_orig = cameraPoints[2].position.clone(); // cam3
-    const p4_orig = cameraPoints[3].position.clone(); // cam4
+    const p1_orig = cameraPoints.find(p => p.name === 'cam1').position.clone(); // cam1
+    const p2_orig = cameraPoints.find(p => p.name === 'cam2').position.clone(); // cam2
+    const p3_orig = cameraPoints.find(p => p.name === 'cam3').position.clone(); // cam3
+    const p4_orig = cameraPoints.find(p => p.name === 'cam4').position.clone(); // cam4
+
+    // Calculate and store the world center of the video plane (using original points)
+    videoPlaneWorldCenter.addVectors(p1_orig, p3_orig).multiplyScalar(0.5);
+    videoPlaneInitialized = true;
+    console.log("Video plane world center calculated:", videoPlaneWorldCenter);
 
     // Calculate the plane normal (points 'out' from the front face if vertices are ordered correctly for front view)
     const vA_geom = new THREE.Vector3().subVectors(p2_orig, p1_orig);
@@ -908,13 +975,13 @@ function createVideoPlane() {
     // Assuming p1=bottom-left, p2=bottom-right, p3=top-right, p4=top-left for standard quad UVs
     // If video appears upside down or mirrored, these UVs or vertex order might need adjustment.
     const uvs = new Float32Array([
-        0, 0, // UV for p1 (cam1)
-        1, 0, // UV for p2 (cam2)
-        0, 1, // UV for p4 (cam4) 
+        0, 1, // UV for p1 (cam1)
+        1, 1, // UV for p2 (cam2)
+        0, 0, // UV for p4 (cam4) 
 
-        1, 0, // UV for p2 (cam2)
-        1, 1, // UV for p3 (cam3)
-        0, 1  // UV for p4 (cam4)
+        1, 1, // UV for p2 (cam2)
+        1, 0, // UV for p3 (cam3)
+        0, 0  // UV for p4 (cam4)
     ]);
     geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 

@@ -1,5 +1,6 @@
 import { getCurrentLanguage } from './ui-language.js';
 import { showControlsBriefly } from './ui-controls-info.js';
+import { toggleVideoZoom, setControlsInfoDiv } from './three-main.js';
 
 const landingPage = document.getElementById('landing-page');
 const enterButton = document.getElementById('enter-button');
@@ -8,6 +9,9 @@ const sceneContainer = document.getElementById('scene-container');
 const sectionTextContainer = document.getElementById('section-text-container');
 
 export function initLandingPage() {
+    const controlsInfoDiv = document.getElementById('controls-info');
+    console.log('In initLandingPage: controlsInfoDiv found?', controlsInfoDiv);
+
     if (enterButton) {
         enterButton.addEventListener('click', function() {
             if (this.classList.contains('ready')) {
@@ -15,6 +19,22 @@ export function initLandingPage() {
             }
         });
     }
+
+    // Add the click listener for the controls-info div
+    if (controlsInfoDiv) {
+        controlsInfoDiv.addEventListener('click', () => {
+            console.log("Controls info div clicked, toggling video zoom.");
+            if (typeof toggleVideoZoom === 'function') {
+                toggleVideoZoom();
+            } else {
+                console.error("toggleVideoZoom is not available or not a function.");
+            }
+        });
+        console.log('In initLandingPage: Event listener ATTACHED to controlsInfoDiv.');
+    } else {
+        console.warn("'controls-info' div not found in landing.js when trying to attach listener.");
+    }
+
     updateLandingTexts(); // Initial text update
 }
 
@@ -51,6 +71,12 @@ export function onEnvironmentLoaded() {
             enterButtonSpan.textContent = enterText;
         }
         loadingStatus.textContent = readyText;
+    }
+    
+    const controlsInfoDiv = document.getElementById('controls-info');
+    if (controlsInfoDiv) {
+        setControlsInfoDiv(controlsInfoDiv);
+        console.log("controlsInfoDiv passed to three-main.js");
     }
 }
 
