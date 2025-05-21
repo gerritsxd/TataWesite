@@ -1,12 +1,12 @@
 import { getCurrentLanguage } from './ui-language.js';
-import { checkAndUpdateSection } from './ui-sections.js';
+import { checkAndUpdateSection, getActiveSectionName } from './ui-sections.js';
 import { registerAnimations, updateMixers, getMixers, clearAnimations } from './animation-handler.js';
 
 // --- Constants ---
 const MAX_SPEED_WAYPOINTS = 0.002; // Max speed for waypoint navigation
 const ACCELERATION_WAYPOINTS = 0.0001;
 const DECELERATION_WAYPOINTS = 0.0002;
-const SHOW_OVERLAY_DISTANCE_THRESHOLD = 75; // Distance to show video overlay (tune as needed)
+// SHOW_OVERLAY_DISTANCE_THRESHOLD removed
 // Note: Other constants like MIN_ZOOM_DISTANCE, MAX_ZOOM_DISTANCE are defined further down or as needed.
 
 let scene, camera, renderer;
@@ -741,6 +741,14 @@ function animate() {
     const delta = clock.getDelta();
     updateMixers(delta); // Update GLTF animations
 
+    // Update current section based on waypoint progress
+    // Assuming currentWaypointIndex is updated reliably elsewhere (e.g., by updateCarPosition or similar)
+    // If not, this needs to be based on pathProgress and waypoints array length.
+    // For now, we'll assume currentWaypointIndex is available and correct.
+    if (typeof currentWaypointIndex !== 'undefined') { // Check if currentWaypointIndex is defined
+        checkAndUpdateSection(currentWaypointIndex, getCurrentLanguage());
+    }
+
     // Camera Zoom/Unzoom Animation Logic
     const lerpFactor = 0.07; // Speed of interpolation, adjust as needed
     if (isZoomedToPlane && targetPlaneCameraPosition && targetPlaneCenter) {
@@ -782,7 +790,8 @@ function animate() {
 }
 
 function updateAttachedDivPosition() {
-    if (!controlsInfoDivElement || !videoPlaneInitialized || !camera || !renderer || !carModel || !videoPlaneWorldCenter) {
+    // Removed !carModel from condition as section logic doesn't directly need carModel here
+    if (!controlsInfoDivElement || !videoPlaneInitialized || !camera || !renderer || !videoPlaneWorldCenter) {
         if (controlsInfoDivElement && controlsInfoDivElement.style.opacity !== '0') {
             controlsInfoDivElement.style.opacity = '0';
             controlsInfoDivElement.style.pointerEvents = 'none';
@@ -790,21 +799,21 @@ function updateAttachedDivPosition() {
         return;
     }
 
-    // Calculate distance from car to video plane center
-    const distanceToPlane = carModel.position.distanceTo(videoPlaneWorldCenter);
-    const carIsCloseEnough = distanceToPlane < SHOW_OVERLAY_DISTANCE_THRESHOLD;
+    // Get current active section name
+    const activeSection = getActiveSectionName();
+    const inCameraSection = activeSection === "Camera";
 
     const screenPosition = videoPlaneWorldCenter.clone();
     screenPosition.project(camera); // Project 3D point to NDC
 
-    // Check if the point is within the camera's view frustum (simple check)
+    // Check if the point is within the camera's view frustum
     const pointIsOnScreen = 
         screenPosition.x >= -1 && screenPosition.x <= 1 &&
         screenPosition.y >= -1 && screenPosition.y <= 1 &&
         screenPosition.z < 1; // z < 1 means in front of camera / not clipped by far plane
 
-    // Show if: point is on screen AND (car is close OR already zoomed in to the plane)
-    if (pointIsOnScreen && (carIsCloseEnough || isZoomedToPlane)) {
+    // Show if: point is on screen AND (in Camera Section OR already zoomed in to the plane)
+    if (pointIsOnScreen && (inCameraSection || isZoomedToPlane)) {
         const x = (screenPosition.x * 0.5 + 0.5) * renderer.domElement.clientWidth;
         const y = (-screenPosition.y * 0.5 + 0.5) * renderer.domElement.clientHeight;
 

@@ -201,3 +201,10 @@ export function updateCurrentSectionTextDisplay() {
         updateSectionTextDisplay();
     }
 }
+
+export function getActiveSectionName() {
+    if (currentSectionIndex !== -1 && sections[currentSectionIndex]) {
+        return sections[currentSectionIndex].name;
+    }
+    return null;
+}
