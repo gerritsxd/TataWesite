@@ -359,6 +359,7 @@ function extractWaypoints(gltf) {
     }
     console.log(`Found and sorted ${waypoints.length} waypoints.`);
     console.log(`Found and sorted ${cameraPoints.length} camera points:`, cameraPoints.map(cp => cp.name));
+    console.log('Full cameraPoints array:', cameraPoints); // Log the full array
     if(carModel) positionCarAtWaypoint(0);
 }
 

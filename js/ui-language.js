@@ -4,20 +4,30 @@ import { updateCurrentSectionTextDisplay } from './ui-sections.js';
 
 
 let currentLanguage = 'en'; // Default language
-let onLanguageChangeCallback = null;
+const languageChangeListeners = []; // Changed from onLanguageChangeCallback = null
 
 const langButton = document.getElementById('lang-button');
 
-export function initLanguageToggle(changeCallback) {
-    onLanguageChangeCallback = changeCallback;
+// Exported function to allow other modules to register listeners
+export function addLanguageChangeListener(callback) {
+    if (typeof callback === 'function') {
+        languageChangeListeners.push(callback);
+    }
+}
+
+export function initLanguageToggle() { // Removed changeCallback parameter
     if (langButton) {
         langButton.addEventListener('click', () => {
             currentLanguage = (currentLanguage === 'en') ? 'nl' : 'en';
             langButton.textContent = currentLanguage === 'en' ? 'EN / NL' : 'NL / EN';
             console.log(`Language switched to: ${currentLanguage}`);
-            if (onLanguageChangeCallback) {
-                onLanguageChangeCallback();
-            }
+            languageChangeListeners.forEach(listener => {
+                try {
+                    listener();
+                } catch (error) {
+                    console.error('Error in language change listener:', error);
+                }
+            });
         });
     }
 }

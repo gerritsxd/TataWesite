@@ -1,11 +1,11 @@
 import { initThreeScene, getThreeJSComponents } from './three-main.js';
 import { initLandingPage, onEnvironmentLoaded } from './landing.js';
 import { initLeftNav, initRightInfoNav } from './ui-nav.js';
-import { initLanguageToggle, updateAllTextsForLanguage } from './ui-language.js';
+import { initLanguageToggle, updateAllTextsForLanguage, addLanguageChangeListener } from './ui-language.js';
 import { initSections } from './ui-sections.js';
 import { initControlsInfo } from './ui-controls-info.js';
 import { initAnimationHandler } from './animation-handler.js';
-
+import { initControlsPopup } from './ui-controls-popup.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM fully loaded, initializing application.');
@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize UI components first
     initLeftNav();
     initRightInfoNav();
-    initLanguageToggle(updateAllTextsForLanguage); // Pass callback for language change
+    initLanguageToggle(); 
+    addLanguageChangeListener(updateAllTextsForLanguage); 
+    initControlsPopup(); 
     initControlsInfo(); // Initializes the brief display of controls info
 
     // Initialize Three.js scene and pass callback for when models are loaded

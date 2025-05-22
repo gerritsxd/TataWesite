@@ -1,6 +1,7 @@
 import { getCurrentLanguage } from './ui-language.js';
 import { showControlsBriefly } from './ui-controls-info.js';
 import { toggleVideoZoom, setControlsInfoDiv } from './three-main.js';
+import { showControlsPopup } from './ui-controls-popup.js';
 
 const landingPage = document.getElementById('landing-page');
 const enterButton = document.getElementById('enter-button');
@@ -62,15 +63,15 @@ export function onEnvironmentLoaded() {
     console.log('Environment fully loaded, enabling enter button.');
     if (enterButton && loadingStatus) {
         enterButton.classList.add('ready');
+        enterButton.classList.add('shine-effect'); // Add shine effect class
         const lang = getCurrentLanguage();
         const enterText = lang === 'nl' ? 'Start Ervaring' : 'Enter Experience';
-        const readyText = lang === 'nl' ? 'Klaar om te verkennen' : 'Ready to explore';
         
         const enterButtonSpan = enterButton.querySelector('span');
         if (enterButtonSpan) {
             enterButtonSpan.textContent = enterText;
         }
-        loadingStatus.textContent = readyText;
+        loadingStatus.style.display = 'none'; // Hide loading status text
     }
     
     const controlsInfoDiv = document.getElementById('controls-info');
@@ -96,7 +97,11 @@ function startExperience() {
         }, 500);
     }
     
-    showControlsBriefly(); // Show controls guide
+    // Show the new device-specific controls popup after a short delay
+    setTimeout(() => {
+        showControlsPopup();
+    }, 1500); // Show after landing page is fully faded and scene might be appearing
+
     console.log("Experience started.");
 }
 
