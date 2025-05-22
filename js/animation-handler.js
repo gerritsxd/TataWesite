@@ -25,6 +25,15 @@ export function registerAnimations(gltf, modelRoot, modelName) {
                     console.log(`Auto-playing airbus animation: ${clip.name}`);
                 }, 1000);
             }
+            // Auto-play the windmill animation (assuming it's island-anim-0 for the 'island' model)
+            else if (modelName === 'island' && animId === 'island-anim-0') {
+                setTimeout(() => { 
+                    playAnimation(animId);
+                    // Find the animation in the list to log its potentially generated name
+                    const windmillAnim = animations.find(a => a.id === animId);
+                    console.log(`Auto-playing windmill animation: ${windmillAnim ? windmillAnim.name : 'Unknown Windmill'} (ID: ${animId})`);
+                }, 1000);
+            }
         });
     } else {
         console.log(`No GLTF animations found in ${modelName} model. Searching for objects to animate.`);

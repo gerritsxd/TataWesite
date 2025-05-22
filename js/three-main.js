@@ -90,10 +90,12 @@ function createSkyGradientTexture() {
     const context = canvas.getContext('2d');
     const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
     
-    // Night time gradient
-    gradient.addColorStop(0, '#0C1445');    // Very dark blue/indigo (top)
-    gradient.addColorStop(0.6, '#1F2A6D'); // Dark blue/purple (middle)
-    gradient.addColorStop(1, '#05081F');    // Darkest grey-blue (bottom) - this will be fog color
+    // Sunrise gradient
+    gradient.addColorStop(0, '#2C3E50');    // Dark blue/grey (top)
+    gradient.addColorStop(0.4, '#5D6D7E');  // Muted mid blue
+    gradient.addColorStop(0.7, '#E74C3C');  // Muted red/orange
+    gradient.addColorStop(0.9, '#F39C12');  // Orange
+    gradient.addColorStop(1, '#FAD7A0');    // Pale yellow/orange (horizon)
 
     context.fillStyle = gradient;
     context.fillRect(0, 0, canvas.width, canvas.height);
@@ -108,7 +110,7 @@ function createHorizonPlane() {
     const horizonSize = 2000; // Make it very large
     const planeGeometry = new THREE.PlaneGeometry(horizonSize, horizonSize);
     // Color should match the bottom of the sky gradient for a seamless blend
-    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0x05081F, side: THREE.DoubleSide }); 
+    const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xFAD7A0, side: THREE.DoubleSide }); 
     
     const horizonPlane = new THREE.Mesh(planeGeometry, planeMaterial);
     horizonPlane.rotation.x = -Math.PI / 2; // Rotate to be horizontal
@@ -122,11 +124,10 @@ export function initThreeScene(callback) {
     onModelsLoadedCallback = callback;
     // Create scene
     scene = new THREE.Scene();
-    // scene.background = new THREE.Color(0x87CEEB); // Old sky blue background
-    scene.background = createSkyGradientTexture(); // New gradient background
+    scene.background = createSkyGradientTexture(); // Sunrise gradient background
     
-    // Adjust fog to match the bottom of the gradient and increase density for night
-    scene.fog = new THREE.FogExp2(0x05081F, 0.015); // Dark fog, slightly denser
+    // Adjust fog for sunrise
+    scene.fog = new THREE.FogExp2(0xFAD7A0, 0.012); // Fog matches horizon, slightly less dense
 
     // Add horizon plane
     const horizon = createHorizonPlane();
@@ -169,12 +170,12 @@ export function initThreeScene(callback) {
 
     }, false);
 
-    // Add lights
-    const ambientLight = new THREE.AmbientLight(0x404060, 0.05); // Cool, very dim ambient light
+    // Add lights for sunrise
+    const ambientLight = new THREE.AmbientLight(0xFFEBCD, 0.15); // Warmer, slightly brighter ambient
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0x7080B0, 0.15); // Pale moonlight blue, dim
-    directionalLight.position.set(-10, 10, -10); // Moon position (e.g., from side/back)
+    const directionalLight = new THREE.DirectionalLight(0xFF8C00, 0.5); // Warm orange sun, moderate intensity
+    directionalLight.position.set(100, 20, 0); // Sun low on the horizon (adjust x,y,z for desired angle)
     directionalLight.castShadow = true;
     directionalLight.shadow.mapSize.width = 2048;
     scene.add(directionalLight);
