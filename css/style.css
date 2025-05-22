@@ -1238,3 +1238,76 @@ html.static-page-scroll body {
     line-height: 1.7;
     max-width: 80%;
 }
+
+/* Blinking animation for interactive elements */
+@keyframes blink-pulse {
+    0% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.05);
+        box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.7);
+    }
+    100% {
+        opacity: 0.7;
+        transform: translate(-50%, -50%) scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+    }
+}
+
+.blinking-indicator {
+    animation: blink-pulse 1.5s infinite ease-in-out;
+}
+
+/* General styles for the scene and UI elements */
+#scene-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    cursor: default; /* For mouse panning */
+    z-index: 1; /* Ensure it's below controls-info */
+}
+
+#scene-container.grabbing {
+    cursor: grabbing;
+}
+
+#controls-info {
+    position: fixed; /* JS will set top/left and transform for centering */
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle background */
+    border: 2px solid rgba(255, 255, 255, 0.3);   /* Subtle border */
+    border-radius: 8px;
+    z-index: 999;    /* Keep it on top */
+    opacity: 0;      /* JS will manage opacity for show/hide */
+    /* pointer-events: none; /* JS sets to 'auto' when visible */
+    
+    /* Transitions for opacity (from JS) and hover effects */
+    transition: opacity 0.3s ease-in-out, border-color 0.3s ease, background-color 0.3s ease;
+
+    /* Ensure no old styles interfere */
+    padding: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+    text-align: initial; /* Reset */
+    max-width: initial; /* Reset */
+    font-weight: initial; /* Reset */
+    letter-spacing: initial; /* Reset */
+}
+
+#controls-info:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--orange); /* Use theme orange for hover border */
+}
+
+#controls-info.blinking-indicator {
+    animation: blink-pulse 1.5s infinite ease-in-out;
+}

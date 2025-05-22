@@ -795,6 +795,7 @@ function updateAttachedDivPosition() {
         if (controlsInfoDivElement && controlsInfoDivElement.style.opacity !== '0') {
             controlsInfoDivElement.style.opacity = '0';
             controlsInfoDivElement.style.pointerEvents = 'none';
+            controlsInfoDivElement.classList.remove('blinking-indicator'); // Ensure removed if div becomes invalid
         }
         return;
     }
@@ -812,23 +813,28 @@ function updateAttachedDivPosition() {
         screenPosition.y >= -1 && screenPosition.y <= 1 &&
         screenPosition.z < 1; // z < 1 means in front of camera / not clipped by far plane
 
-    // Show if: point is on screen AND (in Camera Section OR already zoomed in to the plane)
-    if (pointIsOnScreen && (inCameraSection || isZoomedToPlane)) {
+    // Determine visibility and blinking state
+    const shouldBeVisible = pointIsOnScreen && (inCameraSection || isZoomedToPlane);
+    const shouldBlink = pointIsOnScreen && inCameraSection && !isZoomedToPlane;
+
+    if (shouldBeVisible) {
         const x = (screenPosition.x * 0.5 + 0.5) * renderer.domElement.clientWidth;
         const y = (-screenPosition.y * 0.5 + 0.5) * renderer.domElement.clientHeight;
 
         controlsInfoDivElement.style.left = `${x}px`;
         controlsInfoDivElement.style.top = `${y}px`;
+        controlsInfoDivElement.style.opacity = '1';
+        controlsInfoDivElement.style.pointerEvents = 'auto'; // Make it clickable
 
-        if (controlsInfoDivElement.style.opacity === '0') {
-            controlsInfoDivElement.style.opacity = '1';
-            controlsInfoDivElement.style.pointerEvents = 'auto'; // Make it clickable
+        if (shouldBlink) {
+            controlsInfoDivElement.classList.add('blinking-indicator');
+        } else {
+            controlsInfoDivElement.classList.remove('blinking-indicator');
         }
     } else {
-        if (controlsInfoDivElement.style.opacity !== '0') {
-            controlsInfoDivElement.style.opacity = '0';
-            controlsInfoDivElement.style.pointerEvents = 'none';
-        }
+        controlsInfoDivElement.style.opacity = '0';
+        controlsInfoDivElement.style.pointerEvents = 'none';
+        controlsInfoDivElement.classList.remove('blinking-indicator'); // Ensure removed when not visible
     }
 }
 
