@@ -204,6 +204,7 @@ body {
     border: 2px solid var(--orange);
     border-radius: 6px 6px 0 0; /* Keep top radius */
     box-shadow: 0 0 6px rgba(244, 122, 35, 0.4);
+    cursor: pointer; /* Indicates the header is clickable */
 }
 
 .section-icon {
@@ -694,7 +695,6 @@ body {
     border-bottom: 1px solid rgba(16, 175, 239, 0.3);
     padding-bottom: 5px;
 }
-
 
 .nav-section p {
     color: var(--light-text);
@@ -1417,4 +1417,241 @@ html.static-page-scroll body {
     margin-bottom: 10px;
     font-size: 1.1em;
     line-height: 1.6;
+}
+
+/* Details Overlay Styles */
+.details-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Darker, more immersive backdrop */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 2000; /* Ensure it's above other content */
+    transition: opacity 0.35s ease-in-out, visibility 0.35s ease-in-out; /* Ensure visibility is transitioned */
+}
+
+.details-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.details-overlay-content {
+    background-color: #1E1E1E; /* Dark background for content area as fallback */
+    color: #E0E0E0; /* Light default text color */
+    padding: 0; /* Padding will be handled by inner elements or hero styling */
+    border-radius: 8px; /* Subtle rounding */
+    width: 100%;
+    max-width: 950px; /* Can be wider for this style */
+    height: 90vh; /* Use height for more control with flex */
+    max-height: 700px; /* Cap the height */
+    overflow: hidden; /* Overflow will be on #details-overlay-body */
+    position: relative;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.3); /* More pronounced shadow for dark theme */
+    transform: scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1), opacity 0.35s ease-in-out;
+    opacity: 0; /* Handled by .details-overlay.visible */
+    display: flex; /* Use flex to structure hero and content body */
+    flex-direction: column;
+    /* Background image (hero) is set by JavaScript on this element */
+    background-size: cover;
+    background-position: center top; /* Show top of image by default */
+    background-repeat: no-repeat;
+}
+
+.details-overlay.visible .details-overlay-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.details-overlay-close {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: rgba(0,0,0,0.3); /* Subtle background for better visibility on varied images */
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 1.8rem;
+    font-weight: 300;
+    color: #ffffff; /* White 'x' */
+    cursor: pointer;
+    line-height: 40px; /* Center 'x' in circle */
+    text-align: center;
+    padding: 0;
+    transition: background-color 0.25s ease, transform 0.25s ease;
+    z-index: 10; /* Ensure it's above content */
+}
+
+.details-overlay-close:hover {
+    background-color: rgba(0,0,0,0.6);
+    transform: rotate(90deg) scale(1.1);
+}
+
+#details-overlay-body {
+    /* This div contains the scrollable content *below* the hero title area */
+    padding: 30px 50px 50px 50px; /* Generous padding for content */
+    overflow-y: auto; /* Make this part scrollable */
+    flex-grow: 1; /* Allow it to take remaining space */
+    position: relative; 
+    background-color: #1E1E1E; /* Ensures content area has dark background if hero image doesn't cover all or isn't opaque */
+}
+
+/* Styling for the H1 title which will appear over the hero image */
+#details-overlay-body h1 {
+    font-family: 'Roboto', 'Rajdhani', sans-serif; /* Sharp heading font */
+    font-size: 3.2rem; /* Large, prominent title */
+    font-weight: 700; /* Bold */
+    color: #ffffff; /* Bright white title */
+    text-align: center;
+    /* This padding creates the space for the hero visual. */
+    /* The H1 is technically inside the scrollable body, but appears at the top of .details-overlay-content */
+    padding: 18vh 30px 5vh 30px; 
+    margin: 0; /* Remove default margins */
+    border-bottom: none; /* Remove any previous underline */
+    letter-spacing: -0.02em; /* Slightly tighter for modern feel */
+    line-height: 1.2;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.6); /* Stronger shadow for readability on potentially complex images */
+    position: relative; /* To ensure it's part of the flow but can have text-shadow */
+}
+
+#details-overlay-body h2 {
+    font-family: 'Roboto', 'Rajdhani', sans-serif;
+    font-size: 1.8rem;
+    color: #E0E0E0;
+    margin-top: 2.5em; /* More space before H2 */
+    margin-bottom: 1em;
+    font-weight: 600;
+    border-bottom: 1px solid #444444; /* Subtle separator */
+    padding-bottom: 0.4em;
+}
+
+#details-overlay-body h3 {
+    font-family: 'Roboto', 'Rajdhani', sans-serif;
+    font-size: 1.4rem;
+    color: #C0C0C0;
+    margin-top: 2em;
+    margin-bottom: 0.8em;
+    font-weight: 600;
+}
+
+#details-overlay-body p {
+    line-height: 1.75;
+    margin-bottom: 1.6em;
+    font-size: 1.05rem; /* Readable size on dark */
+    color: #B0B0B0; /* Softer white/grey for paragraphs */
+    font-family: 'Open Sans', sans-serif; /* Or your preferred body font */
+    max-width: 750px; /* Optimal reading line length */
+    margin-left: auto; 
+    margin-right: auto; 
+}
+
+#details-overlay-body strong {
+    font-weight: 600;
+    color: #E0E0E0; /* Brighter for emphasis */
+}
+
+#details-overlay-body img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    margin: 2em auto; /* Centered with good spacing */
+    display: block;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25); /* Shadow suitable for dark theme */
+}
+
+#details-overlay-body a {
+    color: var(--tata-orange, #f47a23); /* Use existing orange, with fallback */
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px solid transparent; /* Prepare for hover effect */
+    transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+#details-overlay-body a:hover {
+    color: #ff9933; /* Brighter orange on hover */
+    border-bottom-color: #ff9933;
+}
+
+#details-overlay-body ul,
+#details-overlay-body ol {
+    padding-left: 30px;
+    margin-top: 0.5em;
+    margin-bottom: 1.6em;
+    line-height: 1.75;
+    color: #B0B0B0;
+    max-width: 750px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#details-overlay-body li {
+    margin-bottom: 0.7em;
+}
+
+/* Scrollbar styling for dark theme (Webkit browsers) */
+#details-overlay-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+#details-overlay-body::-webkit-scrollbar-track {
+    background: #2a2a2a; /* Dark track */
+    border-radius: 10px;
+}
+
+#details-overlay-body::-webkit-scrollbar-thumb {
+    background: #555555; /* Grey thumb */
+    border-radius: 10px;
+    border: 2px solid #2a2a2a; /* Creates padding around thumb, matching track */
+}
+
+#details-overlay-body::-webkit-scrollbar-thumb:hover {
+    background: #777777; /* Lighter thumb on hover */
+}
+
+/* Ensure this new block is the definitive style for the overlay */
+/* Any subsequent general styles for p, h1 etc. should not override these specific ones */
+
+/* Placeholder for where the next distinct style block in your CSS file might begin */
+/* For example, if you have .read-more-container styles after this, they would follow. */
+
+/* Read More Button in Section Text Box */
+.read-more-container {
+    margin-top: 15px; /* Space above the button */
+    text-align: right; /* Align button to the right, or 'left'/'center' as preferred */
+}
+
+.read-more-button {
+    background-color: var(--tata-orange); /* Use Tata orange for primary action */
+    color: #ffffff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 5px;
+    font-family: 'Roboto', sans-serif; /* Assuming Roboto is a primary font, adjust if needed */
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: inline-block;
+    text-decoration: none; /* In case it was an <a> tag before and styles linger */
+}
+
+.read-more-button:hover, .read-more-button:focus {
+    background-color: #e06a1a; /* Slightly darker orange on hover */
+    color: #ffffff;
+    transform: translateY(-2px);
+    outline: none;
+}
+
+/* Ensure .hidden class is effective */
+.hidden {
+    display: none !important;
 }
