@@ -31,20 +31,20 @@
             <h1 data-en="What You Can Do" data-nl="Wat U Kunt Doen">What You Can Do</h1>
         </header>
         <main class="page-content">
-            <section class="action-intro">
-                <p data-en="Here are some ways you can make an impact and contribute to addressing the challenges we highlight. Your voice and actions matter." data-nl="Hier zijn enkele manieren waarop u impact kunt maken en kunt bijdragen aan het aanpakken van de uitdagingen die we benadrukken. Uw stem en acties zijn belangrijk.">
-                    Here are some ways you can make an impact and contribute to addressing the challenges we highlight. Your voice and actions matter.
-                </p>
+            <section id="actions-overview">
+                <h2 data-en="Ways to Get Involved" data-nl="Manieren om Betrokken te Raken">Ways to Get Involved</h2>
+                <p data-en="Every action, big or small, contributes to a larger movement for change. Explore the options below to see how you can make your voice heard and support the cause for a healthier environment and responsible industry practices." data-nl="Elke actie, groot of klein, draagt bij aan een grotere beweging voor verandering. Verken de onderstaande opties om te zien hoe u uw stem kunt laten horen en de zaak voor een gezonder milieu en verantwoorde industriële praktijken kunt steunen.">Every action, big or small, contributes to a larger movement for change. Explore the options below to see how you can make your voice heard and support the cause for a healthier environment and responsible industry practices.</p>
             </section>
-            <div class="action-grid">
-                <a href="#petition-link" class="action-box">
+
+            <div class="actions-grid">
+                <a href="petition-status.html" class="action-box" id="petition-action-box">
                     <span data-en="Petition" data-nl="Petitie">Petition</span>
                 </a>
-                <a href="#organizations-link" class="action-box">
-                    <span data-en="Organizations" data-nl="Organisaties">Organizations</span>
-                </a>
-                <a href="#share-link" class="action-box">
+                <a href="#" class="action-box" id="share-action-box">
                     <span data-en="Share with Friends" data-nl="Deel met Vrienden">Share with Friends</span>
+                </a>
+                <a href="organizations-placeholder.html" class="action-box" id="organizations-action-box">
+                    <span data-en="Organizations" data-nl="Organisaties">Organizations</span>
                 </a>
             </div>
         </main>
@@ -55,5 +55,32 @@
 
     <script src="js/ui-language.js" type="module"></script>
     <script src="js/ui-nav.js" type="module"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const shareButton = document.getElementById('share-action-box');
+            if (shareButton) {
+                shareButton.addEventListener('click', async function(event) {
+                    event.preventDefault(); // Prevent default link behavior
+                    const shareData = {
+                        title: document.title, // Or a custom title
+                        text: 'Check out this information on Tata Steel and how to take action!', // Or a custom text
+                        url: window.location.origin + window.location.pathname // Shares the current page URL
+                    };
+                    try {
+                        if (navigator.share) {
+                            await navigator.share(shareData);
+                            console.log('Content shared successfully');
+                        } else {
+                            alert('Web Share API not supported in your browser. Try copying the link manually!');
+                        }
+                    } catch (err) {
+                        console.error('Error sharing:', err);
+                        // Fallback for browsers where share might fail or is not supported after check
+                        alert('Could not share. Please try copying the link manually.');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
