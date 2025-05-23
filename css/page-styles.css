@@ -98,20 +98,22 @@ body {
 /* --- Specific to about.html --- */
 .team-group-photo {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
 }
 
 .team-group-photo img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
 }
 
 .team-members-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 30px;
+    /* Default to 1 column for mobile-first approach */
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
 .team-member-profile {
@@ -278,10 +280,17 @@ body {
         font-size: 1.8em;
     }
     .team-members-grid {
-        grid-template-columns: 1fr; /* Stack team members on smaller screens */
+        /* Ensure it's 1 column on smaller tablets too if not already covered by default */
+        grid-template-columns: 1fr;
     }
     .action-grid {
         grid-template-columns: 1fr; /* Stack action boxes */
+    }
+}
+
+@media (min-width: 600px) { /* Breakpoint for 2 columns */
+    .team-members-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
