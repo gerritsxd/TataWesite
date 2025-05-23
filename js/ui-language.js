@@ -1,7 +1,5 @@
-import { updateLandingTexts } from './landing.js';
 import { updateNavTexts } from './ui-nav.js';
 import { updateCurrentSectionTextDisplay } from './ui-sections.js';
-
 
 let currentLanguage = 'en'; // Default language
 const languageChangeListeners = []; // Changed from onLanguageChangeCallback = null
@@ -73,13 +71,32 @@ export function updateTextsForNodeAndChildren(parentElement, lang) {
 
 
 // Central callback to update all relevant texts when language changes
-export function updateAllTextsForLanguage() {
+export async function updateAllTextsForLanguage() { // Made async
     const lang = getCurrentLanguage();
     console.log(`Updating all texts for language: ${lang}`);
     
-    updateLandingTexts(); // Updates landing page specific texts
-    updateNavTexts();     // Updates navigation panel texts
-    updateCurrentSectionTextDisplay(); // Updates the currently displayed section text
+    // Conditionally (dynamically) import and call updateLandingTexts
+    if (document.getElementById('landing-page')) { 
+        try {
+            const { updateLandingTexts } = await import('./landing.js');
+            if (typeof updateLandingTexts === 'function') {
+                updateLandingTexts(); 
+            } else {
+                console.error('updateLandingTexts is not a function after dynamic import.');
+            }
+        } catch (e) {
+            console.error("Failed to load or run landing page text updates:", e);
+        }
+    }
+    
+    // These functions are assumed to be safe or have their own checks.
+    // If they also cause issues on static pages, they might need similar treatment.
+    if (typeof updateNavTexts === 'function') {
+        updateNavTexts();
+    }
+    if (typeof updateCurrentSectionTextDisplay === 'function') {
+        updateCurrentSectionTextDisplay();
+    }
     
     // Example for updating any other general elements if needed:
     // const generalElementsContainer = document.getElementById('some-container');
@@ -87,3 +104,9 @@ export function updateAllTextsForLanguage() {
     //     updateTextsForNodeAndChildren(generalElementsContainer, lang);
     // }
 }
+
+// Ensure updateAllTextsForLanguage is registered as a listener and called on init.
+// This might be done in app.js or a main script for each page.
+// For example:
+// addLanguageChangeListener(updateAllTextsForLanguage);
+// document.addEventListener('DOMContentLoaded', () => updateAllTextsForLanguage());
