@@ -10,6 +10,9 @@
     <!-- Landing Page -->
     <div id="landing-page">
         <div class="landing-content">
+            <div id="language-toggle">
+                <button id="lang-button">EN / NL</button>
+            </div>
             <h1 class="landing-title">Tata Steel</h1>
             <p class="landing-subtitle" data-en="A Journey Through Time - Explore the evolution of Tata Steel through an interactive 3D experience" data-nl="Een Reis Door De Tijd - Ontdek de evolutie van Tata Steel door een interactieve 3D-ervaring">A Journey Through Time - Explore the evolution of Tata Steel through an interactive 3D experience</p>
             <div class="loading-container">
@@ -33,18 +36,17 @@
     </div>
 
     <!-- Controls Instruction Popup -->
-    <div id="controls-instruction-popup" class="modal-popup" style="display: none;">
+    <div id="controls-instruction-popup" class="modal-popup">
         <div class="popup-content">
             <span class="popup-close-button">&times;</span>
             <div id="pc-instructions" style="display: none;">
                 <h3 data-en="PC Controls" data-nl="PC Besturing">PC Controls</h3>
-                <p data-en="Use ARROW KEYS to steer." data-nl="Gebruik PIJLTJESTOETSEN om te sturen.">Use ARROW KEYS to steer.</p>
-                <p data-en="Use UP/DOWN ARROWS to change speed." data-nl="Gebruik PIJLEN OMHOOG/OMLAAG om de snelheid te wijzigen.">Use UP/DOWN ARROWS to change speed.</p>
+                <p data-en="Use ARROW KEYS to move Left/Right." data-nl="Gebruik PIJLTJESTOETSEN om Links/Rechts te bewegen.">Use ARROW KEYS to move Left/Right.</p>
+                <p data-en="Use MOUSE WHEEL to zoom." data-nl="Gebruik MUISWIEL om te zoomen.">Use MOUSE WHEEL to zoom.</p>
             </div>
             <div id="mobile-instructions" style="display: none;">
                 <h3 data-en="Mobile Controls" data-nl="Mobiele Besturing">Mobile Controls</h3>
-                <p data-en="SWIPE Left/Right to steer." data-nl="SWIPE Links/Rechts om te sturen.">SWIPE Left/Right to steer.</p>
-                <p data-en="SCROLL Up/Down on screen to change speed." data-nl="SCROL Omhoog/Omlaag op het scherm om de snelheid te wijzigen.">SCROLL Up/Down on screen to change speed.</p>
+                <p data-en="SWIPE Left/Right to move." data-nl="SWIPE Links/Rechts om te bewegen.">SWIPE Left/Right to move.</p>
             </div>
         </div>
     </div>
@@ -103,10 +105,6 @@
     <!-- Controls Info -->
     <div id="controls-info">
         <!-- Content removed as per user request to make this a clickable overlay -->
-    </div>
-
-    <div id="language-toggle">
-        <button id="lang-button">EN / NL</button>
     </div>
 
     <div id="section-text-container">

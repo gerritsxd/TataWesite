@@ -30,7 +30,6 @@ function updatePopupTexts() {
 
     if (mobileInstructionsTitle) mobileInstructionsTitle.textContent = mobileInstructionsTitle.dataset[lang] || mobileInstructionsTitle.dataset['en'];
     if (mobileInstruction1) mobileInstruction1.textContent = mobileInstruction1.dataset[lang] || mobileInstruction1.dataset['en'];
-    if (mobileInstruction2) mobileInstruction2.textContent = mobileInstruction2.dataset[lang] || mobileInstruction2.dataset['en'];
 }
 
 export function initControlsPopup() {
@@ -41,16 +40,20 @@ export function initControlsPopup() {
 
     pcInstructionsTitle = pcInstructions.querySelector('h3');
     const pcParas = pcInstructions.querySelectorAll('p');
-    if (pcParas.length >= 2) {
+    if (pcParas.length > 0) { 
         pcInstruction1 = pcParas[0];
-        pcInstruction2 = pcParas[1];
+        if (pcParas.length > 1) {
+            pcInstruction2 = pcParas[1];
+        } else {
+            pcInstruction2 = null; 
+        }
     }
 
     mobileInstructionsTitle = mobileInstructions.querySelector('h3');
     const mobileParas = mobileInstructions.querySelectorAll('p');
-    if (mobileParas.length >= 2) {
+    if (mobileParas.length > 0) { 
         mobileInstruction1 = mobileParas[0];
-        mobileInstruction2 = mobileParas[1];
+        mobileInstruction2 = null; 
     }
 
     closeButton.addEventListener('click', () => {
@@ -64,19 +67,30 @@ export function initControlsPopup() {
 }
 
 export function showControlsPopup() {
+    console.log('[Debug] showControlsPopup called.'); // Log 1: Function called
     // if (sessionStorage.getItem('controlsPopupDismissed')) {
     //     return; // Don't show if already dismissed this session
     // }
 
-    if (!controlsPopup || !pcInstructions || !mobileInstructions) return;
+    if (!controlsPopup || !pcInstructions || !mobileInstructions) {
+        console.log('[Debug] Popup elements not found in showControlsPopup.'); // Log if elements are missing
+        return;
+    }
 
-    if (isMobileDevice()) {
+    const mobileCheck = isMobileDevice();
+    console.log('[Debug] isMobileDevice:', mobileCheck); // Log 2: Device type check
+
+    if (mobileCheck) {
         pcInstructions.style.display = 'none';
         mobileInstructions.style.display = 'block';
+        console.log('[Debug] Showing mobile instructions.');
     } else {
         pcInstructions.style.display = 'block';
         mobileInstructions.style.display = 'none';
+        console.log('[Debug] Showing PC instructions.');
     }
     updatePopupTexts(); // Ensure texts are correct before showing
+    console.log('[Debug] Attempting to add .show class to controlsPopup.'); // Log 3: Before adding class
     controlsPopup.classList.add('show');
+    console.log('[Debug] controlsPopup classList after add:', controlsPopup.classList); // Log 4: After adding class
 }
