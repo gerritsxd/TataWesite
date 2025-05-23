@@ -1450,7 +1450,6 @@ html.static-page-scroll body {
     max-width: 950px; /* Can be wider for this style */
     height: 90vh; /* Use height for more control with flex */
     max-height: 700px; /* Cap the height */
-    overflow: hidden; /* Overflow will be on #details-overlay-body */
     position: relative;
     box-shadow: 0 15px 50px rgba(0,0,0,0.3); /* More pronounced shadow for dark theme */
     transform: scale(0.97);
@@ -1495,12 +1494,11 @@ html.static-page-scroll body {
 }
 
 #details-overlay-body {
-    /* This div contains the scrollable content *below* the hero title area */
-    padding: 30px 50px 50px 50px; /* Generous padding for content */
-    overflow-y: auto; /* Make this part scrollable */
-    flex-grow: 1; /* Allow it to take remaining space */
-    position: relative; 
-    background-color: #1E1E1E; /* Ensures content area has dark background if hero image doesn't cover all or isn't opaque */
+    padding: 30px;
+    overflow-y: auto;
+    flex-grow: 1;
+    position: relative;
+    background-color: #1E1E1E;
 }
 
 /* Styling for the H1 title which will appear over the hero image */

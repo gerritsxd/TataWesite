@@ -699,7 +699,13 @@ function onKeyUp(event) {
 }
 
 function onMouseWheel(event) {
-    event.preventDefault(); // Prevent default page scrolling
+    const detailsOverlay = document.getElementById('details-overlay');
+    if (detailsOverlay && detailsOverlay.classList.contains('visible')) {
+        // Overlay is visible, allow default scroll behavior for the overlay content
+        return;
+    }
+
+    event.preventDefault(); // Prevent default page scrolling ONLY if overlay is NOT visible
 
     // Positive deltaY for scroll down (zoom out), negative for scroll up (zoom in)
     if (event.deltaY > 0) {
