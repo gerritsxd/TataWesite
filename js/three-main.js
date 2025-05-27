@@ -255,7 +255,7 @@ function loadModels() {
     };
 
 
-    gltfLoader.load('./models/WindMILLisTURNING.glb', (gltf) => {
+    gltfLoader.load('./models/Friday.glb', (gltf) => {
         mainScene = gltf.scene;
         mainScene.traverse((node) => {
             if (node.isMesh) {
