@@ -271,6 +271,111 @@ body {
     text-align: center;
 }
 
+
+/* --- Specific to organizations-placeholder.html --- */
+.organization {
+    background-color: var(--medium-bg, #1e1e1e);
+    border: 1px solid var(--accent-color-translucent, rgba(244, 122, 35, 0.3));
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+    opacity: 0; /* Start hidden for animation */
+    animation: fadeInUpCard 0.6s ease-out forwards;
+}
+
+/* Staggered animation for organization cards */
+.organization:nth-child(1) { animation-delay: 0.1s; }
+.organization:nth-child(2) { animation-delay: 0.2s; }
+.organization:nth-child(3) { animation-delay: 0.3s; }
+.organization:nth-child(4) { animation-delay: 0.4s; }
+/* Add more if there are more than 4 organizations */
+
+@keyframes fadeInUpCard {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.organization:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.organization h2 {
+    font-size: 1.8em; /* Adjusted for consistency */
+    color: var(--accent-color, #f47a23);
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(244, 122, 35, 0.2);
+    padding-bottom: 10px;
+}
+
+.organization p {
+    font-size: 1em; /* Adjusted for consistency */
+    line-height: 1.7;
+    margin-bottom: 12px;
+    color: var(--medium-text, #c0c0c0);
+}
+
+.organization strong {
+    color: var(--light-text, #e0e0e0); /* Brighter for emphasis */
+}
+
+.organization ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 15px;
+}
+
+.organization ul li {
+    margin-bottom: 10px;
+    font-size: 0.95em;
+}
+
+.organization ul li span { /* For labels like 'Email:' */
+    font-weight: 600;
+    color: var(--medium-text, #c0c0c0);
+}
+
+.organization ul li a {
+    color: var(--accent-color-light, #ff9d57);
+    text-decoration: none;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.organization ul li a:hover {
+    color: var(--light-text, #e0e0e0);
+    text-decoration: underline;
+    text-shadow: 0 0 5px rgba(255, 157, 87, 0.5);
+}
+
+/* Ensure back button in footer is styled consistently */
+.page-footer .back-button {
+    display: inline-block;
+    padding: 12px 25px;
+    background-color: var(--accent-color, #f47a23);
+    color: var(--dark-bg, #121212); /* Text color for contrast with accent */
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    border: 1px solid transparent; /* In case of global button borders */
+}
+
+.page-footer .back-button:hover {
+    background-color: var(--accent-color-light, #ff9d57);
+    color: var(--dark-bg, #121212);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(244, 122, 35, 0.3);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .page-header h1 {
