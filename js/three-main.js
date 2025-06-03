@@ -257,6 +257,35 @@ function loadModels() {
 
     gltfLoader.load('./models/Friday.glb', (gltf) => {
         mainScene = gltf.scene;
+
+        // --- BEGIN GLTF DEBUG LOGGING ---
+        console.log('--- GLTF Debugging Info for Friday.glb ---');
+        console.log('Scenes found:', gltf.scenes.map(s => s.name || 'Unnamed Scene'));
+
+        console.log('Traversing mainScene (gltf.scene):');
+        let sceneTraversalLog = '';
+        mainScene.traverse((node) => {
+            let parentName = node.parent ? node.parent.name : 'null';
+            sceneTraversalLog += `  Node: ${node.name || '[no name]'} (Type: ${node.type}), Parent: ${parentName}, UUID: ${node.uuid}\n`;
+        });
+        console.log(sceneTraversalLog);
+
+        if (gltf.animations && gltf.animations.length > 0) {
+            console.log(`Animations found (${gltf.animations.length}):`);
+            gltf.animations.forEach((clip, index) => {
+                console.log(`  Animation Clip #${index}:`);
+                console.log(`    Name: ${clip.name || 'Unnamed Animation Clip'}`);
+                console.log(`    Duration: ${clip.duration.toFixed(2)}s`);
+                console.log(`    Tracks (${clip.tracks.length}):`);
+                clip.tracks.forEach((track, trackIndex) => {
+                    console.log(`      Track #${trackIndex}: Name: ${track.name}, Type: ${track.ValueTypeName}`);
+                });
+            });
+        } else {
+            console.log('No animations found in gltf.animations array.');
+        }
+        console.log('--- End GLTF Debugging Info ---');
+        // --- END GLTF DEBUG LOGGING ---
         mainScene.traverse((node) => {
             if (node.isMesh) {
                 node.castShadow = true;
