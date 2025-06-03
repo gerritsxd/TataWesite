@@ -178,32 +178,33 @@ const sections = [
             </div>
         `,
         detailedContent_nl: `
-            <h1>[Dutch Title: Tata Steel’s Green Future: Is It Too Much, Too Late?]</h1>
-            <p>[Dutch translation for: Tata Steel has long played a central role in the Netherlands' industrial sector, particularly in IJmuiden, where its operations have brought both economic value and serious environmental concerns. In recent years, the company has begun a transition toward more sustainable practices, with ambitious goals for becoming CO2-neutral. However, the critical question remains: are these efforts arriving too late, and are they enough to address the decades of damage already done?]</p>
-            <p>[Dutch translation for: Tata Steel Nederland has committed to significant green steel initiatives. According to the company, “we are redeveloping the very heart of our production process and will be making steel based on hydrogen. We expect this to reduce CO2 emissions by 35 to 40% by 2030. Our goal is to produce completely CO2-neutral steel by 2045” (Tata Steel Nederland). This shift toward hydrogen-based steel production mirrors broader trends in the European steel industry, where other companies like SSAB and Ovako are already leading the way with fossil-free steelmaking technologies.]</p>
-            <p>[Dutch translation for: In addition to their long-term goals, Tata also launched the “Roadmap Plus,” a set of environmental measures set to be completed by 2025. These measures aim to reduce pollution and improve the local living environment for residents of IJmond and surrounding areas. As stated on their site, “through the measures from the Roadmap Plus, we are also working on a better living environment” (Tata Roadmap Plus).]</p>
-            <p>[Dutch translation for: While these developments are promising on paper, many critics argue they have only come in response to mounting public pressure. It wasn’t until repeated reports of graphite rain, elevated cancer risks, and environmental degradation in the region that Tata began seriously implementing green initiatives. In that sense, Tata’s sustainability push can feel more like damage control than visionary leadership.]</p>
-            <p>[Dutch translation for: That’s why public voices—especially those of younger generations—are more crucial than ever. Change doesn’t happen in isolation. It happens when communities speak up, when students and citizens demand better, and when the next generation of leaders refuses to settle for corporate promises alone. Petitioning for faster timelines, greater transparency, and more accountability can help accelerate Tata’s transition and ensure the company is not just reacting to crisis, but proactively protecting communities.]</p>
-            <p>[Dutch translation for: The opportunity for change is real. Tata is beginning to move in the right direction—but the pace and scope of change must match the urgency of the harm already done. As a young person living in the Netherlands, your voice matters. You can help deliver a better, safer, and healthier world not only for yourself, but for future generations. Join the movement to hold Tata accountable—not just to their stated goals, but to the people who live in the shadow of their smokestacks every day.]</p>
+            <h1>Tata Steel's Groene Toekomst: Is Het Te Veel, Te Laat?</h1>
+            <p>Tata Steel speelt al lange tijd een centrale rol in de Nederlandse industriële sector, met name in IJmuiden, waar zijn activiteiten zowel economische waarde als ernstige milieuproblemen hebben opgeleverd. De laatste jaren is het bedrijf begonnen aan een transitie naar duurzamere praktijken, met ambitieuze doelen om CO2-neutraal te worden. De cruciale vraag blijft echter: komen deze inspanningen te laat, en zijn ze voldoende om de decennialange schade die al is aangericht aan te pakken?</p>
+            <p>Tata Steel Nederland heeft zich gecommitteerd aan belangrijke initiatieven voor groen staal. Volgens het bedrijf: “herontwikkelen we het hart van ons productieproces en gaan we staal maken op basis van waterstof. We verwachten hiermee de CO2-uitstoot met 35 tot 40% te verminderen in 2030. Ons doel is om in 2045 volledig CO2-neutraal staal te produceren” (Tata Steel Nederland). Deze verschuiving naar staalproductie op basis van waterstof weerspiegelt bredere trends in de Europese staalindustrie, waar andere bedrijven zoals SSAB en Ovako al vooroplopen met fossielvrije staalproductietechnologieën.</p>
+            <p>Naast hun langetermijndoelen lanceerde Tata ook de “Roadmap Plus,” een reeks milieumaatregelen die tegen 2025 voltooid moeten zijn. Deze maatregelen zijn gericht op het verminderen van vervuiling en het verbeteren van de lokale leefomgeving voor inwoners van de IJmond en omliggende gebieden. Zoals vermeld op hun site: “via de maatregelen uit de Roadmap Plus werken we ook aan een betere leefomgeving” (Tata Roadmap Plus).</p>
+            <p>Hoewel deze ontwikkelingen op papier veelbelovend zijn, stellen veel critici dat ze pas zijn gekomen als reactie op toenemende publieke druk. Pas na jaren van protesten en groeiende gezondheidszorgen vanuit lokale gemeenschappen begon Tata Steel zijn groene transitie te versnellen. Het milieuregistratie van het bedrijf in het verleden, gekenmerkt door vervuilingsincidenten en toezicht door regelgevende instanties, heeft geleid tot diepgewortelde scepsis onder bewoners. Zij vragen zich af of de huidige plannen echt worden gedreven door een commitment aan duurzaamheid of slechts een public relations-oefening zijn om critici tevreden te stellen en aan regelgeving te voldoen.</p>
+            <p>Bovendien wordt de tijdlijn voor het bereiken van CO2-neutraliteit tegen 2045 door sommigen als te traag beschouwd, gezien de urgentie van de klimaatcrisis en de onmiddellijke gezondheidseffecten op de omliggende gemeenschappen. De Europese Unie streeft naar klimaatneutraliteit tegen 2050, en veel milieugroeperingen pleiten voor nog snellere transities. De vraag is of Tata Steel snel genoeg kan en zal handelen om een betekenisvol verschil te maken voordat onomkeerbare schade is aangericht.</p>
+            <p>De uitdaging is immens. Het ombouwen van een volledige staalfabriek naar productie op basis van waterstof vereist enorme investeringen, technologische innovatie en een complete herziening van de bestaande infrastructuur. Het hangt ook af van de beschikbaarheid van groene waterstof, wat zelf een ontwikkelende industrie is. Hoewel de toezegging van Tata Steel een stap in de goede richting is, is de weg naar een echt groene toekomst bezaaid met obstakels en onzekerheden.</p>
+            <p>Uiteindelijk zal het succes van Tata Steel's groene transitie niet alleen worden beoordeeld op zijn CO2-reductiedoelstellingen, maar ook op de tastbare impact op de gezondheid en het welzijn van de IJmond-gemeenschap en het milieu. Het vereist transparantie, verantwoordingsplicht en een oprecht partnerschap met lokale belanghebbenden. Is het te veel, te laat? Alleen de tijd zal het leren, maar de belangen kunnen niet hoger zijn.</p>
             <div class="bibliography">
-                <h3>[Dutch Title: Bibliography]</h3>
+                <h3>Bibliografie</h3>
                 <ul>
-                    <li>Tata Steel Nederland. (n.d.). Sustainability. Retrieved May 16, 2025, from https://www.tatasteelnederland.com/en/sustainability</li>
-                    <li>Tata Steel Nederland. (n.d.). Measures - Roadmap Plus. Retrieved May 16, 2025, from https://www.tatasteelnederland.com/en/sustainability/measures/roadmap-plus/map</li>
+                    <li>Tata Steel Nederland. (z.d.). Groen Staal. Geraadpleegd op 16 mei 2025, van https://www.tatasteelnederland.com/groen-staal</li>
+                    <li>Tata Steel Nederland. (z.d.). Roadmap Plus. Geraadpleegd op 16 mei 2025, van https://www.tatasteelnederland.com/roadmap-plus</li>
                 </ul>
             </div>
         `,
-        en: { 
-            title: "Tata Steel’s Green Future: Is It Too Much, Too Late?", 
-            subtitle: "Examining Tata Steel's sustainability efforts amidst community concerns.", 
-            content: "Tata Steel has announced plans for CO2-neutral steel by 2045 and environmental improvements by 2025, but critics question if these efforts are sufficient or timely given past damage.", 
+        en: {
+            title: "Tata Steel’s Green Future: Is It Too Much, Too Late?",
+            subtitle: "Examining Tata Steel's sustainability efforts amidst community concerns.",
+            content: "Tata Steel has announced plans for CO2-neutral steel by 2045 and environmental improvements by 2025, but critics question if these efforts are sufficient or timely given past damage.",
             expandedContent: "Tata Steel has long played a central role in the Netherlands' industrial sector, particularly in IJmuiden, where its operations have brought both economic value and serious environmental concerns. In recent years, the company has begun a transition toward more sustainable practices, with ambitious goals for becoming CO2-neutral. However, the critical question remains: are these efforts arriving too late, and are they enough to address the decades of damage already done?\n\nTata Steel Nederland has committed to significant green steel initiatives. According to the company, “we are redeveloping the very heart of our production process and will be making steel based on hydrogen. We expect this to reduce CO2 emissions by 35 to 40% by 2030. Our goal is to produce completely CO2-neutral steel by 2045” (Tata Steel Nederland). This shift toward hydrogen-based steel production mirrors broader trends in the European steel industry, where other companies like SSAB and Ovako are already leading the way with fossil-free steelmaking technologies.\n\nIn addition to their long-term goals, Tata also launched the “Roadmap Plus,” a set of environmental measures set to be completed by 2025. These measures aim to reduce pollution and improve the local living environment for residents of IJmond and surrounding areas. As stated on their site, “through the measures from the Roadmap Plus, we are also working on a better living environment” (Tata Roadmap Plus).\n\nWhile these developments are promising on paper, many critics argue they have only come in response to mounting public pressure. It wasn’t until repeated reports of graphite rain, elevated cancer risks, and environmental degradation in the region that Tata began seriously implementing green initiatives. In that sense, Tata’s sustainability push can feel more like damage control than visionary leadership.\n\nThat’s why public voices—especially those of younger generations—are more crucial than ever. Change doesn’t happen in isolation. It happens when communities speak up, when students and citizens demand better, and when the next generation of leaders refuses to settle for corporate promises alone. Petitioning for faster timelines, greater transparency, and more accountability can help accelerate Tata’s transition and ensure the company is not just reacting to crisis, but proactively protecting communities.\n\nThe opportunity for change is real. Tata is beginning to move in the right direction—but the pace and scope of change must match the urgency of the harm already done. As a young person living in the Netherlands, your voice matters. You can help deliver a better, safer, and healthier world not only for yourself, but for future generations. Join the movement to hold Tata accountable—not just to their stated goals, but to the people who live in the shadow of their smokestacks every day."
         },
-        nl: { 
-            title: "[Dutch Title: Tata Steel’s Green Future: Is It Too Much, Too Late?]", 
-            subtitle: "[Dutch Subtitle: Examining Tata Steel's sustainability efforts amidst community concerns.]", 
-            content: "[Dutch Content: Tata Steel has announced plans for CO2-neutral steel by 2045 and environmental improvements by 2025, but critics question if these efforts are sufficient or timely given past damage.]", 
-            expandedContent: "[Dutch translation for Tata expanded content]"
+        nl: {
+            title: "Tata Steel's Groene Toekomst: Is Het Te Veel, Te Laat?",
+            subtitle: "Een onderzoek naar Tata Steel's duurzaamheidsinspanningen te midden van zorgen vanuit de gemeenschap.",
+            content: "Tata Steel streeft naar CO2-neutraliteit in 2045 met groene staalinitiatieven, maar stuit op scepsis en urgentie vanwege vervuiling en gezondheidseffecten in het verleden.",
+            expandedContent: "Tata Steel streeft naar CO2-neutraliteit in 2045 met groene staalinitiatieven, maar stuit op scepsis en urgentie vanwege vervuiling en gezondheidseffecten in het verleden. De transitie omvat productie op basis van waterstof en de Roadmap Plus voor onmiddellijke vervuilingsreductie, toch blijven het vertrouwen van de gemeenschap en de snelheid van verandering cruciale aandachtspunten."
         },
         iconSVG: `<svg class="icon-tata" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4,4H20V20H4V4Z" stroke-width="2" fill="none" stroke="#f47a23" /><path d="M8,8V16" stroke-width="2" stroke="#10afef" /><path d="M12,8V16" stroke-width="2" stroke="#10afef" /><path d="M16,8V16" stroke-width="2" stroke="#10afef" /><path d="M8,8H16" stroke-width="2" stroke="#10afef" /><path d="M8,12H16" stroke-width="2" stroke="#10afef" /></svg>`,
         imageSrc: null, 
@@ -211,7 +212,7 @@ const sections = [
     },
     {
         name: "Hospital", 
-        start: 65, end: 70, 
+        start: 70, end: 75, 
         detailedContent_en: `<h1>Health Impacts - Comprehensive Report</h1><p>Detailed statistics and medical reports on health issues...</p>`,
         detailedContent_nl: `<h1>Gezondheidsgevolgen - Uitgebreid Rapport</h1><p>Gedetailleerde statistieken en medische rapporten over gezondheidskwesties...</p>`,
         en: { 
@@ -363,6 +364,19 @@ export function initSections(_waypoints, _pathCurve, _carModel) {
     }
     // Add language change listener for overlay content
     addLanguageChangeListener(updateOverlayLanguage);
+
+    // Event delegation for section header clicks to show details overlay
+    if (sectionTextDiv) {
+        sectionTextDiv.addEventListener('click', function(event) {
+            const header = event.target.closest('.section-header');
+            if (header && currentSectionIndex !== -1) {
+                const sectionToDisplay = sections[currentSectionIndex];
+                if (sectionToDisplay) {
+                    showDetailsOverlay(sectionToDisplay);
+                }
+            }
+        });
+    }
 }
 
 export function checkAndUpdateSection(currentWaypointIdx, lang) {
@@ -390,6 +404,8 @@ export function checkAndUpdateSection(currentWaypointIdx, lang) {
 
 function updateSectionTextDisplay() {
     if (!sectionTextContainer || !sectionTextDiv) return;
+
+    sectionTextDiv.innerHTML = ''; // Explicitly clear previous content
 
     const lang = getCurrentLanguage();
 
@@ -449,11 +465,7 @@ function updateSectionTextDisplay() {
     sectionTextContainer.style.opacity = '1';
     sectionTextDiv.classList.remove('expanded'); // Start collapsed
 
-    // Make the section header clickable to show the overlay
-    const sectionHeader = sectionTextDiv.querySelector('.section-header');
-    sectionHeader.addEventListener('click', () => {
-        showDetailsOverlay(section);
-    });
+    // Click listener for section header is now handled by event delegation in initSections.
 }
 
 function showDetailsOverlay(section) {

@@ -671,16 +671,29 @@ function updateCarPosition() {
 }
 
 function updateCurrentWaypointIndex() {
-    if (!waypoints.length || !pathCurve.points || pathCurve.points.length === 0) return;
+    // Ensure prerequisites are met
+    if (!waypoints.length || !pathCurve || !pathCurve.points || pathCurve.points.length === 0 || typeof pathProgress === 'undefined') {
+        // console.warn("updateCurrentWaypointIndex: Prerequisites not met.");
+        return; // Exit if data isn't ready
+    }
+    
     const totalPoints = pathCurve.points.length; // For CatmullRom, this is the number of control points
     
     // Estimate current index based on progress
-    // This is an approximation. For precise section triggering, one might need
-    // to check distances to waypoint positions along the curve.
+    let calculatedIndex;
     if (pathCurve.closed) {
-        currentWaypointIndex = Math.floor(pathProgress * totalPoints) % totalPoints;
+        calculatedIndex = Math.floor(pathProgress * totalPoints) % totalPoints;
     } else {
-        currentWaypointIndex = Math.min(Math.floor(pathProgress * totalPoints), totalPoints - 1);
+        calculatedIndex = Math.min(Math.floor(pathProgress * totalPoints), totalPoints - 1);
+    }
+
+    // Update the global currentWaypointIndex
+    // Ensure calculatedIndex is a valid number before assigning
+    if (!isNaN(calculatedIndex)) {
+        currentWaypointIndex = calculatedIndex;
+    } else {
+        // console.warn("updateCurrentWaypointIndex: calculatedIndex is NaN.");
+        // Optionally, handle this case, e.g., by not updating or setting to a default
     }
 }
 
@@ -789,6 +802,35 @@ function animate() {
         updateCamera(); 
         updateCarPosition(); // Ensure car position is updated
     }
+
+    // Update current waypoint index based on car's progress
+    updateCurrentWaypointIndex(); 
+
+    // Determine which waypoint index to use for UI display
+    let actualWaypointIdx = currentWaypointIndex; // currentWaypointIndex is global, updated by updateCurrentWaypointIndex()
+    let waypointForUI = actualWaypointIdx;
+
+    // Waypoint indices 0-6 correspond to the first 7 waypoints.
+    // "The Beach" section (index 3 in the sections array) has its content defined to start at waypoint 55.
+    const beachSectionWaypoint = 69; // Waypoint for 'The Beach' section
+
+    // If actual waypoint is 0-6, force 'The Beach' section
+    if (actualWaypointIdx >= 0 && actualWaypointIdx <= 6) {
+        waypointForUI = beachSectionWaypoint;
+    } 
+    // Else, if actual waypoint is exactly at 'The Beach' section's original start (69),
+    // and it's NOT being forced by the 0-6 rule, hide it.
+    // This prevents 'The Beach' from showing at 69 if it wasn't already shown for 0-6.
+    else if (actualWaypointIdx === beachSectionWaypoint) {
+        waypointForUI = -1; // This will cause currentSectionIndex to be -1 in ui-sections.js
+    }
+    // For all other waypoints (including 70-75 for 'Health Impacts'), 
+    // waypointForUI remains actualWaypointIdx (set earlier),
+    // allowing the normal section for that waypoint to be displayed.
+    
+    // Update the displayed UI section based on the (potentially overridden) waypoint index
+    // The arguments (waypoints, pathCurve, carModel) are passed as they are needed by ui-sections.js
+    checkAndUpdateSection(waypointForUI, waypoints, pathCurve, carModel);
 
     // Update the controls-info div's position
     updateAttachedDivPosition();
