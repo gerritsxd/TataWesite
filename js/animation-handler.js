@@ -26,13 +26,12 @@ export function registerAnimations(gltf, modelRoot, modelName) {
                 }, 1000);
             }
             // Auto-play the windmill animation (assuming it's island-anim-0 for the 'island' model)
-            else if (modelName === 'island' && animId === 'island-anim-0') {
-                setTimeout(() => { 
+            else if (modelName === 'island') {
+                setTimeout(() => {
                     playAnimation(animId);
-                    // Find the animation in the list to log its potentially generated name
-                    const windmillAnim = animations.find(a => a.id === animId);
-                    console.log(`Auto-playing windmill animation: ${windmillAnim ? windmillAnim.name : 'Unknown Windmill'} (ID: ${animId})`);
-                }, 1000);
+                    const animDetails = animations.find(a => a.id === animId);
+                    console.log(`Auto-playing animation for 'island' model: ${animDetails ? animDetails.name : 'Unknown Animation'} (ID: ${animId})`);
+                }, 1000); // Retain a small delay
             }
         });
     } else {
